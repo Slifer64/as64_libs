@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--
+  =====  Load Robot description  =====
+  -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find bhand_test)/urdf/multi_bh282_robots_test.xacro'" />
+
+  <!-- Set the name of the topic for publishing the joints states -->
+  <arg name="publish_states_topic" default="/robot_joint_states" />
+
+  <!--
+  =====  Launch joint_state_publisher, robot_state_publisher and rviz  =====
+  -->
+  <!-- <include file="$(find bhand)/launch/common.launch" /> -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" required="true">
+    <rosparam param="source_list" subst_value="true">[$(arg publish_states_topic)]</rosparam>
+    <rosparam>
+      rate: 50
+      use_gui: true
+    </rosparam>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" required="true"/>
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find bhand_test)/rviz/multi_bh282_robots_test.rviz" output="screen" required="true"/>
+
+  <!--
+  =====  Launch execution node  =====
+  -->
+  <node name="multi_bhand_robots_test_node"
+        pkg="bhand_test"
+        type="multi_bh282_robots_test"
+        required="true" respawn="false" cwd="node" output="screen">
+
+        <rosparam param="publish_states_topic" subst_value="true">$(arg publish_states_topic)</rosparam>
+
+        <rosparam>
+          robot_description_name: "/robot_description"
+
+          # ====  bhand1 args  ====
+          base_link_1: "bh282_1_base_link"
+          tool_link_1: ["bh282_1_finger_1_tip_link", "bh282_1_finger_2_tip_link", "bh282_1_finger_3_tip_link"]
+          ctrl_cycle_1: 0.005
+          q1_1: [0.4, 0.3, 0.25, 0.22]
+          q2_1: [1.4, 1.3, 1.25, 1.3]
+          time_duration_1: 2.5
+          use_sim_1: true
+
+          # ====  bhand2 args  ====
+          base_link_2: "bh282_2_base_link"
+          tool_link_2: ["bh282_2_finger_1_tip_link", "bh282_2_finger_2_tip_link", "bh282_2_finger_3_tip_link"]
+          ctrl_cycle_2: 0.005
+          q1_2: [0.2, 0.5, 0.4, 0.22]
+          q2_2: [1.5, 1.0, 1.7, 1.3]
+          time_duration_2: 2.0
+          use_sim_2: true
+
+          # ====  bhand3 args  ====
+          base_link_3: "bh282_3_base_link"
+          tool_link_3: ["bh282_3_finger_1_tip_link", "bh282_3_finger_2_tip_link", "bh282_3_finger_3_tip_link"]
+          ctrl_cycle_3: 0.005
+          q1_3: [1.4, 1.3, 1.25, 0.3]
+          q2_3: [0.2, 0.3, 0.15, 1.6]
+          time_duration_3: 3.0
+          use_sim_3: true
+
+        </rosparam>
+  </node>
+
+
+</launch>

@@ -1,0 +1,5 @@
+<launch>
+
+  <node pkg="io_test" type="xml_parser_test" name="xml_parser_test_node" output="screen" />
+
+</launch>

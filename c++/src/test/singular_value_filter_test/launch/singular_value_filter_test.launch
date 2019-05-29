@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--
+  =====  Load Robot description  =====
+  -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find singular_value_filter_test)/urdf/singular_value_filter_test.xacro'" />
+
+  <!-- Set the name of the topic for publishing the joints states -->
+  <arg name="publish_states_topic" default="/robot_joint_states" />
+
+  <!--
+  =====  Launch joint_state_publisher, robot_state_publisher and rviz  =====
+  -->
+  <!-- <include file="$(find lwr4p)/launch/common.launch" /> -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" required="true">
+    <rosparam param="source_list" subst_value="true">[$(arg publish_states_topic)]</rosparam>
+    <rosparam>
+      rate: 50
+      use_gui: true
+    </rosparam>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" required="true"/>
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find singular_value_filter_test)/rviz/singular_value_filter_test.rviz" output="screen" required="true"/>
+
+  <!--
+  =====  Launch execution node  =====
+  -->
+  <node name="singular_value_filter_test_node"
+        pkg="singular_value_filter_test"
+        type="singular_value_filter_test"
+        required="true" respawn="false" cwd="node" output="screen">
+
+        <rosparam param="publish_states_topic" subst_value="true">$(arg publish_states_topic)</rosparam>
+
+        <rosparam>
+          robot_description_name: "/robot_description"
+          base_link: "lwr_arm_base_link"
+          tool_link: "lwr_arm_7_link"
+          ctrl_cycle: 0.005
+
+          <!-- j0, j1, j2, j3, j4, j5, j6 -->
+          q1: [0.34, 0.52, 0.09, -0.87, 0.0, 0.55, -0.2]
+          q2: [0.34, -0.58, 0.0, 1.59, 0.0, 1.25, 0.2]
+          time_duration: 4.0 <!-- duration to move from q1 to q2 and vice versa -->
+          use_sim: true
+
+          <!-- svf args -->
+          sigma_min: 0.1
+          shape_f: 19.9
+        </rosparam>
+
+  </node>
+
+</launch>

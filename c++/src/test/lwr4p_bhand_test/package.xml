@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <name>lwr4p_bhand_test</name>
+  <version>0.0.0</version>
+  <description>Simulated robot</description>
+
+  <maintainer email="antosidi646@gmail.com">Antonis Sidiropoulos</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <run_depend>roscpp</run_depend>
+
+  <build_depend>roslib</build_depend>
+  <run_depend>roslib</run_depend>
+
+  <build_depend>lwr4p</build_depend>
+  <run_depend>lwr4p</run_depend>
+
+  <build_depend>bhand</build_depend>
+  <run_depend>bhand</run_depend>
+
+  <build_depend>misc_lib</build_depend>
+  <run_depend>misc_lib</run_depend>
+
+  <export></export>
+</package>

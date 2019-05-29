@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--
+  =====  Load Robot description  =====
+  -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find lwr4p_bhand_test)/urdf/lwr4p_bh282_robot_test.xacro'" />
+
+  <!-- Set the name of the topic for publishing the joints states -->
+  <arg name="publish_states_topic" default="/robot_joint_states" />
+
+  <!--
+  =====  Launch joint_state_publisher, robot_state_publisher and rviz  =====
+  -->
+  <!-- <include file="$(find lwr4p)/launch/common.launch" /> -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" required="true">
+    <rosparam param="source_list" subst_value="true">[$(arg publish_states_topic)]</rosparam>
+    <rosparam>
+      rate: 50
+      use_gui: true
+    </rosparam>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" required="true"/>
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find lwr4p_bhand_test)/rviz/lwr4p_bh282_robot_test.rviz" output="screen" required="true"/>
+
+  <!--
+  =====  Launch execution node  =====
+  -->
+  <node name="lwr4p_bh282_robot_test_node"
+        pkg="lwr4p_bhand_test"
+        type="lwr4p_bh282_robot_test"
+        required="true" respawn="false" cwd="node" output="screen">
+
+        <rosparam param="publish_states_topic" subst_value="true">$(arg publish_states_topic)</rosparam>
+
+        <rosparam>
+          robot_description_name: "/robot_description"
+
+          # ====  lwr4p params  ====
+          lwr_base_link: "lwr_arm_base_link"
+          lwr_tool_link: "lwr_arm_7_link"
+          lwr_ctrl_cycle: 0.005
+
+          <!-- j0, j1, j2, j3, j4, j5, j6 -->
+          lwr_q1: [-0.46, 0.58, 0.28, -1.4, 0, -0.25, 1.27]
+          lwr_q2: [2.1, 0.92, -0.24, -1.38, 0.03, -1.51, -1.42]
+          lwr_time_duration: 4.5 <!-- duration to move from q1 to q2 and vice versa -->
+          lwr_use_sim: true
+
+          # ====  bh282 params  ====
+          bh_base_link: "bh282_base_link"
+          bh_tool_link: ["bh282_finger_1_tip_link", "bh282_finger_2_tip_link", "bh282_finger_3_tip_link"]
+          bh_ctrl_cycle: 0.005
+
+          <!-- spread, fing1, fing2, fing3 -->
+          bh_q1: [0.4, 0.3, 0.25, 0.22]
+          bh_q2: [1.4, 1.3, 1.25, 1.3]
+          bh_time_duration: 2.5 <!-- duration to move from q1 to q2 and vice versa -->
+          bh_use_sim: true
+        </rosparam>
+
+  </node>
+
+</launch>

@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="io_test" type="term_color_test" name="term_color_test" output="screen" cwd="node" />
+
+</launch>

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--
+  =====  Load Robot description  =====
+  -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find lwr4p_test)/urdf/multi_lwr4p_robots_test.xacro'" />
+
+  <!-- Set the name of the topic for publishing the joints states -->
+  <arg name="publish_states_topic" default="/robot_joint_states" />
+
+  <!--
+  =====  Launch joint_state_publisher, robot_state_publisher and rviz  =====
+  -->
+  <!-- <include file="$(find lwr4p)/launch/common.launch" /> -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" required="true">
+    <rosparam param="source_list" subst_value="true">[$(arg publish_states_topic)]</rosparam>
+    <rosparam>
+      rate: 50
+      use_gui: true
+    </rosparam>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" required="true"/>
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find lwr4p_test)/rviz/multi_lwr4p_robots_test.rviz" output="screen" required="true"/>
+
+  <!--
+  =====  Launch execution node  =====
+  -->
+  <node name="multi_lwr4p_robots_test_node"
+        pkg="lwr4p_test"
+        type="multi_lwr4p_robots_test"
+        required="true" respawn="false" cwd="node" output="screen">
+
+        <rosparam param="publish_states_topic" subst_value="true">$(arg publish_states_topic)</rosparam>
+
+        <rosparam>
+          robot_description_name: "/robot_description"
+
+          # ====  lwr4p1 args  ====
+          base_link_1: "lwr1_arm_base_link"
+          tool_link_1: "lwr1_arm_7_link"
+          ctrl_cycle_1: 0.005
+          q1_1: [-0.46, 0.58, 0.28, -1.4, 0, -0.25, 1.27]
+          q2_1: [2.1, 0.92, -0.24, -1.38, 0.03, -1.51, -1.42]
+          time_duration_1: 4.5
+          use_sim_1: true
+
+          # ====  lwr4p2 args  ====
+          base_link_2: "lwr2_arm_base_link"
+          tool_link_2: "lwr2_arm_7_link"
+          ctrl_cycle_2: 0.005
+          q1_2: [0.46, -0.58, -0.28, 1.4, 0, 0.25, -1.27]
+          q2_2: [-2.1, -0.92, 0.24, 1.38, -0.03, 1.51, 1.42]
+          time_duration_2: 4.0
+          use_sim_2: true
+
+          # ====  lwr4p3 args  ====
+          base_link_3: "lwr3_arm_base_link"
+          tool_link_3: "lwr3_arm_7_link"
+          ctrl_cycle_3: 0.005
+          q1_3: [-0.2, 0.7, 0.3, -1.4, 0, -0.2, 1.4]
+          q2_3: [2.1, 1.1, -0.3, -1.38, 0.2, -1.3, -1.1]
+          time_duration_3: 5.0
+          use_sim_3: true
+
+        </rosparam>
+
+  </node>
+
+
+</launch>

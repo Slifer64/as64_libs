@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<robot name="bh282" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find bhand)/urdf/bh282.urdf.xacro"/>
+
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <xacro:include filename="$(find bhand)/urdf/bh282.gazebo.xacro"/>
+
+<link name="world" />
+
+<!--
+======  set up 1st robot  ======
+-->
+<joint name="world_to_base1" type="fixed">
+   <origin xyz="0.0 -0.2 0" rpy="0 0 0"/>
+   <parent link="world"/>
+   <child link="base1"/>
+</joint>
+
+<link name="base1" />
+
+<xacro:bhand_macro name="bh282_1" parent="base1">
+  <origin xyz="0 0 0" rpy="0 0 0" />
+</xacro:bhand_macro>
+
+<!--
+======  set up 2nd robot  ======
+-->
+<joint name="world_to_base2" type="fixed">
+   <origin xyz="-0.2 0.2 0" rpy="0 0 0"/>
+   <parent link="world"/>
+   <child link="base2"/>
+</joint>
+
+<link name="base2" />
+
+<xacro:bhand_macro name="bh282_2" parent="base2">
+  <origin xyz="0 0 0" rpy="0 0 0" />
+</xacro:bhand_macro>
+
+<!--
+======  set up 3rd robot  ======
+-->
+<joint name="world_to_base3" type="fixed">
+   <origin xyz="0.2 0.15 0" rpy="0 0 0"/>
+   <parent link="world"/>
+   <child link="base3"/>
+</joint>
+
+<link name="base3" />
+
+<xacro:bhand_macro name="bh282_3" parent="base3">
+  <origin xyz="0 0 0" rpy="0 0 0" />
+</xacro:bhand_macro>
+
+
+</robot>

@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--
+  =====  Load Robot description  =====
+  -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ppc_joint_limit_avoid_test)/urdf/ppc_joint_limit_avoid_test.xacro'" />
+
+  <!-- Set the name of the topic for publishing the joints states -->
+  <arg name="publish_states_topic" default="/robot_joint_states" />
+
+  <!--
+  =====  Launch joint_state_publisher, robot_state_publisher and rviz  =====
+  -->
+  <!-- <include file="$(find lwr4p)/launch/common.launch" /> -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" required="true">
+    <rosparam param="source_list" subst_value="true">[$(arg publish_states_topic)]</rosparam>
+    <rosparam>
+      rate: 50
+      use_gui: true
+    </rosparam>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" required="true"/>
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="-d $(find ppc_joint_limit_avoid_test)/rviz/ppc_joint_limit_avoid_test.rviz" output="screen" required="true"/>
+
+  <!--
+  =====  Launch execution node  =====
+  -->
+  <node name="ppc_joint_limit_avoid_test_node"
+        pkg="ppc_joint_limit_avoid_test"
+        type="ppc_joint_limit_avoid_test"
+        required="true" respawn="false" cwd="node" output="screen">
+
+        <rosparam param="publish_states_topic" subst_value="true">$(arg publish_states_topic)</rosparam>
+
+        <rosparam>
+          robot_description_name: "/robot_description"
+          base_link: "lwr_arm_base_link"
+          tool_link: "lwr_arm_7_link"
+          ctrl_cycle: 0.005
+
+          <!-- j0, j1, j2, j3, j4, j5, j6 -->
+          q1: [-0.46, 0.58, 0.28, -1.4, 0, -0.25, 1.27]
+          q2: [2.1, 0.92, -0.24, -1.38, 0.03, -1.51, -1.42]
+          time_duration: 4.0 <!-- duration to move from q1 to q2 and vice versa -->
+          use_sim: true
+
+          <!-- ppc joint limit avoid args -->
+          kq: 1e-4
+          jlim_safety_margin: 5 <!-- degrees -->
+        </rosparam>
+
+  </node>
+
+</launch>

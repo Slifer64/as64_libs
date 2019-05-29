@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<robot name="LWR" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find lwr4p)/urdf/kuka_lwr_arm.xacro"/>
+
+<!-- Import all Gazebo-customization elements, including Gazebo colors -->
+<xacro:include filename="$(find lwr4p)/urdf/kuka_lwr_arm.gazebo"/>
+
+<link name="world" />
+
+<!--
+======  set up 1st robot  ======
+-->
+<joint name="world_to_base1" type="fixed">
+   <origin xyz="0.8 -0.5 0" rpy="0 0 0"/>
+   <parent link="world"/>
+   <child link="base1"/>
+</joint>
+
+<link name="base1" />
+
+<xacro:kuka_lwr_arm parent="base1" name="lwr1" right="1" tool_name=""/>
+<xacro:kuka_lwr_arm_gazebo name="lwr1"/>
+
+<!--
+======  set up 2nd robot  ======
+-->
+<joint name="world_to_base2" type="fixed">
+   <origin xyz="-0.8 0.5 0" rpy="0 0 0"/>
+   <parent link="world"/>
+   <child link="base2"/>
+</joint>
+
+<link name="base2" />
+
+<xacro:kuka_lwr_arm parent="base2" name="lwr2" right="1" tool_name=""/>
+<xacro:kuka_lwr_arm_gazebo name="lwr2"/>
+
+
+<!--
+======  set up 3rd robot  ======
+-->
+<joint name="world_to_base3" type="fixed">
+   <origin xyz="1.15 1.2 0" rpy="0 0 0"/>
+   <parent link="world"/>
+   <child link="base3"/>
+</joint>
+
+<link name="base3" />
+
+<xacro:kuka_lwr_arm parent="base3" name="lwr3" right="1" tool_name=""/>
+<xacro:kuka_lwr_arm_gazebo name="lwr3"/>
+
+<!--
+======  set up 4th robot  ======
+<joint name="world_to_base4" type="fixed">
+   <origin xyz="-1.15 -1.2 0" rpy="0 0 0"/>
+   <parent link="world"/>
+   <child link="base4"/>
+</joint>
+
+<link name="base4" />
+
+<xacro:kuka_lwr_arm parent="base4" name="lwr4" right="1" tool_name=""/>
+<xacro:kuka_lwr_arm_gazebo name="lwr4"/>
+-->
+
+</robot>

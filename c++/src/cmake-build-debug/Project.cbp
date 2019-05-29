@@ -1,0 +1,2250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="Project"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\opt\;CMake Files\..\..\..\..\..\..\opt\ros\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\platform\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\test\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\tools\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\em\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\orocos_kdl\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\kdl_parser\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\kdl_parser\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\cpp_common\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\cpp_common\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\message_runtime\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\message_runtime\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_serialization\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_serialization\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_traits\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_traits\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rostime\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rostime\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosgraph_msgs\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosgraph_msgs\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\std_msgs\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\std_msgs\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\xmlrpcpp\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\xmlrpcpp\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\urdf\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\urdf\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole_bridge\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole_bridge\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roslib\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roslib\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rospack\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rospack\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\sensor_msgs\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\sensor_msgs\cmake\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\geometry_msgs\;CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\geometry_msgs\cmake\;CMake Files\..\..\..\..\..\..\usr\;CMake Files\..\..\..\..\..\..\usr\src\;CMake Files\..\..\..\..\..\..\usr\src\gtest\;CMake Files\..\..\..\..\..\..\usr\src\gtest\cmake\;CMake Files\cmake-build-debug\;CMake Files\cmake-build-debug\catkin\;CMake Files\cmake-build-debug\catkin\catkin_generated\;CMake Files\cmake-build-debug\catkin\catkin_generated\version\;CMake Files\cmake-build-debug\catkin_generated\;CMake Files\cmake-build-debug\catkin_generated\installspace\;CMake Files\cmake-build-debug\dmp_lib\;CMake Files\cmake-build-debug\dmp_lib\catkin_generated\;CMake Files\cmake-build-debug\io_lib\;CMake Files\cmake-build-debug\io_lib\catkin_generated\;CMake Files\cmake-build-debug\kalmanfilter_lib\;CMake Files\cmake-build-debug\kalmanfilter_lib\catkin_generated\;CMake Files\cmake-build-debug\robots\;CMake Files\cmake-build-debug\robots\bhand\;CMake Files\cmake-build-debug\robots\bhand\catkin_generated\;CMake Files\cmake-build-debug\robots\lwr4p\;CMake Files\cmake-build-debug\robots\lwr4p\catkin_generated\;CMake Files\cmake-build-debug\devel\;CMake Files\cmake-build-debug\devel\share\;CMake Files\cmake-build-debug\devel\share\io_lib\;CMake Files\cmake-build-debug\devel\share\io_lib\cmake\;CMake Files\cmake-build-debug\devel\share\bhand\;CMake Files\cmake-build-debug\devel\share\bhand\cmake\;CMake Files\cmake-build-debug\devel\share\misc_lib\;CMake Files\cmake-build-debug\devel\share\misc_lib\cmake\;CMake Files\cmake-build-debug\devel\share\lwr4p\;CMake Files\cmake-build-debug\devel\share\lwr4p\cmake\;CMake Files\cmake-build-debug\devel\share\robo_lib\;CMake Files\cmake-build-debug\devel\share\robo_lib\cmake\;CMake Files\cmake-build-debug\test\;CMake Files\cmake-build-debug\test\io_test\;CMake Files\cmake-build-debug\test\io_test\catkin_generated\;CMake Files\cmake-build-debug\test\bhand_test\;CMake Files\cmake-build-debug\test\bhand_test\catkin_generated\;CMake Files\cmake-build-debug\test\lwr4p_bhand_test\;CMake Files\cmake-build-debug\test\lwr4p_bhand_test\catkin_generated\;CMake Files\cmake-build-debug\test\lwr4p_test\;CMake Files\cmake-build-debug\test\lwr4p_test\catkin_generated\;CMake Files\cmake-build-debug\test\ppc_joint_limit_avoid_test\;CMake Files\cmake-build-debug\test\ppc_joint_limit_avoid_test\catkin_generated\;CMake Files\cmake-build-debug\test\singular_value_filter_test\;CMake Files\cmake-build-debug\test\singular_value_filter_test\catkin_generated\;CMake Files\cmake-build-debug\math_lib\;CMake Files\cmake-build-debug\math_lib\catkin_generated\;CMake Files\cmake-build-debug\misc_lib\;CMake Files\cmake-build-debug\misc_lib\catkin_generated\;CMake Files\cmake-build-debug\robo_lib\;CMake Files\cmake-build-debug\robo_lib\catkin_generated\;CMake Files\dmp_lib\;CMake Files\io_lib\;CMake Files\kalmanfilter_lib\;CMake Files\robots\;CMake Files\robots\bhand\;CMake Files\robots\lwr4p\;CMake Files\robots\lwr4p\cmake\;CMake Files\test\;CMake Files\test\io_test\;CMake Files\test\bhand_test\;CMake Files\test\lwr4p_bhand_test\;CMake Files\test\lwr4p_test\;CMake Files\test\ppc_joint_limit_avoid_test\;CMake Files\test\singular_value_filter_test\;CMake Files\math_lib\;CMake Files\misc_lib\;CMake Files\robo_lib\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/strip">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/strip"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 install"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="list_install_components">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tests">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 tests"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="download_extra_data">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 download_extra_data"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="run_tests">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 run_tests"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="clean_test_results">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean_test_results"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="doxygen">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 doxygen"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest_main">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/libgtest_main.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DGTEST_CREATE_SHARED_LIBRARY=1"/>
+					<Add directory="/usr/src/gtest/include"/>
+					<Add directory="/usr/src/gtest"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 gtest_main"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest_main/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/libgtest_main.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DGTEST_CREATE_SHARED_LIBRARY=1"/>
+					<Add directory="/usr/src/gtest/include"/>
+					<Add directory="/usr/src/gtest"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 gtest_main/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/libgtest.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DGTEST_CREATE_SHARED_LIBRARY=1"/>
+					<Add directory="/usr/src/gtest/include"/>
+					<Add directory="/usr/src/gtest"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 gtest"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="gtest/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/libgtest.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DGTEST_CREATE_SHARED_LIBRARY=1"/>
+					<Add directory="/usr/src/gtest/include"/>
+					<Add directory="/usr/src/gtest"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 gtest/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="dmp_lib">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libdmp_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 dmp_lib"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="dmp_lib/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libdmp_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 dmp_lib/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="_catkin_empty_exported_target">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 _catkin_empty_exported_target"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="io_lib">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libio_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 io_lib"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="io_lib/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libio_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 io_lib/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="kalmanfilter_lib">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libkalmanfilter_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/kalmanfilter_lib/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 kalmanfilter_lib"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="kalmanfilter_lib/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libkalmanfilter_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/kalmanfilter_lib/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 kalmanfilter_lib/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rosgraph_msgs_generate_messages_lisp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 rosgraph_msgs_generate_messages_lisp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="roscpp_generate_messages_py">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 roscpp_generate_messages_py"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rosgraph_msgs_generate_messages_py">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 rosgraph_msgs_generate_messages_py"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rosgraph_msgs_generate_messages_cpp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 rosgraph_msgs_generate_messages_cpp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="roscpp_generate_messages_cpp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 roscpp_generate_messages_cpp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="geometry_msgs_generate_messages_cpp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 geometry_msgs_generate_messages_cpp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="roscpp_generate_messages_lisp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 roscpp_generate_messages_lisp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="std_msgs_generate_messages_lisp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 std_msgs_generate_messages_lisp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="sensor_msgs_generate_messages_cpp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 sensor_msgs_generate_messages_cpp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="sensor_msgs_generate_messages_py">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 sensor_msgs_generate_messages_py"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="geometry_msgs_generate_messages_lisp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 geometry_msgs_generate_messages_lisp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="std_msgs_generate_messages_cpp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 std_msgs_generate_messages_cpp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="std_msgs_generate_messages_py">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 std_msgs_generate_messages_py"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="geometry_msgs_generate_messages_py">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 geometry_msgs_generate_messages_py"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="sensor_msgs_generate_messages_lisp">
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 sensor_msgs_generate_messages_lisp"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bhand">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libbhand.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;bhand&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14/linux"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 bhand"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bhand/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libbhand.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;bhand&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14/linux"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 bhand/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="term_color_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test/term_color_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;io_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/io_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 term_color_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="term_color_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test/term_color_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;io_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/io_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 term_color_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="file_io_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test/file_io_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;io_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/io_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 file_io_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="file_io_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test/file_io_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;io_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/io_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 file_io_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="xml_parser_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test/xml_parser_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;io_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/io_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 xml_parser_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="xml_parser_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test/xml_parser_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/io_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;io_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/io_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 xml_parser_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lwr4p">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/liblwr4p.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 lwr4p"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lwr4p/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/liblwr4p.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 lwr4p/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="math_lib">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libmath_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;math_lib&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/math_lib/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 math_lib"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="math_lib/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libmath_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;math_lib&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/math_lib/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 math_lib/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="misc_lib">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libmisc_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;misc_lib&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 misc_lib"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="misc_lib/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/libmisc_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;misc_lib&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 misc_lib/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="multi_bh282_robots_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test/multi_bh282_robots_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;bhand_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 multi_bh282_robots_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="multi_bh282_robots_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test/multi_bh282_robots_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;bhand_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 multi_bh282_robots_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bh282_robot_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test/bh282_robot_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;bhand_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 bh282_robot_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="bh282_robot_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test/bh282_robot_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/bhand_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;bhand_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 bh282_robot_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lwr4p_bh282_robot_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_bhand_test/lwr4p_bh282_robot_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_bhand_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p_bhand_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 lwr4p_bh282_robot_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lwr4p_bh282_robot_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_bhand_test/lwr4p_bh282_robot_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_bhand_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p_bhand_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 lwr4p_bh282_robot_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="multi_lwr4p_robots_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test/multi_lwr4p_robots_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 multi_lwr4p_robots_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="multi_lwr4p_robots_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test/multi_lwr4p_robots_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 multi_lwr4p_robots_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lwr4p_robot_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test/lwr4p_robot_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 lwr4p_robot_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lwr4p_robot_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test/lwr4p_robot_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/lwr4p_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;lwr4p_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 lwr4p_robot_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="robo_lib">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/librobo_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;robo_lib&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 robo_lib"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="robo_lib/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/librobo_lib.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;robo_lib&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 robo_lib/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ppc_joint_limit_avoid_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/ppc_joint_limit_avoid_test/ppc_joint_limit_avoid_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/ppc_joint_limit_avoid_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;ppc_joint_limit_avoid_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/ppc_joint_limit_avoid_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/ppc_joint_limit_avoid_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 ppc_joint_limit_avoid_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ppc_joint_limit_avoid_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/ppc_joint_limit_avoid_test/ppc_joint_limit_avoid_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/ppc_joint_limit_avoid_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;ppc_joint_limit_avoid_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/ppc_joint_limit_avoid_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/ppc_joint_limit_avoid_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 ppc_joint_limit_avoid_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="singular_value_filter_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/singular_value_filter_test/singular_value_filter_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/singular_value_filter_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;singular_value_filter_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/singular_value_filter_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/singular_value_filter_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 singular_value_filter_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="singular_value_filter_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/singular_value_filter_test/singular_value_filter_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/singular_value_filter_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DLINUX"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;singular_value_filter_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/singular_value_filter_test/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/singular_value_filter_test/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/misc_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robo_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 singular_value_filter_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/CanonicalClock/CanonicalClock.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/DMP/DMP.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/GatingFunction/ExpGatingFunction.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/GatingFunction/GatingFunction.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/GatingFunction/LinGatingFunction.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/GatingFunction/SigmoidGatingFunction.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/trainMethods/LWR.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/trainMethods/LeastSquares.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/io_lib/src/io_utils.cpp">
+			<Option target="io_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/io_lib/src/xml_parser.cpp">
+			<Option target="io_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/kalmanfilter_lib/src/EKF.cpp">
+			<Option target="kalmanfilter_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/kalmanfilter_lib/src/KF.cpp">
+			<Option target="kalmanfilter_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/kalmanfilter_lib/src/UKF.cpp">
+			<Option target="kalmanfilter_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/math_lib/src/convertions.cpp">
+			<Option target="math_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/math_lib/src/math.cpp">
+			<Option target="math_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/math_lib/src/quaternions.cpp">
+			<Option target="math_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/math_lib/src/svf.cpp">
+			<Option target="math_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/misc_lib/src/joint_state_publisher.cpp">
+			<Option target="misc_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/misc_lib/src/timer.cpp">
+			<Option target="misc_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/misc_lib/src/wrench_reader.cpp">
+			<Option target="misc_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robo_lib/src/kinematic_chain.cpp">
+			<Option target="robo_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robo_lib/src/ppc_joint_limit_avoid.cpp">
+			<Option target="robo_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robo_lib/src/singular_value_filter.cpp">
+			<Option target="robo_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/src/fifo.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/src/getopt.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/src/iobase.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/src/kbhit.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/src/linux/serport.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/src/linux/timer.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/src/serportx.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bh282_robot.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bh282_sim_robot.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHand.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandAppHelper.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandBH8_262.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandBH8_280.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandCANDriver.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandDriver.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandHardware.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandSerialDriver.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BHandSupervisoryRealTime.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BPuck2.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BPuck2Manager.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BSerialPort.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/BhandHWinterface.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/PucksInHand.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/bhand_misc.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/bhand_motors.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/bhand_parse.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/bhand_API/puck2.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/kinematic_chain.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/robot_hand.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/src/utils.cpp">
+			<Option target="bhand"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/src/robot.cpp">
+			<Option target="lwr4p"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/src/robot_arm.cpp">
+			<Option target="lwr4p"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/src/sim_robot.cpp">
+			<Option target="lwr4p"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/src/utils.cpp">
+			<Option target="lwr4p"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/src/bh282_robot_test.cpp">
+			<Option target="bh282_robot_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/src/multi_bh282_robots_test.cpp">
+			<Option target="multi_bh282_robots_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/src/utils.cpp">
+			<Option target="multi_bh282_robots_test"/>
+			<Option target="bh282_robot_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/io_test/src/file_io_test.cpp">
+			<Option target="file_io_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/io_test/src/term_color_test.cpp">
+			<Option target="term_color_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/io_test/src/xml_parser_test.cpp">
+			<Option target="xml_parser_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/src/lwr4p_bh282_robot_test.cpp">
+			<Option target="lwr4p_bh282_robot_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/src/utils.cpp">
+			<Option target="lwr4p_bh282_robot_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/src/lwr4p_robot_test.cpp">
+			<Option target="lwr4p_robot_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/src/multi_lwr4p_robots_test.cpp">
+			<Option target="multi_lwr4p_robots_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/src/utils.cpp">
+			<Option target="multi_lwr4p_robots_test"/>
+			<Option target="lwr4p_robot_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/ppc_joint_limit_avoid_test/src/ppc_joint_limit_avoid_test.cpp">
+			<Option target="ppc_joint_limit_avoid_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/singular_value_filter_test/src/singular_value_filter_test.cpp">
+			<Option target="singular_value_filter_test"/>
+		</Unit>
+		<Unit filename="/usr/src/gtest/src/gtest-all.cc">
+			<Option target="gtest"/>
+		</Unit>
+		<Unit filename="/usr/src/gtest/src/gtest_main.cc">
+			<Option target="gtest_main"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/package.xml">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/all.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/assert.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/atomic_configure_file.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkinConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkinConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_add_env_hooks.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_destinations.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_download.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_generate_environment.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_install_python.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_libraries.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_metapackage.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_package.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_package_xml.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_python_setup.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/catkin_workspace.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/debug_message.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/em_expand.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/empy.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/find_program_required.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/interrogate_setup_dot_py.py">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/legacy.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/list_append_deduplicate.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/list_append_unique.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/list_insert_in_workspace_order.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/python.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/safe_execute_process.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/stamp.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/string_starts_with.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/platform/lsb.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\platform\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/platform/ubuntu.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\platform\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/platform/windows.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\platform\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/test/catkin_download_test_data.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/test/gtest.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/test/nosetests.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/test/tests.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/tools/doxygen.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\tools\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/tools/libraries.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\tools\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/tools/rt.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\tools\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/_setup_util.py.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/env.sh.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/generate_cached_setup.py.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/order_packages.context.py.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/pkg.context.pc.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/pkgConfig-version.cmake.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/pkgConfig.cmake.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/rosinstall.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/setup.bash.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/setup.sh.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/templates/setup.zsh.in">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\templates\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/em/order_packages.cmake.em">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\em\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/catkin/cmake/em/pkg.pc.em">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\catkin\cmake\em\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/orocos_kdl/OrocosKDLTargets-none.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\orocos_kdl\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/orocos_kdl/OrocosKDLTargets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\orocos_kdl\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/orocos_kdl/orocos_kdl-config-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\orocos_kdl\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/orocos_kdl/orocos_kdl-config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\orocos_kdl\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/kdl_parser/cmake/kdl_parserConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\kdl_parser\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/kdl_parser/cmake/kdl_parserConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\kdl_parser\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roscpp/cmake/roscpp-msg-extras.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roscpp/cmake/roscppConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roscpp/cmake/roscppConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/cpp_common/cmake/cpp_commonConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\cpp_common\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/cpp_common/cmake/cpp_commonConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\cpp_common\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/message_runtime/cmake/message_runtimeConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\message_runtime\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/message_runtime/cmake/message_runtimeConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\message_runtime\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roscpp_serialization/cmake/roscpp_serializationConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_serialization\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roscpp_serialization/cmake/roscpp_serializationConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_serialization\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roscpp_traits/cmake/roscpp_traitsConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_traits\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roscpp_traits/cmake/roscpp_traitsConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roscpp_traits\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rostime/cmake/rostimeConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rostime\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rostime/cmake/rostimeConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rostime\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosconsole/cmake/rosconsole-extras.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosconsole/cmake/rosconsoleConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosconsole/cmake/rosconsoleConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosgraph_msgs/cmake/rosgraph_msgs-msg-extras.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosgraph_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosgraph_msgs/cmake/rosgraph_msgsConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosgraph_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosgraph_msgs/cmake/rosgraph_msgsConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosgraph_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/std_msgs/cmake/std_msgs-msg-extras.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\std_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/std_msgs/cmake/std_msgsConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\std_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/std_msgs/cmake/std_msgsConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\std_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/xmlrpcpp/cmake/xmlrpcppConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\xmlrpcpp\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/xmlrpcpp/cmake/xmlrpcppConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\xmlrpcpp\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/urdf/cmake/urdfConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\urdf\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/urdf/cmake/urdfConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\urdf\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosconsole_bridge/cmake/rosconsole_bridgeConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole_bridge\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rosconsole_bridge/cmake/rosconsole_bridgeConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rosconsole_bridge\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roslib/cmake/roslib-extras.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roslib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roslib/cmake/roslibConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roslib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/roslib/cmake/roslibConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\roslib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rospack/cmake/rospackConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rospack\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/rospack/cmake/rospackConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\rospack\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/sensor_msgs/cmake/sensor_msgs-msg-extras.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\sensor_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/sensor_msgs/cmake/sensor_msgsConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\sensor_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/sensor_msgs/cmake/sensor_msgsConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\sensor_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/geometry_msgs/cmake/geometry_msgs-msg-extras.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\geometry_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/geometry_msgs/cmake/geometry_msgsConfig-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\geometry_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../opt/ros/indigo/share/geometry_msgs/cmake/geometry_msgsConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\opt\ros\indigo\share\geometry_msgs\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../usr/src/gtest/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\src\gtest\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/../../../../../../usr/src/gtest/cmake/internal_utils.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\src\gtest\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/catkin/catkin_generated/version/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\catkin\catkin_generated\version\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/catkin_generated/order_packages.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/catkin_generated/installspace/_setup_util.py">
+			<Option virtualFolder="CMake Files\cmake-build-debug\catkin_generated\installspace\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/dmp_lib/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\dmp_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/io_lib/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\io_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/kalmanfilter_lib/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\kalmanfilter_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\robots\bhand\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/bhand/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\robots\bhand\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\robots\lwr4p\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robots/lwr4p/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\robots\lwr4p\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/io_lib/cmake/io_libConfig-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\io_lib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/io_lib/cmake/io_libConfig.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\io_lib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/bhand/cmake/bhandConfig-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\bhand\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/bhand/cmake/bhandConfig.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\bhand\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/misc_lib/cmake/misc_libConfig-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\misc_lib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/misc_lib/cmake/misc_libConfig.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\misc_lib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/lwr4p/cmake/lwr4pConfig-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\lwr4p\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/lwr4p/cmake/lwr4pConfig.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\lwr4p\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/robo_lib/cmake/robo_libConfig-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\robo_lib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/share/robo_lib/cmake/robo_libConfig.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\devel\share\robo_lib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\io_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/io_test/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\io_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\bhand_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/bhand_test/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\bhand_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\lwr4p_bhand_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_bhand_test/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\lwr4p_bhand_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\lwr4p_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/lwr4p_test/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\lwr4p_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\ppc_joint_limit_avoid_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/ppc_joint_limit_avoid_test/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\ppc_joint_limit_avoid_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\singular_value_filter_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/singular_value_filter_test/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\test\singular_value_filter_test\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\math_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/math_lib/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\math_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\misc_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/misc_lib/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\misc_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/catkin_generated/ordered_paths.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\robo_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/robo_lib/catkin_generated/package.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-debug\robo_lib\catkin_generated\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dmp_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/package.xml">
+			<Option virtualFolder="CMake Files\dmp_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/io_lib/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\io_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/io_lib/package.xml">
+			<Option virtualFolder="CMake Files\io_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/kalmanfilter_lib/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\kalmanfilter_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/kalmanfilter_lib/package.xml">
+			<Option virtualFolder="CMake Files\kalmanfilter_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\robots\bhand\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/package.xml">
+			<Option virtualFolder="CMake Files\robots\bhand\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\robots\lwr4p\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/package.xml">
+			<Option virtualFolder="CMake Files\robots\lwr4p\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/cmake/FindFastResearchInterfaceLibrary.cmake">
+			<Option virtualFolder="CMake Files\robots\lwr4p\cmake\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/io_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\io_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/io_test/package.xml">
+			<Option virtualFolder="CMake Files\test\io_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\bhand_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/bhand_test/package.xml">
+			<Option virtualFolder="CMake Files\test\bhand_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\lwr4p_bhand_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_bhand_test/package.xml">
+			<Option virtualFolder="CMake Files\test\lwr4p_bhand_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\lwr4p_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/lwr4p_test/package.xml">
+			<Option virtualFolder="CMake Files\test\lwr4p_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/ppc_joint_limit_avoid_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\ppc_joint_limit_avoid_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/ppc_joint_limit_avoid_test/package.xml">
+			<Option virtualFolder="CMake Files\test\ppc_joint_limit_avoid_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/singular_value_filter_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\singular_value_filter_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/singular_value_filter_test/package.xml">
+			<Option virtualFolder="CMake Files\test\singular_value_filter_test\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/math_lib/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\math_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/math_lib/package.xml">
+			<Option virtualFolder="CMake Files\math_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/misc_lib/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\misc_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/misc_lib/package.xml">
+			<Option virtualFolder="CMake Files\misc_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robo_lib/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\robo_lib\"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/robo_lib/package.xml">
+			<Option virtualFolder="CMake Files\robo_lib\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,8 @@
+/bh282_robot/robot_description_name: "/robot_description"
+/bh282_robot/publish_joint_state_topic: "/robot_joint_states"
+/bh282_robot/tool_frame: ["bh282_finger_1_tip_link", "bh282_finger_2_tip_link", "bh282_finger_3_tip_link"]
+/bh282_robot/base_frame: ["bh282_base_link", "bh282_base_link", "bh282_base_link"]
+/bh282_robot/ctrl_cycle: 0.005
+/bh282_robot/check_limits: true
+/bh282_robot/check_singularity: true
+/bh282_robot/wrench_topic: ["", "", ""]
