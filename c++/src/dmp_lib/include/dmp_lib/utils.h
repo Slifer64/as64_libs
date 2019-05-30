@@ -7,17 +7,17 @@ namespace as64_
   namespace dmp_
   {
 
-    enum DMP_TYPE
+    enum TYPE
     {
       STD = 1001,
       BIO = 1003
     };
 
-    enum DMP_TRAIN
+    enum TrainMethod
     {
       LWR = 7,
       LS = 11
-    }
+    };
 
 
   } // namespace dmp_

@@ -33,7 +33,7 @@ namespace dmp_
  * @param[in] zero_tol: Tollerance value to avoid divisions by zero.
  * @return K x N matrix with the learned weights.
  */
-arma::mat LWR(const arma::mat &Psi, const arma::mat &X, const arma::rowvec &Fd, double zero_tol=0.0);
+arma::mat localWeightRegress(const arma::mat &Psi, const arma::mat &X, const arma::rowvec &Fd, double zero_tol=0.0);
 
 } // namespace dmp_
 

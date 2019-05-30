@@ -88,6 +88,15 @@
 		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/DMP/DMP.cpp">
 			<Option target="dmp_lib"/>
 		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/DMP/DMP_.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/DMP/DMP_bio.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/DMP/DMP_pos.cpp">
+			<Option target="dmp_lib"/>
+		</Unit>
 		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/src/GatingFunction/ExpGatingFunction.cpp">
 			<Option target="dmp_lib"/>
 		</Unit>

@@ -6,7 +6,7 @@ namespace as64_
 namespace dmp_
 {
 
-arma::mat LWR(const arma::mat &Psi, const arma::mat &X, const arma::rowvec &Fd, double zero_tol)
+arma::mat localWeightRegress(const arma::mat &Psi, const arma::mat &X, const arma::rowvec &Fd, double zero_tol)
 {
   int N_kernels = Psi.n_rows;
   int w_dim = X.n_rows;

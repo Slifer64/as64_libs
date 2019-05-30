@@ -5,6 +5,7 @@
 
 namespace as64_
 {
+
 namespace dmp_
 {
 
@@ -13,32 +14,31 @@ DMP_::DMP_(int N_kernels, double a_z, double b_z, std::shared_ptr<CanonicalClock
 {
   this->zero_tol = 1e-30; // realmin;
 
-  this->shape_attr_gating_ptr = shape_attr_gating_ptr;
-
   this->N_kernels = N_kernels;
   this->a_z = a_z;
   this->b_z = b_z;
   this->can_clock_ptr = can_clock_ptr;
+  this->shape_attr_gating_ptr = shape_attr_gating_ptr;
 
   this->w = arma::vec().zeros(this->N_kernels);
   this->setCenters();
-  double kernel_std_scaling = 1.0;
-  this->setStds(kernel_std_scaling);
+  this->setStds(1.0);
+  this->setY0(0);
 }
 
 
-void DMP_::train(const std::string &train_method, const arma::rowvec &Time,
+void DMP_::train(dmp_::TrainMethod train_method, const arma::rowvec &Time,
   const arma::rowvec &yd_data, const arma::rowvec &dyd_data, const arma::rowvec &ddyd_data, double *train_err)
 {
   int n_data = Time.size();
   int i_end = n_data-1;
 
-  double tau0 = this->getTau();
   double tau = Time(i_end);
   double y0 = yd_data(0);
   double g = yd_data(i_end);
 
   this->setTau(tau);
+  this->setY0(y0);
 
   arma::rowvec x(n_data);
   arma::rowvec s(n_data);
@@ -47,30 +47,30 @@ void DMP_::train(const std::string &train_method, const arma::rowvec &Time,
   for (int i=0; i<n_data; i++)
   {
     x(i) = this->phase(Time(i));
-    s(i) = this->forcingTermScaling(y0, g) * this->shapeAttrGating(x(i));
-    Fd(i) = this->calcFd(x(i), yd_data(i), dyd_data(i), ddyd_data(i), y0, g);
+    s(i) = this->forcingTermScaling(g) * this->shapeAttrGating(x(i));
+    Fd(i) = this->calcFd(x(i), yd_data(i), dyd_data(i), ddyd_data(i), g);
     Psi.col(i) = this->kernelFunction(x(i));
   }
 
-  if (train_method.compare("LWR")==0)
+  switch (train_method)
   {
-    this->w = LWR(Psi, s, Fd, this->zero_tol);
+    case dmp_::TrainMethod::LWR:
+      this->w = localWeightRegress(Psi, s, Fd, this->zero_tol);
+      break;
+    case dmp_::TrainMethod::LS:
+      this->w = leastSquares(Psi, s, Fd, this->zero_tol);
+      break;
+    default:
+      throw std::runtime_error("[DMP_::train]: Unsopported training method");
   }
-  else if (train_method.compare("LS")==0)
-  {
-    this->w = leastSquares(Psi, s, Fd, this->zero_tol);
-  }
-  else
-  {
-    throw std::runtime_error(std::string("Unsopported training method \"") + train_method);
-  }
+
 
   if (train_err)
   {
     arma::rowvec F(Fd.size());
     for (int i=0; i<F.size(); i++)
     {
-      F(i) = this->shapeAttractor(x(i), y0, g);
+      F(i) = this->calcLearnedFd(x(i), g);
     }
     *train_err = arma::norm(F-Fd)/F.size();
   }
@@ -78,16 +78,49 @@ void DMP_::train(const std::string &train_method, const arma::rowvec &Time,
 }
 
 
-void DMP_::update(double x, double y, double z, double y0, double g, double y_c, double z_c)
+void DMP_::update(double x, double y, double z, double g, double y_c, double z_c)
 {
   double tau = this->getTau();
 
-  double shape_attr = this->shapeAttractor(x, y0, g);
+  double shape_attr = this->shapeAttractor(x, g);
   double goal_attr = this->goalAttractor(x, y, z, g);
 
   this->dz = ( goal_attr + shape_attr + z_c) / tau;
   this->dy = ( z + y_c) / tau;
   this->dx = this->phaseDot(x);
+}
+
+
+double DMP_::calcYddot(double x, double y, double dy, double g, double tau_dot, double yc, double zc, double yc_dot) const
+{
+  double tau = this->getTau();
+  double z = dy*tau - yc;
+
+  double shape_attr = this->shapeAttractor(x, g);
+  double goal_attr = this->goalAttractor(x, y, z, g);
+  double dz = ( goal_attr + shape_attr + zc) / tau;
+
+  double ddy = (dz + yc_dot - tau_dot*dy)/tau;
+
+  return ddy;
+}
+
+
+double DMP_::getYddot(double tau_dot, double yc_dot) const
+{
+  return (this->getZdot() + yc_dot - tau_dot*this->getYdot()) / this->getTau();
+}
+
+
+int DMP_::numOfKernels() const
+{
+  return w.size();
+}
+
+
+void DMP_::setY0(double y0)
+{
+  this->y0 = y0;
 }
 
 
@@ -131,18 +164,18 @@ double DMP_::goalAttractor(double x, double y, double z, double g) const
 }
 
 
+double DMP_::goalAttrGating(double x) const
+{
+  double gAttrGat = 1.0;
+  return gAttrGat;
+}
+
+
 double DMP_::shapeAttrGating(double x) const
 {
   double sAttrGat = this->shape_attr_gating_ptr->getOutput(x);
   if (sAttrGat<0) sAttrGat = 0.0;
   return sAttrGat;
-}
-
-
-double DMP_::goalAttrGating(double x) const
-{
-  double gAttrGat = 1.0;
-  return gAttrGat;
 }
 
 
@@ -177,11 +210,6 @@ void DMP_::setStds(double kernelStdScaling)
   this->h(N_kernels-1) = this->h(N_kernels-2);
 }
 
-
-int DMP_::numOfKernels() const
-{
-  return w.size();
-}
 
 arma::vec DMP_::getAcellPartDev_g_tau(double t, double y, double dy, double y0,
                                 double x_hat, double g_hat, double tau_hat) const

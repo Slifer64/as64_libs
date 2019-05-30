@@ -183,8 +183,8 @@
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14/linux"/>
-					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/c++/4.8"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
 					<Add directory="/usr/include/c++/4.8/backward"/>
@@ -217,8 +217,8 @@
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/bhand/include/bhand/bhand_API/ctb-0.14/linux"/>
-					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/c++/4.8"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
 					<Add directory="/usr/include/c++/4.8/backward"/>

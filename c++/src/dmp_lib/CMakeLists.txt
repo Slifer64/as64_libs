@@ -29,8 +29,13 @@ add_library(${PROJECT_NAME}
   src/trainMethods/LeastSquares.cpp
   src/trainMethods/LWR.cpp
 
+  src/math/quaternions.cpp
+
   src/DMP/DMP_.cpp
   src/DMP/DMP.cpp
+  src/DMP/DMP_bio.cpp
+  src/DMP/DMP_pos.cpp
+  src/DMP/DMP_eo.cpp
 )
 
 add_dependencies(${PROJECT_NAME}

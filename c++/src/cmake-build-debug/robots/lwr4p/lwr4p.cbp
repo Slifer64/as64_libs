@@ -30,9 +30,9 @@
 					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/usr/include/eigen3"/>
-					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/eigen3"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/c++/4.8"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
 					<Add directory="/usr/include/c++/4.8/backward"/>
@@ -62,9 +62,9 @@
 					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/include"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/usr/include/eigen3"/>
-					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/eigen3"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/robots/lwr4p/FRILibrary/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
 					<Add directory="/usr/include/c++/4.8"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
 					<Add directory="/usr/include/c++/4.8/backward"/>

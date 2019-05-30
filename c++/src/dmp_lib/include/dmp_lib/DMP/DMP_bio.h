@@ -1,5 +1,5 @@
-#ifndef AS64_STD_DYNAMICAL_MOVEMENT_PRIMITIVE_H
-#define AS64_STD_DYNAMICAL_MOVEMENT_PRIMITIVE_H
+#ifndef AS64_BIO_DYNAMICAL_MOVEMENT_PRIMITIVE_H
+#define AS64_BIO_DYNAMICAL_MOVEMENT_PRIMITIVE_H
 
 #include <dmp_lib/DMP/DMP_.h>
 
@@ -9,14 +9,14 @@ namespace as64_
 namespace dmp_
 {
 
-class DMP : public DMP_
+class DMP_bio : public DMP_
 {
 public:
 
-  DMP(int N_kernels, double a_z, double b_z, std::shared_ptr<CanonicalClock> can_clock_ptr=std::shared_ptr<CanonicalClock>(),
+    DMP_bio(int N_kernels, double a_z, double b_z, std::shared_ptr<CanonicalClock> can_clock_ptr=std::shared_ptr<CanonicalClock>(),
       std::shared_ptr<GatingFunction> shape_attr_gating_ptr=std::shared_ptr<GatingFunction>());
 
-  DMP *deepCopy() const;
+    DMP_bio *deepCopy() const;
 
 protected:
 
@@ -28,10 +28,10 @@ protected:
 
     double calcLearnedFd(double x, double g) const;
 
-}; // class DMP
+}; // class DMP_bio
 
 } // namespace dmp_
 
 } // namespace as64_
 
-#endif // AS64_STD_DYNAMICAL_MOVEMENT_PRIMITIVE_H
+#endif // AS64_BIO_DYNAMICAL_MOVEMENT_PRIMITIVE_H
