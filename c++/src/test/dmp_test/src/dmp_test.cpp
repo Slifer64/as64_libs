@@ -9,6 +9,9 @@
 
 #include <io_lib/io_utils.h>
 #include <dmp_lib/DMP/DMP.h>
+#include <dmp_lib/DMP/DMP_bio.h>
+#include <dmp_lib/GatingFunction/LinGatingFunction.h>
+#include <dmp_lib/GatingFunction/ExpGatingFunction.h>
 #include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
 
 #include <dmp_test/utils.h>
@@ -18,12 +21,14 @@ using namespace as64_;
 int main(int argc, char** argv)
 {
   // ===========  Initialize the ROS node  ===============
-  ros::init(argc, argv, "dmp_std_test_node");
+  ros::init(argc, argv, "dmp_test_node");
   ros::NodeHandle nh_("~");
 
   // ===========  Read params  ===============
   std::string path = ros::package::getPath("dmp_test") + "/matlab/data/";
 
+  std::string dmp_type;
+  std::string gating_type;
   std::string train_data_file;
   std::string sim_data_file;
   double a_z;
@@ -33,6 +38,8 @@ int main(int argc, char** argv)
   double ks;
   double kt;
 
+  if (!nh_.getParam("dmp_type", dmp_type)) dmp_type = "STD";
+  if (!nh_.getParam("gating_type", gating_type)) gating_type = "sigmoid";
   if (!nh_.getParam("train_data_file", train_data_file)) train_data_file = "dmp_std_train_data.bin";
   if (!nh_.getParam("sim_data_file", sim_data_file)) sim_data_file = "dmp_std_sim_data.bin";
   if (!nh_.getParam("a_z", a_z)) a_z = 20;
@@ -69,9 +76,16 @@ int main(int argc, char** argv)
 
   // ===========  initialize DMP  ===============
   std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr( new dmp_::CanonicalClock());
-  std::shared_ptr<dmp_::GatingFunction> shape_attr_gat_ptr(new dmp_::SigmoidGatingFunction(1.0, 0.5));
+  std::shared_ptr<dmp_::GatingFunction> shape_attr_gat_ptr;
+  if (gating_type.compare("sigmoid")==0) shape_attr_gat_ptr.reset(new dmp_::SigmoidGatingFunction(1.0, 0.5));
+  else if (gating_type.compare("lin")==0) shape_attr_gat_ptr.reset(new dmp_::LinGatingFunction(1.0, 0.02));
+  else if (gating_type.compare("exp")==0) shape_attr_gat_ptr.reset(new dmp_::ExpGatingFunction(1.0, 0.02));
+  else throw std::runtime_error("Unsupported gating type: \"" + gating_type + "\"...");
 
-  std::shared_ptr<dmp_::DMP_> dmp(new dmp_::DMP(N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr));
+  std::shared_ptr<dmp_::DMP_> dmp;
+  if (dmp_type.compare("STD")==0) dmp.reset(new dmp_::DMP(N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr));
+  else if (dmp_type.compare("BIO")==0) dmp.reset(new dmp_::DMP_bio(N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr));
+  else throw std::runtime_error("Unsupported DMP type: \"" + dmp_type + "\"...");
 
   arma::wall_clock timer;
   timer.tic();

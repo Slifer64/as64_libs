@@ -49,7 +49,7 @@ public:
    *  @param[in] ret_train_err Flag to return the training error (optinal, default = false).
    *  @return The training error (-1 is returned if \a ret_train_err=false)
    */
-  void train(dmp_::TrainMethod train_method, const arma::vec &Time, const arma::mat &Quat_data,
+  void train(dmp_::TrainMethod train_method, const arma::rowvec &Time, const arma::mat &Quat_data,
                      const arma::mat &rotVel_data, const arma::mat &rotAccel_data, arma::vec *train_err=0);
 
 

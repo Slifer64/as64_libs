@@ -23,6 +23,12 @@ set(SRC_LIST
 	src/utils.cpp
 )
 
+set(LINK_LIBS
+  ${catkin_LIBRARIES}
+  dmp_lib
+  io_lib
+)
+
 file(GLOB INCLUDE_LIST "")
 
 ###########
@@ -36,26 +42,32 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-# ***********************************************
-# ************   Test STD DMP  ******************
-# ***********************************************
+# *******************************************
+# ************   Test DMP  ******************
+# *******************************************
 
-add_executable(dmp_std_test
-  src/dmp_std_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
+add_executable(dmp_test
+		src/dmp_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
 )
 
-add_dependencies(dmp_std_test
+add_dependencies(dmp_test
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(dmp_std_test
-  ${catkin_LIBRARIES}
-  dmp_lib
-  io_lib
+target_link_libraries(dmp_test ${LINK_LIBS} )
+
+# ***********************************************
+# ************   Test DMP_pos  ******************
+# ***********************************************
+
+add_executable(dmp_pos_test
+	src/dmp_pos_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
 )
 
-# *************************************************
-# **********  COLORED TERMINAL OUTPUT  ************
-# *************************************************
+add_dependencies(dmp_pos_test
+	${${PROJECT_NAME}_EXPORTED_TARGETS}
+	${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(dmp_pos_test ${LINK_LIBS} )
 
 

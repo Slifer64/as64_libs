@@ -17,7 +17,6 @@
       <config projectName="Project" targetName="clean_test_results" />
       <config projectName="Project" targetName="file_io_test" />
       <config projectName="Project" targetName="std_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="gtest" />
       <config projectName="Project" targetName="lwr4p" />
       <config projectName="Project" targetName="sensor_msgs_generate_messages_lisp" />
       <config projectName="Project" targetName="geometry_msgs_generate_messages_cpp" />
@@ -26,9 +25,8 @@
       <config projectName="Project" targetName="rosgraph_msgs_generate_messages_cpp" />
       <config projectName="Project" targetName="rosgraph_msgs_generate_messages_lisp" />
       <config projectName="Project" targetName="sensor_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="geometry_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="gtest_main" />
       <config projectName="Project" targetName="dmp_std_test" />
+      <config projectName="Project" targetName="geometry_msgs_generate_messages_lisp" />
       <config projectName="Project" targetName="rosgraph_msgs_generate_messages_py" />
       <config projectName="Project" targetName="std_msgs_generate_messages_py" />
       <config projectName="Project" targetName="misc_lib" />
@@ -54,6 +52,29 @@
   <component name="ChangeListManager">
     <list default="true" id="037d3d2a-9157-4199-bfd5-f865c6fdec8b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Project.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Project.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/catkin_generated/setup_cached.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/catkin_generated/setup_cached.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/dmp_lib/dmp_lib.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/dmp_lib/dmp_lib.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/io_lib/io_lib.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/io_lib/io_lib.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/kalmanfilter_lib/kalmanfilter_lib.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/kalmanfilter_lib/kalmanfilter_lib.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/math_lib/math_lib.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/math_lib/math_lib.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/misc_lib/misc_lib.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/misc_lib/misc_lib.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/robo_lib/robo_lib.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/robo_lib/robo_lib.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/robots/bhand/bhand.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/robots/bhand/bhand.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/robots/lwr4p/lwr4p.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/robots/lwr4p/lwr4p.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/test/bhand_test/bhand_test.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/test/bhand_test/bhand_test.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/test/dmp_test/dmp_test.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/test/dmp_test/dmp_test.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/test/io_test/io_test.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/test/io_test/io_test.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/test/lwr4p_bhand_test/lwr4p_bhand_test.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/test/lwr4p_bhand_test/lwr4p_bhand_test.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/test/lwr4p_test/lwr4p_test.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/test/lwr4p_test/lwr4p_test.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/test/ppc_joint_limit_avoid_test/ppc_joint_limit_avoid_test.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/test/ppc_joint_limit_avoid_test/ppc_joint_limit_avoid_test.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/test/singular_value_filter_test/singular_value_filter_test.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/test/singular_value_filter_test/singular_value_filter_test.cbp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dmp_test/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/test/dmp_test/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dmp_test/launch/dmp_std_test.launch" beforeDir="false" afterPath="$PROJECT_DIR$/test/dmp_test/launch/dmp_test.launch" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dmp_test/matlab/convertTrainData.m" beforeDir="false" afterPath="$PROJECT_DIR$/test/dmp_test/matlab/convertTrainData.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dmp_test/matlab/data/dmp_std_sim_data.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dmp_test/matlab/data/dmp_std_train_data.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/dmp_test/matlab/dmp_std_plot.m" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -69,19 +90,19 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/dmp_test/CMakeLists.txt">
+        <entry file="file://$PROJECT_DIR$/test/dmp_test/launch/dmp_pos_test.launch">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="138">
-              <caret line="12" column="35" selection-start-line="12" selection-start-column="35" selection-end-line="12" selection-end-column="35" />
+            <state relative-caret-position="220">
+              <caret line="10" column="22" lean-forward="true" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/dmp_test/include/dmp_test/utils.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+            <state relative-caret-position="440">
+              <caret line="20" column="92" selection-start-line="20" selection-start-column="92" selection-end-line="20" selection-end-column="92" />
               <folding>
                 <element signature="e#51#68#0" expanded="true" />
               </folding>
@@ -90,31 +111,47 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/dmp_test/package.xml">
+        <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_pos.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="96">
-              <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/dmp_test/src/dmp_std_test.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="521">
-              <caret line="39" column="60" lean-forward="true" selection-start-line="39" selection-start-column="60" selection-end-line="39" selection-end-column="60" />
+            <state relative-caret-position="374">
+              <caret line="51" selection-start-line="51" selection-end-line="51" />
               <folding>
-                <element signature="e#0#20#0" expanded="true" />
+                <element signature="e#0#32#0" expanded="true" />
+                <element signature="e#300#1280#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test/dmp_test/launch/dmp_std_test.launch">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="10" column="24" selection-start-line="10" selection-start-column="21" selection-end-line="10" selection-end-column="24" />
+            <state relative-caret-position="-220">
+              <caret line="7" selection-start-line="7" selection-end-line="7" />
+              <folding>
+                <element signature="e#0#29#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_pos.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="276">
+              <caret line="51" column="63" selection-start-line="51" selection-start-column="63" selection-end-line="51" selection-end-column="63" />
+              <folding>
+                <element signature="e#107#123#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/dmp_test/src/dmp_pos_test.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="112">
+              <caret line="110" selection-start-line="110" selection-end-line="110" />
             </state>
           </provider>
         </entry>
@@ -122,19 +159,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/dmp_test/src/utils.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="12" column="40" lean-forward="true" selection-start-line="12" selection-start-column="40" selection-end-line="12" selection-end-column="40" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_eo.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="16" column="26" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="26" />
+            <state relative-caret-position="352">
+              <caret line="69" column="100" selection-start-line="69" selection-start-column="100" selection-end-line="69" selection-end-column="100" />
               <folding>
-                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#29#1512#0" />
               </folding>
             </state>
           </provider>
@@ -143,10 +171,23 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_eo.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="364">
-              <caret line="193" column="10" selection-start-line="193" selection-start-column="10" selection-end-line="193" selection-end-column="10" />
+            <state relative-caret-position="418">
+              <caret line="49" column="48" selection-start-line="49" selection-start-column="48" selection-end-line="49" selection-end-column="48" />
               <folding>
                 <element signature="e#111#127#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_eo.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="349">
+              <caret line="51" column="1" selection-start-line="51" selection-start-column="1" selection-end-line="51" selection-end-column="1" />
+              <folding>
+                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#383#1433#0" />
               </folding>
             </state>
           </provider>
@@ -204,35 +245,41 @@
         <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP.h" />
         <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_bio.h" />
         <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP.cpp" />
-        <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP_bio.cpp" />
         <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP_.cpp" />
-        <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_pos.h" />
-        <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP_pos.cpp" />
         <option value="$PROJECT_DIR$/dmp_lib/src/math/quaternions.cpp" />
         <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/math/quaternions.h" />
         <option value="$PROJECT_DIR$/dmp_lib/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_.h" />
         <option value="$PROJECT_DIR$/test/dmp_test/package.xml" />
-        <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP_eo.cpp" />
-        <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_eo.h" />
         <option value="$PROJECT_DIR$/test/dmp_test/matlab/dmp_std_plot.m" />
         <option value="$PROJECT_DIR$/test/dmp_test/include/utils.h" />
-        <option value="$PROJECT_DIR$/test/dmp_test/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/test/dmp_test/include/dmp_test/utils.h" />
-        <option value="$PROJECT_DIR$/test/dmp_test/src/utils.cpp" />
         <option value="$PROJECT_DIR$/test/dmp_test/src/dmp_std_test.cpp" />
         <option value="$PROJECT_DIR$/test/dmp_test/launch/dmp_std_test.launch" />
+        <option value="$PROJECT_DIR$/test/dmp_test/matlab/convertTrainData.m" />
+        <option value="$PROJECT_DIR$/test/dmp_test/matlab/dmp_test_plot.m" />
+        <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP_bio.cpp" />
+        <option value="$PROJECT_DIR$/test/dmp_test/src/dmp_test.cpp" />
+        <option value="$PROJECT_DIR$/test/dmp_test/launch/dmp_test.launch" />
+        <option value="$PROJECT_DIR$/test/dmp_test/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/test/dmp_test/launch/dmp_pos_test.launch" />
+        <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_pos.h" />
+        <option value="$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_eo.h" />
+        <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP_eo.cpp" />
+        <option value="$PROJECT_DIR$/dmp_lib/src/DMP/DMP_pos.cpp" />
+        <option value="$PROJECT_DIR$/test/dmp_test/src/dmp_pos_test.cpp" />
+        <option value="$PROJECT_DIR$/test/dmp_test/src/utils.cpp" />
+        <option value="$PROJECT_DIR$/test/dmp_test/include/dmp_test/utils.h" />
       </list>
     </option>
   </component>
   <component name="OCResolveContextSettings">
     <option name="configuration" value="0-dmp_lib" />
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="37" />
-    <option name="y" value="521" />
-    <option name="width" value="1837" />
-    <option name="height" value="753" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="2053" />
+    <option name="y" value="137" />
+    <option name="width" value="1748" />
+    <option name="height" value="846" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
@@ -248,37 +295,53 @@
           <expand>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
-            </path>
-            <path>
-              <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="dmp_lib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="dmp_lib" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="dmp_lib" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="dmp_lib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="dmp_lib" type="462c0819:PsiDirectoryNode" />
+              <item name="include" type="462c0819:PsiDirectoryNode" />
+              <item name="dmp_lib" type="462c0819:PsiDirectoryNode" />
+              <item name="DMP" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="dmp_lib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="dmp_test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="dmp_test" type="462c0819:PsiDirectoryNode" />
-              <item name="config" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="dmp_test" type="462c0819:PsiDirectoryNode" />
@@ -286,7 +349,6 @@
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="dmp_test" type="462c0819:PsiDirectoryNode" />
@@ -295,7 +357,6 @@
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="dmp_test" type="462c0819:PsiDirectoryNode" />
@@ -303,25 +364,9 @@
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="dmp_test" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="io_test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="io_test" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -334,11 +379,16 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="editor.config.ad.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/test/dmp_test/launch" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.folding" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/test/dmp_test/launch" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -409,16 +459,6 @@
       </method>
     </configuration>
     <configuration name="geometry_msgs_generate_messages_py" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="geometry_msgs_generate_messages_py" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="gtest" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="gtest" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="gtest_main" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="gtest_main" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -575,8 +615,6 @@
       <item itemvalue="CMake Application.geometry_msgs_generate_messages_cpp" />
       <item itemvalue="CMake Application.geometry_msgs_generate_messages_lisp" />
       <item itemvalue="CMake Application.geometry_msgs_generate_messages_py" />
-      <item itemvalue="CMake Application.gtest" />
-      <item itemvalue="CMake Application.gtest_main" />
       <item itemvalue="CMake Application.io_lib" />
       <item itemvalue="CMake Application.kalmanfilter_lib" />
       <item itemvalue="CMake Application.lwr4p" />
@@ -624,17 +662,18 @@
       <workItem from="1559197248043" duration="5710000" />
       <workItem from="1559203863687" duration="14272000" />
       <workItem from="1559315870134" duration="3976000" />
+      <workItem from="1559329792184" duration="7249000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="35296000" />
+    <option name="totallyTimeSpent" value="42545000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="66" y="-11" width="1855" height="1092" extended-state="6" />
+    <frame x="2053" y="137" width="1748" height="846" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18317653" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18037602" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -796,17 +835,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="7" column="2" selection-start-line="7" selection-start-column="2" selection-end-line="7" selection-end-column="2" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#2804#2857#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
@@ -821,13 +849,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="383">
           <caret line="16" column="95" lean-forward="true" selection-start-line="15" selection-start-column="49" selection-end-line="16" selection-end-column="95" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_bio.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="1" selection-start-line="1" selection-end-line="3" selection-end-column="57" />
         </state>
       </provider>
     </entry>
@@ -866,39 +887,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_pos.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1803">
-          <caret line="132" selection-start-line="132" selection-end-line="154" selection-end-column="46" />
-          <folding>
-            <element signature="e#107#123#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="288">
           <caret line="12" column="1" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_pos.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="1" selection-start-line="1" selection-end-line="2" selection-end-column="32" />
-          <folding>
-            <element signature="e#219#748#0" />
-            <element signature="e#1368#1856#0" />
-            <element signature="e#1908#2412#0" />
-            <element signature="e#2355#2761#0" />
-            <element signature="e#2742#2887#0" />
-            <element signature="e#2949#3000#0" />
-            <element signature="e#3003#3075#0" />
-            <element signature="e#3078#3152#0" />
-            <element signature="e#3155#3239#0" />
-            <element signature="e#3242#3332#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -925,16 +917,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_eo.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="16" column="26" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/dmp_test/matlab/utils/read_mat.m">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -945,68 +927,148 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/dmp_test/include/utils.h">
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/include/utils.h" />
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/matlab/convertTrainData.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="12" selection-start-line="12" selection-end-line="12" />
+        <state relative-caret-position="132">
+          <caret line="6" column="16" selection-start-line="6" selection-start-column="16" selection-end-line="6" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_bio.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="16" column="95" selection-start-line="16" selection-start-column="95" selection-end-line="16" selection-end-column="95" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/launch/dmp_test.launch">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="6" column="27" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/dmp_test/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="138">
-          <caret line="12" column="35" selection-start-line="12" selection-start-column="35" selection-end-line="12" selection-end-column="35" />
+        <state relative-caret-position="264">
+          <caret line="12" column="2" selection-start-line="12" selection-start-column="2" selection-end-line="12" selection-end-column="2" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_eo.h">
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/matlab/dmp_pos_test_plot.m">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/package.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="364">
-          <caret line="193" column="10" selection-start-line="193" selection-start-column="10" selection-end-line="193" selection-end-column="10" />
-          <folding>
-            <element signature="e#111#127#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="88">
+          <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/dmp_test/include/dmp_test/utils.h">
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/matlab/dmp_test_plot.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
-          <folding>
-            <element signature="e#51#68#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="132">
+          <caret line="6" column="54" selection-start-line="6" selection-start-column="54" selection-end-line="6" selection-end-column="54" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/dmp_test/src/utils.cpp">
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/src/dmp_test.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="12" column="40" lean-forward="true" selection-start-line="12" selection-start-column="40" selection-end-line="12" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/dmp_test/src/dmp_std_test.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="521">
-          <caret line="39" column="60" lean-forward="true" selection-start-line="39" selection-start-column="60" selection-end-line="39" selection-end-column="60" />
+        <state relative-caret-position="1144">
+          <caret line="103" column="30" selection-start-line="102" selection-start-column="2" selection-end-line="103" selection-end-column="30" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/dmp_test/package.xml">
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/launch/dmp_pos_test.launch">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
+        <state relative-caret-position="220">
+          <caret line="10" column="22" lean-forward="true" selection-start-line="10" selection-start-column="22" selection-end-line="10" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/dmp_test/launch/dmp_std_test.launch">
+    <entry file="file://$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_pos.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="10" column="24" selection-start-line="10" selection-start-column="21" selection-end-line="10" selection-end-column="24" />
+        <state relative-caret-position="276">
+          <caret line="51" column="63" selection-start-line="51" selection-start-column="63" selection-end-line="51" selection-end-column="63" />
+          <folding>
+            <element signature="e#107#123#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dmp_lib/include/dmp_lib/DMP/DMP_eo.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="49" column="48" selection-start-line="49" selection-start-column="48" selection-end-line="49" selection-end-column="48" />
+          <folding>
+            <element signature="e#111#127#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_eo.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="349">
+          <caret line="51" column="1" selection-start-line="51" selection-start-column="1" selection-end-line="51" selection-end-column="1" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#383#1433#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-220">
+          <caret line="7" selection-start-line="7" selection-end-line="7" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dmp_lib/src/DMP/DMP_pos.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="51" selection-start-line="51" selection-end-line="51" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+            <element signature="e#300#1280#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/src/dmp_pos_test.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="110" selection-start-line="110" selection-end-line="110" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/src/utils.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="69" column="100" selection-start-line="69" selection-start-column="100" selection-end-line="69" selection-end-column="100" />
+          <folding>
+            <element signature="e#29#1512#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/dmp_test/include/dmp_test/utils.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="440">
+          <caret line="20" column="92" selection-start-line="20" selection-start-column="92" selection-end-line="20" selection-end-column="92" />
+          <folding>
+            <element signature="e#51#68#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

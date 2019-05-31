@@ -41,7 +41,7 @@ DMP_pos::DMP_pos(dmp_::TYPE dmp_type, const arma::uvec &N_kernels, const arma::v
 }
 
 
-void DMP_pos::train(dmp_::TrainMethod train_method, const arma::vec &Time, const arma::mat &Pd_data,
+void DMP_pos::train(dmp_::TrainMethod train_method, const arma::rowvec &Time, const arma::mat &Pd_data,
     const arma::mat &dPd_data, const arma::mat &ddPd_data, arma::vec *train_err)
 {
   int i_end = Time.size()-1;

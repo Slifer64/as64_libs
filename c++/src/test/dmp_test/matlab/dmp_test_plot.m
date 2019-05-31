@@ -1,9 +1,10 @@
 
 addpath('utils/');
 
+filename = 'data/dmp_sim_data.bin';
 %% Load sim data
-in = fopen('data/dmp_std_sim_data.bin','r');
-if (in < 0), error('Failed to load ''dmp_std_sim_data'''); end
+in = fopen(filename,'r');
+if (in < 0), error(['Failed to load ''' filename '''']); end
 
 Timed = read_mat(in, true);
 yd_data = read_mat(in, true);

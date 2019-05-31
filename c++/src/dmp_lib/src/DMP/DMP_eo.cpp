@@ -47,7 +47,7 @@ DMP_eo::DMP_eo(dmp_::TYPE dmp_type, const arma::uvec &N_kernels, const arma::vec
 }
 
 
-void DMP_eo::train(dmp_::TrainMethod train_method, const arma::vec &Time, const arma::mat &Quat_data,
+void DMP_eo::train(dmp_::TrainMethod train_method, const arma::rowvec &Time, const arma::mat &Quat_data,
                    const arma::mat &rotVel_data, const arma::mat &rotAccel_data, arma::vec *train_err)
 {
   int n_data = Time.size();
