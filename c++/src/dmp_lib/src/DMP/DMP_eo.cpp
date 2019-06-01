@@ -14,7 +14,7 @@ namespace as64_
 namespace dmp_
 {
 
-const long double DMP_eo::zero_tol = 1e-20;
+const long double DMP_eo::zero_tol = 1e-8;
 
 DMP_eo::DMP_eo(dmp_::TYPE dmp_type, const arma::uvec &N_kernels, const arma::vec &a_z, const arma::vec &b_z,
                std::shared_ptr<CanonicalClock> can_clock_ptr, std::shared_ptr<GatingFunction> shape_attr_gating_ptr)
@@ -61,6 +61,7 @@ void DMP_eo::train(dmp_::TrainMethod train_method, const arma::rowvec &Time, con
 
   arma::vec Qg = Quat_data.col(i_end);
 
+
   for (int j=0; j<n_data; j++)
   {
     arma::vec Qe = quatProd( Qg, quatInv(Quat_data.col(j)) );
@@ -97,6 +98,7 @@ void DMP_eo::setQg(const arma::vec &Qg, const arma::vec &Q, arma::vec *Y, arma::
 {
   if (Y)
   {
+    if (Y->size()==0) *Y = DMP_eo::quat2eo(Q, Qg);
     arma::vec eo_old = *Y;
     arma::vec Qe_old = quatExp(eo_old);
 
@@ -105,6 +107,7 @@ void DMP_eo::setQg(const arma::vec &Qg, const arma::vec &Q, arma::vec *Y, arma::
 
     if (Z)
     {
+      if (Z->size()==0) *Z = arma::vec().zeros(3);
       arma::vec deo_old = (*Z + Yc) / this->getTau();
       arma::vec vRot = DMP_eo::deo2rotVel(deo_old, Qe_old);
       arma::vec deo = DMP_eo::rotVel2deo(vRot, quatExp(eo));
@@ -242,10 +245,12 @@ arma::vec DMP_eo::quat2eo(const arma::vec &Q, const arma::vec &Qg)
   return quatLog(DMP_eo::quatError(Q,Qg));
 }
 
+
 arma::vec DMP_eo::eo2quat(const arma::vec &eo, const arma::vec &Qg)
 {
   return quatProd( quatInv(quatExp(eo)), Qg);
 }
+
 
 arma::vec DMP_eo::rotVel2deo(const arma::vec &rotVel, const arma::vec &Qe)
 {
@@ -253,12 +258,14 @@ arma::vec DMP_eo::rotVel2deo(const arma::vec &rotVel, const arma::vec &Qe)
   return -0.5 * J_deo_dQ * quatProd(Qe, arma::join_vert(arma::vec({0}), rotVel));
 }
 
+
 arma::vec DMP_eo::deo2rotVel(const arma::vec &deo, const arma::vec &Qe)
 {
   arma::mat J_dQ_deo = DMP_eo::jacobDquatDeo(Qe);
   arma::vec rotVel = -2 * quatProd( quatInv(Qe), J_dQ_deo*deo );
   return rotVel.subvec(1,3);
 }
+
 
 arma::vec DMP_eo::rotAccel2ddeo(const arma::vec &rotAccel, const arma::vec &rotVel, const arma::vec &Qe)
 {
@@ -271,6 +278,7 @@ arma::vec DMP_eo::rotAccel2ddeo(const arma::vec &rotAccel, const arma::vec &rotV
   return -0.5 * (dJ * quatProd(Qe, rotVelQ) + J * quatProd( Qe, rotAccelQ-0.5*quatProd(rotVelQ,rotVelQ) ) );
 }
 
+
 arma::vec DMP_eo::ddeo2rotAccel(const arma::vec &ddeo, const arma::vec &rotVel, const arma::vec &Qe)
 {
   arma::vec deo = DMP_eo::rotVel2deo(rotVel, Qe);
@@ -281,6 +289,7 @@ arma::vec DMP_eo::ddeo2rotAccel(const arma::vec &ddeo, const arma::vec &rotVel, 
   arma::vec rotAccel = - 2 * (quatProd(invQe, dJ*deo) + quatProd(invQe, J*ddeo));
   return rotAccel.subvec(1,3);
 }
+
 
 arma::mat DMP_eo::jacobDquatDeo(const arma::vec &Qe)
 {
@@ -307,6 +316,7 @@ arma::mat DMP_eo::jacobDquatDeo(const arma::vec &Qe)
   return J_dQ_deo;
 }
 
+
 arma::mat DMP_eo::jacobDeoDquat(const arma::vec &Qe)
 {
   arma::mat J_deo_dQ(3,4);
@@ -330,6 +340,7 @@ arma::mat DMP_eo::jacobDeoDquat(const arma::vec &Qe)
   J_deo_dQ.submat(0,1,2,3) = 2*arma::mat().eye(3,3)*th/s_th;
   return J_deo_dQ;
 }
+
 
 arma::mat DMP_eo::jacobDotDeoDquat(const arma::vec &Qe, const arma::vec &rotVel)
 {
@@ -355,9 +366,10 @@ arma::mat DMP_eo::jacobDotDeoDquat(const arma::vec &Qe, const arma::vec &rotVel)
   double temp = (th*c_th-s_th)/std::pow(s_th,2);
 
   dJ_deo_dQ.col(0) = ((-th/s_th - 2*c_th*temp/s_th)*Eta + temp*(arma::mat().eye(3,3)-Eta)/th)*deo;
-  dJ_deo_dQ.submat(0,1,2,3) = -temp*eta.t()*deo*arma::mat().eye(3,3);
+  dJ_deo_dQ.submat(0,1,2,3) = (-temp*arma::dot(eta,deo))*arma::mat().eye(3,3);
   return dJ_deo_dQ;
 }
+
 
 arma::mat DMP_eo::jacobDotDquatDeo(const arma::vec &Qe, const arma::vec &rotVel)
 {
@@ -384,7 +396,7 @@ arma::mat DMP_eo::jacobDotDquatDeo(const arma::vec &Qe, const arma::vec &rotVel)
   double temp = ((th*c_th-s_th)/std::pow(th,2));
 
   dJ_dQ_deo.row(0) = -0.25 * deo.t() * (c_th*Eta + (s_th/th)*I_eta);
-  dJ_dQ_deo.submat(1,0,3,2) = 0.25*(eta.t()*deo)*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(deo.t()*I_eta) + (I_eta*deo)*eta.t() );
+  dJ_dQ_deo.submat(1,0,3,2) = (0.25*arma::dot(eta,deo))*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(deo.t()*I_eta) + (I_eta*deo)*eta.t() );
 
   return dJ_dQ_deo;
 }

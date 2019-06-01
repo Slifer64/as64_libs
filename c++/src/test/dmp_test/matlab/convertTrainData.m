@@ -8,6 +8,7 @@ addpath('utils/');
 
 convert_dmp_data();
 convert_dmp_pos_data();
+convert_dmp_eo_data();
 
 end
 
@@ -52,3 +53,25 @@ function convert_dmp_pos_data()
     write_mat(ddPd_data, out, true);
 
 end
+
+function convert_dmp_eo_data()
+
+    filename = 'dmp_eo_train_data.bin';
+
+    load('data/train_data.mat', 'Data');
+
+    Timed = Data.Time;
+    Qd_data = Data.Quat;
+    vRotd_data = Data.RotVel;
+    dvRotd_data = Data.RotAccel;
+
+    out = fopen(['data/' filename],'w');
+    if (out < 0), error(['Failed to create ''' filename '''']); end
+
+    write_mat(Timed, out, true);
+    write_mat(Qd_data, out, true);
+    write_mat(vRotd_data, out, true);
+    write_mat(dvRotd_data, out, true);
+
+end
+

@@ -39,6 +39,7 @@ file(GLOB INCLUDE_LIST "")
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  /usr/include/eigen3
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -56,6 +57,7 @@ add_dependencies(dmp_test
 
 target_link_libraries(dmp_test ${LINK_LIBS} )
 
+
 # ***********************************************
 # ************   Test DMP_pos  ******************
 # ***********************************************
@@ -71,3 +73,16 @@ add_dependencies(dmp_pos_test
 target_link_libraries(dmp_pos_test ${LINK_LIBS} )
 
 
+# ***********************************************
+# ************   Test DMP_eo  ******************
+# ***********************************************
+
+add_executable(dmp_eo_test
+	src/dmp_eo_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
+)
+
+add_dependencies(dmp_eo_test
+		${${PROJECT_NAME}_EXPORTED_TARGETS}
+		${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(dmp_eo_test ${LINK_LIBS} )

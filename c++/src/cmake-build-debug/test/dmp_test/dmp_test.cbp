@@ -17,8 +17,8 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="dmp_std_test">
-				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_std_test" prefix_auto="0" extension_auto="0"/>
+			<Target title="dmp_pos_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_pos_test" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -28,6 +28,7 @@
 					<Add option="-DROS_PACKAGE_NAME=&quot;dmp_test&quot;"/>
 					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/include"/>
+					<Add directory="/usr/include/eigen3"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
 					<Add directory="/opt/ros/indigo/include"/>
@@ -41,14 +42,14 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_std_test"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_pos_test"/>
 					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="dmp_std_test/fast">
-				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_std_test" prefix_auto="0" extension_auto="0"/>
+			<Target title="dmp_pos_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_pos_test" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -58,6 +59,7 @@
 					<Add option="-DROS_PACKAGE_NAME=&quot;dmp_test&quot;"/>
 					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/include"/>
+					<Add directory="/usr/include/eigen3"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
 					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
 					<Add directory="/opt/ros/indigo/include"/>
@@ -71,18 +73,150 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_std_test/fast"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_pos_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="dmp_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;dmp_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="dmp_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;dmp_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_test/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="dmp_eo_test">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_eo_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;dmp_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_eo_test"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="dmp_eo_test/fast">
+				<Option output="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test/dmp_eo_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/devel/lib/dmp_test"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DROS_BUILD_SHARED_LIBS=1"/>
+					<Add option="-DROS_PACKAGE_NAME=&quot;dmp_test&quot;"/>
+					<Add option="-DROSCONSOLE_BACKEND_LOG4CXX"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/include"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/dmp_lib/include"/>
+					<Add directory="/home/slifer/slifer/as64_libs/c++/src/io_lib/include"/>
+					<Add directory="/opt/ros/indigo/include"/>
+					<Add directory="/usr/include/c++/4.8"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/4.8"/>
+					<Add directory="/usr/include/c++/4.8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 dmp_eo_test/fast"/>
 					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/slifer/slifer/as64_libs/c++/src/cmake-build-debug/test/dmp_test/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/src/dmp_std_test.cpp">
-			<Option target="dmp_std_test"/>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/src/dmp_eo_test.cpp">
+			<Option target="dmp_eo_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/src/dmp_pos_test.cpp">
+			<Option target="dmp_pos_test"/>
+		</Unit>
+		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/src/dmp_test.cpp">
+			<Option target="dmp_test"/>
 		</Unit>
 		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/test/dmp_test/src/utils.cpp">
-			<Option target="dmp_std_test"/>
+			<Option target="dmp_pos_test"/>
+			<Option target="dmp_test"/>
+			<Option target="dmp_eo_test"/>
 		</Unit>
 		<Unit filename="/home/slifer/slifer/as64_libs/c++/src/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>

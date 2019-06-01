@@ -4,7 +4,7 @@ set_matlab_utils_path();
 
 %% Load training data
 
-load('data/train_data.mat', 'Data');
+load('data/train_data3.mat', 'Data');
 % load('data/orient_data.mat', 'Data');
 
 Timed = Data.Time;
@@ -27,8 +27,8 @@ a_z = 20;
 b_z = a_z/4;
 train_method = DMP_TRAIN.LS;
 can_clock_ptr = CanonicalClock();
-% shape_attr_gat_ptr = SigmoidGatingFunction(1.0, 0.5);
-shape_attr_gat_ptr = LinGatingFunction(1.0, 0.01);
+shape_attr_gat_ptr = SigmoidGatingFunction(1.0, 0.5);
+% shape_attr_gat_ptr = LinGatingFunction(1.0, 0.02);
 N_kernels = [40; 40; 40];
 dmp_o = DMP_eo(DMP_TYPE.STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
 
@@ -52,7 +52,7 @@ disp('DMP simulation...');
 tic
 Q0 = Qd_data(:,1);
 Qgd = Qd_data(:,end);
-ks = 1.0;
+ks = 2.0;
 e0 = ks*quatLog( quatProd( Qgd, quatInv(Q0) ) );
 Qg = quatProd(quatExp(e0), Q0); %quatExp(1.0*quatLog(Qd_data(:,end)));
 T = 1.0*Timed(end);
