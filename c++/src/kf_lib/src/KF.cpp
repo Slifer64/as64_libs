@@ -1,4 +1,4 @@
-#include <kalmanfilter_lib/UKF.h>
+#include <kf_lib/KF.h>
 
 namespace as64_
 {
@@ -7,7 +7,7 @@ namespace kf_
 {
 
 
-UKF::UKF()
+KF::KF()
 {}
 
 } // namespace kf_

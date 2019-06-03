@@ -1,0 +1,20 @@
+<launch>
+
+  <node pkg="dmp_kf_test" type="sim_DMP_Pos_EKF_disc" name="sim_DMP_Pos_EKF_disc" output="screen">
+
+    <rosparam>
+      dmp_type: "STD" # {STD, BIO}
+      gating_type: "sigmoid" # {lin, exp, sigmoid}
+      train_data_file: "dmp_pos_train_data.bin"
+      sim_data_file: "dmp_pos_sim_data.bin"
+      a_z: [20, 20, 20]
+      # b_z: [5, 5, 5]
+      N_kernels: [60, 60, 60]
+      train_method: "LWR" # {LWR, LS}
+      ks: 1.0
+      kt: 1.0
+    </rosparam>
+
+  </node>
+
+</launch>

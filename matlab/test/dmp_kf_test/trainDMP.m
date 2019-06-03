@@ -74,7 +74,7 @@ toc
 % Data.Quat = Q_data;
 % Data.RotVel = vRot_data;
 % Data.RotAccel = dvRot_data;
-% save('data/train_data2.mat', 'Data');
+% save([path 'data/train_data2.mat'], 'Data');
 % return
 
 Yg0 = Pd_data(:,end);

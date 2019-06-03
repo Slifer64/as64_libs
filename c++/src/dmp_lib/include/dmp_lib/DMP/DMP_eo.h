@@ -56,7 +56,7 @@ public:
   void setQ0(const arma::vec &Q0);
 
 
-  void setQg(const arma::vec &Qg, const arma::vec &Q=arma::vec({1,0,0,0}), arma::vec *Y=0, arma::vec *Z=0, const arma::vec &Yc=arma::vec().zeros(3));
+  void setQg(const arma::vec &Qg);
 
 
     /** \brief Returns the derivatives of the DMP states.
@@ -76,16 +76,16 @@ public:
   arma::vec getYdot() const { return this->dY; }
   arma::vec getZdot() const { return this->dZ; }
 
-  arma::vec getRotVel(const arma::vec &Q, const arma::vec &Qg) const;
+  arma::vec getRotVel(const arma::vec &Q) const;
 
-  arma::vec getRotAccel(const arma::vec &Q, const arma::vec &Qg, double tau_dot=0, const arma::vec &Yc_dot=arma::vec().zeros(3)) const;
+  arma::vec getRotAccel(const arma::vec &Q, double tau_dot=0, const arma::vec &Yc_dot=arma::vec().zeros(3)) const;
 
-  arma::vec calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotVel, const arma::vec &Qg, const arma::vec &Q0,
+  arma::vec calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotVel, const arma::vec &Qg,
       double tau_dot=0, const arma::vec &Yc=arma::vec().zeros(3), const arma::vec &Zc=arma::vec().zeros(3), const arma::vec &Yc_dot=arma::vec().zeros(3)) const;
 
-  arma::vec getY(const arma::vec &Q, const arma::vec &Qg) const;
+  arma::vec getY(const arma::vec &Q) const;
 
-  arma::vec getZ(const arma::vec &rotVel, const arma::vec &Q, const arma::vec &Qg) const;
+  arma::vec getZ(const arma::vec &rotVel, const arma::vec &Q) const;
 
 
   /** \brief Sets the time scale of the DMP.

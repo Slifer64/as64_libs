@@ -94,28 +94,8 @@ void DMP_eo::setQ0(const arma::vec &Q0)
 }
 
 
-void DMP_eo::setQg(const arma::vec &Qg, const arma::vec &Q, arma::vec *Y, arma::vec *Z, const arma::vec &Yc)
+void DMP_eo::setQg(const arma::vec &Qg)
 {
-  if (Y)
-  {
-    if (Y->size()==0) *Y = DMP_eo::quat2eo(Q, Qg);
-    arma::vec eo_old = *Y;
-    arma::vec Qe_old = quatExp(eo_old);
-
-    arma::vec eo = DMP_eo::quat2eo(Q, Qg);
-    *Y = eo;
-
-    if (Z)
-    {
-      if (Z->size()==0) *Z = arma::vec().zeros(3);
-      arma::vec deo_old = (*Z + Yc) / this->getTau();
-      arma::vec vRot = DMP_eo::deo2rotVel(deo_old, Qe_old);
-      arma::vec deo = DMP_eo::rotVel2deo(vRot, quatExp(eo));
-      *Z = this->getTau()*deo - Yc;
-    }
-
-  }
-
   this->Qg = Qg;
   arma::vec Y0 = DMP_eo::quat2eo(this->Q0, this->Qg);
   for (int i=0; i < this->dmp.size(); i++) this->dmp[i]->setY0(Y0(i));
@@ -143,22 +123,22 @@ arma::vec DMP_eo::getYddot(double tau_dot, const arma::vec &Yc_dot) const
   return (this->getZdot() - tau_dot*this->getYdot() + Yc_dot) / this->getTau();
 }
 
-arma::vec DMP_eo::getRotVel(const arma::vec &Q, const arma::vec &Qg) const
+arma::vec DMP_eo::getRotVel(const arma::vec &Q) const
 {
-  arma::vec Qe = DMP_eo::quatError(Q, Qg);
+  arma::vec Qe = DMP_eo::quatError(Q, this->Qg);
   arma::vec deo = this->getYdot();
   return DMP_eo::deo2rotVel(deo, Qe);
 }
 
-arma::vec DMP_eo::getRotAccel(const arma::vec &Q, const arma::vec &Qg, double tau_dot, const arma::vec &Yc_dot) const
+arma::vec DMP_eo::getRotAccel(const arma::vec &Q, double tau_dot, const arma::vec &Yc_dot) const
 {
-  arma::vec Qe = DMP_eo::quatError(Q, Qg);
+  arma::vec Qe = DMP_eo::quatError(Q, this->Qg);
   arma::vec ddeo = this->getYddot(tau_dot, Yc_dot);
-  arma::vec rotVel = this->getRotVel(Q, Qg);
+  arma::vec rotVel = this->getRotVel(Q);
   return DMP_eo::ddeo2rotAccel(ddeo, rotVel, Qe);
 }
 
-arma::vec DMP_eo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotVel, const arma::vec &Qg, const arma::vec &Q0,
+arma::vec DMP_eo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotVel, const arma::vec &Qg,
                        double tau_dot, const arma::vec &Yc, const arma::vec &Zc, const arma::vec &Yc_dot) const
 {
   arma::vec a_z = {this->dmp[0]->a_z, this->dmp[1]->a_z, this->dmp[2]->a_z};
@@ -176,9 +156,10 @@ arma::vec DMP_eo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &ro
   arma::mat J_dQ_deo = DMP_eo::jacobDquatDeo(Qe);
   arma::mat dJ_dQ_deo = DMP_eo::jacobDotDquatDeo(Qe, rotVel);
 
-  arma::vec fo(3);
-  arma::vec eo0 = DMP_eo::quat2eo(Q0,Qg);
+  arma::vec Qg_prev = this->Qg;
+  (const_cast<DMP_eo *>(this))->setQg(Qg);
 
+  arma::vec fo(3);
   for (int i=0; i<3; i++) fo(i) = this->dmp[i]->shapeAttractor(x, 0);
 
   arma::vec deo = DMP_eo::rotVel2deo(rotVel, Qe);
@@ -187,17 +168,20 @@ arma::vec DMP_eo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &ro
   arma::vec rotAccel1 = quatProd(invQe, dJ_dQ_deo*J_deo_dQ*QeRotVel);
   arma::vec rotAccel2 = 2*quatProd(invQe, J_dQ_deo*-ddeo);
   arma::vec rotAccel = rotAccel1 + rotAccel2;
+
+  (const_cast<DMP_eo *>(this))->setQg(Qg_prev);
+
   return rotAccel.subvec(1,3);
 }
 
-arma::vec DMP_eo::getY(const arma::vec &Q, const arma::vec &Qg) const
+arma::vec DMP_eo::getY(const arma::vec &Q) const
 {
-  return DMP_eo::quat2eo(Q, Qg);
+  return DMP_eo::quat2eo(Q, this->Qg);
 }
 
-arma::vec DMP_eo::getZ(const arma::vec &rotVel, const arma::vec &Q, const arma::vec &Qg) const
+arma::vec DMP_eo::getZ(const arma::vec &rotVel, const arma::vec &Q) const
 {
-  arma::vec Qe = DMP_eo::quatError(Q, Qg);
+  arma::vec Qe = DMP_eo::quatError(Q, this->Qg);
   arma::vec deo = DMP_eo::rotVel2deo(rotVel, Qe);
   arma::vec dy = deo;
 

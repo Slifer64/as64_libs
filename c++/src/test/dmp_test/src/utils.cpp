@@ -75,7 +75,6 @@ void simulateDMPpos(std::shared_ptr<dmp_::DMP_pos> &dmp_p, const arma::vec &P0, 
                     double T, double dt, arma::rowvec &Time, arma::mat &P_data, arma::mat &dP_data, arma::mat &ddP_data)
 {
   // set initial values
-  std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_p->can_clock_ptr;
   double t = 0.0;
 
   double x = 0.0;
@@ -86,7 +85,7 @@ void simulateDMPpos(std::shared_ptr<dmp_::DMP_pos> &dmp_p, const arma::vec &P0, 
   arma::vec ddP = arma::vec().zeros(3);
 
   double t_end = T;
-  can_clock_ptr->setTau(t_end);
+  dmp_p->setTau(t_end);
 
   dmp_p->setY0(P0);
 
@@ -103,7 +102,7 @@ void simulateDMPpos(std::shared_ptr<dmp_::DMP_pos> &dmp_p, const arma::vec &P0, 
     ddP = dmp_p->calcYddot(x, P, dP, Pg);
 
     // Update phase variable
-    dx = can_clock_ptr->getPhaseDot(x);
+    dx = dmp_p->phaseDot(x);
 
     // Stopping criteria
     if (t>=t_end) break;
@@ -138,9 +137,9 @@ void simulateDMPeo_in_eo_space(std::shared_ptr<dmp_::DMP_eo> &dmp_o, const arma:
   arma::vec dz = arma::vec().zeros(3);
 
   dmp_o->setQ0(Q0);
-  arma::vec y = arma::vec().zeros(3);
-  arma::vec z = arma::vec().zeros(3);
-  dmp_o->setQg(Qg, Q, &y, &z);
+  dmp_o->setQg(Qg);
+  arma::vec y = dmp_o->getY(Q);
+  arma::vec z = dmp_o->getZ(rotVel, Q);
 
   // simulate
   while (true)
@@ -162,8 +161,8 @@ void simulateDMPeo_in_eo_space(std::shared_ptr<dmp_::DMP_eo> &dmp_o, const arma:
 
     dy = dmp_o->getYdot();
     dz = dmp_o->getZdot();
-    rotAccel = dmp_o->getRotAccel(Q, Qg, tau_dot, yc_dot);
-    // rotAccel2 = dmp_o->calcRotAccel(x, Q, rotVel, Qg, Q0);
+    rotAccel = dmp_o->getRotAccel(Q, tau_dot, yc_dot);
+    // rotAccel2 = dmp_o->calcRotAccel(x, Q, rotVel, Qg);
 
     // Update phase variable
     dx = dmp_o->phaseDot(x);
@@ -213,12 +212,11 @@ void simulateDMPeo_in_quat_space(std::shared_ptr<dmp_::DMP_eo> &dmp_o, const arm
   arma::vec Q = Q0;
   arma::vec rotVel = arma::vec().zeros(3);
   arma::vec rotAccel = arma::vec().zeros(3);
-  arma::vec y0 = dmp_o->getY(Q0, Qg);
 
   double tau_dot = 0;
 
   dmp_o->setQ0(Q0);
-  dmp_o->setQg(Qg, Q);
+  dmp_o->setQg(Qg);
 
   // simulate
   while (true)
@@ -234,7 +232,7 @@ void simulateDMPeo_in_quat_space(std::shared_ptr<dmp_::DMP_eo> &dmp_o, const arm
     arma::vec zc = arma::vec().zeros(3);
     double tau_dot = 0;
     arma::vec yc_dot = arma::vec().zeros(3);
-    rotAccel = dmp_o->calcRotAccel(x, Q, rotVel, Qg, Q0, tau_dot, yc, zc, yc_dot);
+    rotAccel = dmp_o->calcRotAccel(x, Q, rotVel, Qg, tau_dot, yc, zc, yc_dot);
 
     // Update phase variable
     dx = dmp_o->phaseDot(x);

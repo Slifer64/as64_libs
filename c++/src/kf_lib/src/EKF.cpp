@@ -1,4 +1,4 @@
-#include <kalmanfilter_lib/EKF.h>
+#include <kf_lib/EKF.h>
 
 namespace as64_
 {
@@ -83,10 +83,10 @@ void EKF::predict(void *cookie)
 void EKF::correct(const arma::vec &z, void *cookie)
 {
   // =====  Retrive the measurement function Jacobian  =====
-  H_k = msrFunJacob_ptr(theta, cookie);
+  this->H_k = msrFunJacob_ptr(theta, cookie);
 
   // =====  Correction estimates =====
-  arma::vec z_hat = msrFun_ptr(theta, cookie);
+  arma::vec z_hat = this->msrFun_ptr(this->theta, cookie);
   arma::mat K_kf = arma::solve((H_k*P*H_k.t() + R).t(), H_k*P.t(), arma::solve_opts::fast).t();
   // arma::mat K_kf = P*H_k.t()*arma::inv(H_k*P*H_k.t() + R);
   // arma::mat K_kf = P*H_k.t()*arma::inv_sympd(H_k*P*H_k.t() + R);
@@ -116,29 +116,20 @@ void EKF::correct(const arma::vec &z, void *cookie)
   //   std::cout << "============================\n";
   // }
 
-  theta = theta + K_kf * (z - z_hat);
+  this->theta = this->theta + K_kf * (z - z_hat);
 
   // =====  Apply projection if enabled  =====
-  arma::mat D = arma::mat(A_c.n_rows, A_c.n_cols); // active contraints
-  arma::vec d(b_c.size());
+  arma::mat D; // active contraints
+  arma::vec d;
   bool proj_flag = false;
-  if (enable_constraints)
+  if ( this->enable_constraints & ~b_c.is_empty() )
   {
-    int j = -1;
-    for (int i=0; i<A_c.n_rows; i++)
-    {
-      if (arma::dot(A_c.row(i),theta) > b_c(i))
-      {
-        j++;
-        d(j) = b_c(i);
-        D.row(j) = A_c.row(i);
-      }
-    }
-    if (j >= 0)
+    arma::uvec ind = arma::find(A_c*theta > b_c);
+    if (~ind.is_empty())
     {
       proj_flag = true;
-      D = D.rows(0,j);
-      d = d.rows(0,j);
+      D = A_c.rows(ind);
+      d = b_c.elem(ind);
     }
   }
 
@@ -147,16 +138,16 @@ void EKF::correct(const arma::vec &z, void *cookie)
 
   if (proj_flag)
   {
-    K_kf = ( I - P*D.t()*arma::inv_sympd(D*P*D.t())*D ) * K_kf;
-    theta = theta - P*D.t()*arma::inv_sympd(D*P*D.t())*(D*theta-d);
-    //K_kf = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K_kf;
-    //theta = theta - D.t()*arma::inv_sympd(D*D.t())*(D*theta-d);
+    // K_kf = ( I - P*D.t()*arma::inv_sympd(D*P*D.t())*D ) * K_kf;
+    // theta = theta - P*D.t()*arma::inv_sympd(D*P*D.t())*(D*theta-d);
+    K_kf = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K_kf;
+    this->theta = theta - D.t()*arma::inv_sympd(D*D.t())*(D*theta-d);
   }
 
   // =====  Calculate new covariance  =====
-  P = (I - K_kf*H_k) * P * (I - K_kf*H_k).t() + K_kf*R*K_kf.t();
+  this->P = (I - K_kf*H_k) * P * (I - K_kf*H_k).t() + K_kf*R*K_kf.t();
 
-  K = K_kf;
+  this->K = K_kf;
 }
 
 arma::mat EKF::calcStateTransFunJacob(const arma::vec &theta, void *cookie)
