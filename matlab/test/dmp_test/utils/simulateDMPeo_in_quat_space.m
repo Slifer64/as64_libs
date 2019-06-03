@@ -3,11 +3,9 @@ function [Time, Q_data, rotVel_data, rotAccel_data] = simulateDMPeo_in_quat_spac
 
 
 %% set initial values
-can_clock_ptr = dmp_o.can_clock_ptr;
-
 t_end = T;
 tau = t_end;
-can_clock_ptr.setTau(tau);
+dmp_o.setTau(tau);
 
 Time = [];
 Q_data = [];
@@ -22,15 +20,12 @@ Q = Q0;
 rotVel = zeros(3,1);
 rotAccel = zeros(3,1);
 rotAccel2 = zeros(3,1);
-y0 = dmp_o.getY(Q0, Qg);
 
 T1 = [];
 T2 = [];
 
-tau_dot = 0;
-
 dmp_o.setQ0(Q0);
-dmp_o.setQg(Qg, Q);
+dmp_o.setQg(Qg);
 
 %% simulate
 while (true)
@@ -45,16 +40,16 @@ while (true)
     %% DMP simulation
     yc = 0; % optional coupling for 'y' state
     zc = 0; % optional coupling for 'z' state
-    y = dmp_o.getY(Q, Qg);
-    z = dmp_o.getZ(rotVel, Q, Qg);
+    y = dmp_o.getY(Q);
+    z = dmp_o.getZ(rotVel, Q);
     
     tic();
     dmp_o.update(x, y, z, yc, zc);
     
     tau_dot = 0;
     yc_dot = 0; % derivative of coupling for 'y' state
-    rotVel = dmp_o.getRotVel(Q, Qg);
-    rotAccel2 = dmp_o.getRotAccel(Q, Qg, tau_dot, yc_dot);
+    rotVel = dmp_o.getRotVel(Q);
+    rotAccel2 = dmp_o.getRotAccel(Q, tau_dot, yc_dot);
 
     T1 = [T1 toc()];
     
@@ -66,7 +61,7 @@ while (true)
 
 
     %% Update phase variable
-    dx = can_clock_ptr.getPhaseDot(x);
+    dx = dmp_o.phaseDot(x);
 
     %% Stopping criteria   
     if (t>1.5*t_end)
@@ -86,7 +81,7 @@ while (true)
     Q = quatProd( quatExp(rotVel*dt), Q);
     rotVel = rotVel + rotAccel*dt;  
     
-    can_clock_ptr.setTau(tau);
+    dmp_o.setTau(tau);
     
 end
 

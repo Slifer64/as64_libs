@@ -34,8 +34,8 @@ classdef DMP_ < matlab.mixin.Copyable
         %  @param[in] can_clock_ptr: Pointer to a DMP canonical system object.
         function this = DMP_(N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gating_ptr)
 
-            if (nargin < 4), can_clock_ptr = CanonicalClock(); end
-            if (nargin < 5), shape_attr_gating_ptr=SigmoidGatingFunction(1.0, 0.5); end
+            % if (nargin < 4), can_clock_ptr = CanonicalClock(); end
+            % if (nargin < 5), shape_attr_gating_ptr=SigmoidGatingFunction(1.0, 0.5); end
                 
             this.N_kernels = N_kernels;
             this.a_z = a_z;
@@ -48,15 +48,9 @@ classdef DMP_ < matlab.mixin.Copyable
             this.w = zeros(this.N_kernels,1);
             this.setCenters();
             this.setStds(1.0);
+            this.setY0(0.0);
         end
 
-        function n_ker = getNumOfKernels(this), n_ker = length(this.w); end
-        function c = getKernelCenters(this), c = this.c; end
-        function w = getKernelWeights(this), w = this.w; end
-        function a_z = getAz(this), a_z = this.a_z; end
-        function b_z = getBz(this), b_z = this.b_z; end
-        function can_clock_ptr = getCanClockPtr(this), can_clock_ptr = this.can_clock_ptr; end
-        
         
         %% Trains the DMP.
         %  @param[in] Time: Row vector with the timestamps of the training data points.
@@ -83,10 +77,25 @@ classdef DMP_ < matlab.mixin.Copyable
         %  @param[out] dy: derivative of the \a y state of the this.
         %  @param[out] dz: derivative of the \a z state of the this.
         %  @param[out] dx: derivative of the phase variable of the this.
-        update(this, x, y, z, y0, g, y_c, z_c)
+        update(this, x, y, z, g, y_c, z_c)
+        
+        
+        function dx = getXdot(this), dx=this.dx; end
+        function dy = getYdot(this), dy=this.dy; end
+        function dz = getZdot(this), dz=this.dz; end
+        
+        
+        %% Returns the DMP's acceleration.
+        ddy = getYddot(this, tau_dot, yc_dot)
+        
+        
+        ddy = calcYddot(this, x, y, dy, g, tau_dot, yc, zc, yc_dot)
+        
+        
+        function n_ker = numOfKernels(this), n_ker = length(this.w); end
 
         
-        ddy = calcYddot(this, x, y, dy, y0, g, tau_dot, yc, zc, yc_dot)
+        function setY0(this, y0), this.y0 = y0; end
 
         
         %% Returns the time scale of the DMP.
@@ -110,12 +119,6 @@ classdef DMP_ < matlab.mixin.Copyable
         function dx = phaseDot(this, x), dx = this.can_clock_ptr.getPhaseDot(x); end
 
         
-        %% Returns a column vector with the values of the kernel functions of the DMP.
-        %  @param[in] x: phase variable
-        %  @param[out] psi: column vector with the values of the kernel functions of the DMP
-        psi = kernelFunction(this,x)
-        
-        
         %% Returns the goal attractor of the this.
         %  @param[in] x: The phase variable.
         %  @param[in] y: \a y state of the this.
@@ -123,7 +126,26 @@ classdef DMP_ < matlab.mixin.Copyable
         %  @param[in] g: Goal position.
         %  @param[out] goal_attr: The goal attractor of the this.
         goal_attr = goalAttractor(this, x, y, z, g)
-     
+
+        
+        %% Returns the partial derivative of the DMP's acceleration wrt to the goal and tau.
+        %  @param[in] t: current timestamp.
+        %  @param[in] y: position.
+        %  @param[in] dy: velocity.
+        %  @param[in] y0: initial position.
+        %  @param[in] x_hat: phase variable estimate.
+        %  @param[in] g_hat: goal estimate.
+        %  @param[in] tau_hat: time scale estimate.
+        %  @param[out] dC_dtheta: partial derivative of the DMP's acceleration wrt to the goal and tau.
+        dC_dtheta = getAcellPartDev_g_tau(this, t, y, dy, y0, x, g, tau)
+
+        
+        %% Creates a deep copy of this object
+        cp_obj = deepCopy(this)
+ 
+    end
+    
+    methods (Access = protected)
         
         %% Returns the shape attractor gating factor.
         %  @param[in] x: The phase variable.
@@ -144,7 +166,13 @@ classdef DMP_ < matlab.mixin.Copyable
         %  @param[in] x: The phase variable.
         %  @param[out] f: The normalized weighted sum of Gaussians.
         f = forcingTerm(this,x)
-
+        
+        
+        %% Returns a column vector with the values of the kernel functions of the DMP.
+        %  @param[in] x: phase variable
+        %  @param[out] psi: column vector with the values of the kernel functions of the DMP
+        psi = kernelFunction(this,x)
+        
         
         %% Sets the centers for the kernel functions of the DMP according to the canonical system.
         setCenters(this)
@@ -154,46 +182,26 @@ classdef DMP_ < matlab.mixin.Copyable
         %  Sets the variance of each kernel equal to squared difference between the current and the next kernel.
         %  @param[in] kernelStdScaling: Scales the std of each kernel by 'kernelStdScaling' (optional, default = 1.0).
         setStds(this, kernelStdScaling)
-
         
-        %% Returns the partial derivative of the DMP's acceleration wrt to the goal and tau.
-        %  @param[in] t: current timestamp.
-        %  @param[in] y: position.
-        %  @param[in] dy: velocity.
-        %  @param[in] y0: initial position.
-        %  @param[in] x_hat: phase variable estimate.
-        %  @param[in] g_hat: goal estimate.
-        %  @param[in] tau_hat: time scale estimate.
-        %  @param[out] dC_dtheta: partial derivative of the DMP's acceleration wrt to the goal and tau.
-        dC_dtheta = getAcellPartDev_g_tau(this, t, y, dy, y0, x_hat, g_hat, tau_hat)
-        
-        
-        function dx = getXdot(this), dx=this.dx; end
-        function dy = getYdot(this), dy=this.dy; end
-        function dz = getZdot(this), dz=this.dz; end
-        
-        
-        %% Returns the DMP's acceleration.
-        ddy = getYddot(this, tau_dot, yc_dot)
-
-        %% Creates a deep copy of this object
-        cp_obj = deepCopy(this)
- 
     end
 
-    methods (Abstract)
+    methods (Abstract, Access = public)
         
-        Fd = calcFd(this, x, y, dy, ddy, y0, g)
-        
-        Fd = calcLearnedFd(this, x, y0, g)
-        
-        f_scale = forcingTermScaling(this, y0, g)
-        
-        shape_attr = shapeAttractor(this, x, y0, g)
+        shape_attr = shapeAttractor(this, x, g)
 
     end
     
-    properties (Access = protected)
+    methods (Abstract, Access = protected)
+        
+        Fd = calcFd(this, x, y, dy, ddy, g)
+        
+        Fd = calcLearnedFd(this, x, g)
+        
+        f_scale = forcingTermScaling(this, g)
+
+    end
+    
+    properties (Access = public)
         
         N_kernels % number of kernels (basis functions)
 
@@ -207,7 +215,14 @@ classdef DMP_ < matlab.mixin.Copyable
         c % N_kernelsx1 vector with the kernel centers of the DMP
         h % N_kernelsx1 vector with the kernel stds of the DMP
 
+    end
+    
+    
+    properties (Access = protected)
+
         zero_tol % tolerance value used to avoid divisions with very small numbers
+        
+        y0 % initial position
         
         %% output state
         dy % position derivative

@@ -18,7 +18,19 @@ classdef DMP < DMP_
         end
         
         
-        function Fd = calcFd(this, x, y, dy, ddy, y0, g)
+        function shape_attr = shapeAttractor(this, x, g)
+
+            s_attr_gating = this.shapeAttrGating(x);
+            f_scale = this.forcingTermScaling(g);
+            shape_attr = s_attr_gating * f_scale * this.forcingTerm(x);
+
+        end
+        
+    end
+    
+    methods (Access = protected)
+        
+        function Fd = calcFd(this, x, y, dy, ddy, g)
 
             tau = this.getTau();
             Fd = (ddy*tau^2 - this.goalAttractor(x, y, tau*dy, g));
@@ -26,29 +38,18 @@ classdef DMP < DMP_
         end
         
         
-        function Fd = calcLearnedFd(this, x, y0, g)
+        function Fd = calcLearnedFd(this, x, g)
             
-            Fd = this.shapeAttractor(x, y0, g);
+            Fd = this.shapeAttractor(x, g);
 
         end
         
         
-        function f_scale = forcingTermScaling(this, y0, g)
+        function f_scale = forcingTermScaling(this, g)
 
-            f_scale = (g-y0);
-
-        end
-        
-        
-        function shape_attr = shapeAttractor(this, x, y0, g)
-
-            s_attr_gating = this.shapeAttrGating(x);
-            f_scale = this.forcingTermScaling(y0, g);
-            shape_attr = s_attr_gating * f_scale * this.forcingTerm(x);
+            f_scale = (g - this.y0);
 
         end
-
-
 
     end
     

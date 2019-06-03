@@ -1,9 +1,11 @@
 function set_matlab_utils_path()
 
-addpath('utils/');
-addpath('utils/lib/dmp_lib/');
-addpath('utils/lib/io_lib/');
-addpath('utils/lib/plot_lib/');
+path = strrep(mfilename('fullpath'), 'set_matlab_utils_path','');
+
+addpath([path 'utils/']);
+addpath([path '../../dmp_lib/']);
+addpath([path '../../io_lib/']);
+addpath([path '../../plot_lib/']);
 
 import_dmp_lib();
 import_io_lib();

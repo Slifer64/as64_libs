@@ -60,15 +60,18 @@ function ax = plot_3Dpath_with_orientFrames(Pos, Quat, varargin)
 
     
     %% Set axes limits
-    w = max(max(X) - min(X), 0.2);
+    w = max(max(X) - min(X), 1.0);
     a = w*0.1;
-    ax.XLim = [min(X)-a max(X)+a];
-    w = max(max(Y) - min(Y), 0.2);
+    % ax.XLim = [min(X)-a max(X)+a];
+    ax.XLim = [min(ax.XLim(1),min(X)-a) max(ax.XLim(2),max(X)+a)];
+    w = max(max(Y) - min(Y), 1.0);
     a = w*0.1;
-    ax.YLim = [min(Y)-a max(Y)+a];
-    w = max(max(Z) - min(Z), 0.2);
+    % ax.YLim = [min(Y)-a max(Y)+a];
+    ax.YLim = [min(ax.YLim(1),min(Y)-a) max(ax.YLim(2),max(Y)+a)];
+    w = max(max(Z) - min(Z), 1.0);
     a = w*0.1;
-    ax.ZLim = [min(Z)-a max(Z)+a];
+    % ax.ZLim = [min(Z)-a max(Z)+a];
+    ax.ZLim = [min(ax.ZLim(1),min(Z)-a) max(ax.ZLim(2),max(Z)+a)];
     
     
     %% Find where to place the orientation frames so that they equally spaced

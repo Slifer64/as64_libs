@@ -3,7 +3,7 @@ function dJ_dQ_deo = jacobDotDquatDeo(Qe, rotVel)
     deo = DMP_eo.rotVel2deo(rotVel, Qe);
     
     if (abs(Qe(1)-1) <= DMP_eo.zero_tol)
-        dJ_dQ_deo = 0.25*[-deo'*eye(3,3); zeros(3,3)];
+        dJ_dQ_deo = [-deo'/4; zeros(3,3)];
         return;
     end
     
@@ -20,6 +20,6 @@ function dJ_dQ_deo = jacobDotDquatDeo(Qe, rotVel)
     
     dJ_dQ_deo = zeros(4,3);
     dJ_dQ_deo(1,:) = -0.25 * deo' * (c_th*Eta + (s_th/th)*I_eta);
-    dJ_dQ_deo(2:4,:) = 0.25*(eta'*deo)*( temp*I_eta - s_th*Eta ) + 0.25*temp*( (eta*deo')*I_eta + I_eta*(deo*eta') );
+    dJ_dQ_deo(2:4,:) = 0.25*dot(eta,deo)*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(deo'*I_eta) + (I_eta*deo)*eta' );
 
 end

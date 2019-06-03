@@ -79,7 +79,7 @@ classdef DMP_orient_old < handle % : public DMP_
         %  @param[out] dy: derivative of the \a y state of the this.
         %  @param[out] dz: derivative of the \a z state of the this.
         %  @param[out] dx: derivative of the phase variable of the this.
-        function dvRot = calcRotAccel(this, x, Q, vRot, Q0, Qg, y_c, z_c)
+        function dvRot = calcRotAccel(this, x, Q, vRot, Qg, Q0, y_c, z_c)
             
             if (nargin < 7), y_c = zeros(3,1); end
             if (nargin < 8), z_c = zeros(3,1); end
@@ -96,7 +96,8 @@ classdef DMP_orient_old < handle % : public DMP_
             dy = zeros(3,1);
             
             for i=1:3
-               this.dmp{i}.update(x, Y(i), eta(i), Y0(i), Yg(i), y_c(i), z_c(i));
+               this.dmp{i}.setY0(Y0(i));
+               this.dmp{i}.update(x, Y(i), eta(i), Yg(i), y_c(i), z_c(i));
                deta(i) = this.dmp{i}.getZdot();
             end
             
@@ -166,7 +167,7 @@ classdef DMP_orient_old < handle % : public DMP_
 
         end
         
-        function shape_attr = shapeAttractor(this, x, Q0, Qg)
+        function shape_attr = shapeAttractor(this, x, Qg, Q0)
 
             shape_attr = zeros(3,1);
             

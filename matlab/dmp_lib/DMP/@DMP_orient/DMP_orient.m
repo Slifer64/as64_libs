@@ -7,6 +7,7 @@ classdef DMP_orient < handle
 
     properties
         
+        Q0
         Qgd % Trained target orientation as unit quaternion.
         Q0d % Trained initial orientation as unit quaternion.
         log_Qgd_invQ0d % log(Qgd * inv(Q0d)), precalculated
@@ -80,10 +81,10 @@ classdef DMP_orient < handle
             
             this.Q0d = Qd_data(:,1);
             this.Qgd = Qd_data(:,end);
-            this.log_Qgd_invQ0d = this.quatLog( this.quatProd(this.Qgd, this.quatInv(this.Q0d) ) );
+            this.log_Qgd_invQ0d = quatLog( quatProd(this.Qgd, quatInv(this.Q0d) ) );
             
             eqd = zeros(3, n_data);           
-            for j=1:n_data, eqd(:,j) = this.quatLog(this.quatProd(Qd_data(:,j),this.quatInv(this.Qgd))); end
+            for j=1:n_data, eqd(:,j) = quatLog(quatProd(Qd_data(:,j),quatInv(this.Qgd))); end
 
             tau = Time(end);
             this.tau_d = tau;
@@ -108,6 +109,7 @@ classdef DMP_orient < handle
 
         end
         
+        function setQ0(this, Q0), this.Q0 = Q0; end
         
         %% Returns the angular acceleration for the given input state defined by the timestamp,
         %  the orientation, the angular velocity and acceleration, the initial and target orientation
@@ -120,18 +122,18 @@ classdef DMP_orient < handle
         %  @param[in] Z_c: Coupling term. (optional, default=arma::vec().zeros(3))
         %  @return dvRot: Rotational acceleration.
         %
-        function dvRot = calcRotAccel(this, x, Q, vRot, Q0, Qg, Z_c)
+        function dvRot = calcRotAccel(this, x, Q, vRot, Qg, Z_c)
 
             if (nargin < 7), Z_c=zeros(3,1); end
             
             tau = this.getTau();
             phi = vRot*tau;
-            update(this, x, Q, phi, Q0, Qg, zeros(3,1), Z_c);
+            update(this, x, Q, phi, Qg, zeros(3,1), Z_c);
             dvRot = this.getDphi()/tau;
             
         end
         
-        function update(this, x, Q, phi, Q0, Qg, Y_c, Z_c)
+        function update(this, x, Q, phi, Qg, Y_c, Z_c)
 
             if (nargin < 7), Y_c=zeros(3,1); end
             if (nargin < 8), Z_c=zeros(3,1); end
@@ -146,7 +148,9 @@ classdef DMP_orient < handle
                 dvRotd(i) = this.dvRot_f{i}.output(x);
             end 
 
-            Qd = this.quatProd( this.quatExp(eqd), this.Qgd );
+            Qd = quatProd( quatExp(eqd), this.Qgd );
+            
+            Q0 = this.Q0;
             
             tau = this.getTau();
             tau_d = this.tau_d;
@@ -154,7 +158,7 @@ classdef DMP_orient < handle
             Q0d = this.Q0d;
             % kt = this.tau_d / tau;
             
-            ks = this.quatLog( this.quatProd(Qg, this.quatInv(Q0) ) ) ./ this.log_Qgd_invQ0d;
+            ks = quatLog( quatProd(Qg, quatInv(Q0) ) ) ./ this.log_Qgd_invQ0d;
             % ks = ones(3,1);
             
             Qd_s = quatExp( ks.*quatLog(Qd) );
@@ -191,16 +195,16 @@ classdef DMP_orient < handle
 %             eo = quatLog( quatProd( QQd, quatInv(QgQgd) ) );
             
             %% (y-g) - ks*(yd-gd)
-%             QQg = this.quatProd(Q,this.quatInv(Qg));
-%             inv_exp_QdQgd = this.quatInv( this.quatExp( ks.* this.quatLog( this.quatProd(Qd,this.quatInv(this.Qgd)) ) ) );
-%             eo = this.quatLog( this.quatProd(QQg, inv_exp_QdQgd) );
+%             QQg = quatProd(Q,quatInv(Qg));
+%             inv_exp_QdQgd = quatInv( quatExp( ks.* quatLog( quatProd(Qd,quatInv(this.Qgd)) ) ) );
+%             eo = quatLog( quatProd(QQg, inv_exp_QdQgd) );
 
             %% -log(Qg*Q^{-1}) + log(Qgd*Qd^{-1}) 
 %             eo = -quatLog(quatProd(Qg,quatInv(Q))) + ks.*quatLog(quatProd(Qgd,quatInv(Qd)));
 
 %             eqd2 = zeros(3,1);    
 %             for i=1:3, eqd(i) = this.eq_f{i}.output(x+0.01); end 
-%             Qd2 = this.quatProd( this.quatExp(eqd2), this.Qgd );
+%             Qd2 = quatProd( quatExp(eqd2), this.Qgd );
 %             
 %             v = quatLog( quatProd(Qd2, quatInv(Qd)) );
 %             v2 = quatLog( quatProd( quatExp(ks.*quatLog(quatProd(Qd2,quatInv(Q0d)))), quatExp(ks.*quatLog(quatProd(Qd,quatInv(Q0d)))) ) );
@@ -259,62 +263,4 @@ classdef DMP_orient < handle
 
     end
     
-    methods (Static)
-        
-        function v_rot = quatLog(Q)
-
-            n = Q(1);
-            e = Q(2:4);
-            norm_e = norm(e);
-
-            if (norm_e > 1e-16)
-                theta = 2*real(atan2(norm_e,n));
-                v_rot = theta*e/norm_e;
-            else
-                v_rot = zeros(size(e));
-            end
-
-        end
-        
-        function Q = quatExp(v_rot)
-
-            norm_v_rot = norm(v_rot);
-            theta = norm_v_rot;
-
-            if (norm_v_rot > 1e-16)
-                Q(1) = cos(theta/2);
-                Q(2:4) = sin(theta/2)*v_rot/norm_v_rot;
-            else
-                Q = [1 0 0 0]';
-            end
-
-        end
-        
-        function Q12 = quatProd(Q1, Q2)
-
-            Q1 = Q1(:);
-            Q2 = Q2(:);
-
-            n1 = Q1(1);
-            e1 = Q1(2:4);
-
-            n2 = Q2(1);
-            e2 = Q2(2:4);
-
-            Q12 = zeros(4,1);
-            Q12(1) = n1*n2 - e1'*e2;
-            Q12(2:4) = n1*e2 + n2*e1 + cross(e1,e2);
-
-        end
-        
-        function invQ = quatInv(Q)
-
-            invQ = zeros(size(Q));
-
-            invQ(1) = Q(1);
-            invQ(2:4) = -Q(2:4);
-
-        end
-
-    end
 end

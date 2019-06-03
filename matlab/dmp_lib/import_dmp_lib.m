@@ -1,6 +1,5 @@
 
-dmp_lib_path = mfilename('fullpath');
-dmp_lib_path = strrep(dmp_lib_path, 'import_dmp_lib','');
+dmp_lib_path = strrep(mfilename('fullpath'), 'import_dmp_lib','');
 
 addpath(dmp_lib_path);
 addpath([dmp_lib_path '/DMP/']);

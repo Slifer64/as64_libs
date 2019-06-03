@@ -17,14 +17,16 @@ classdef DMP_nss < DMP
 
         end
         
+    end
+    
+    methods  (Access = protected)
         
-        function f_scale = forcingTermScaling(this, y0, g)
+        function f_scale = forcingTermScaling(this, g)
 
             f_scale = 1.0;
 
         end
-
-
+        
     end
     
 

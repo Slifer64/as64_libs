@@ -7,14 +7,14 @@ function train_err = train(this, train_method, Time, Quat_data, rotVel_data, rot
     eo_data = zeros(3, n_data);
     deo_data = zeros(3, n_data);
     ddeo_data = zeros(3, n_data);
-
+    
     Qg = Quat_data(:,end);
 
     for j=1:n_data
        Qe = quatProd(Qg, quatInv(Quat_data(:,j)) );
        eo_data(:,j) = quatLog(Qe);
-       deo_data(:,j) = this.rotVel2deo(rotVel_data(:,j), Qe);
-       ddeo_data(:,j) = this.rotAccel2ddeo(rotAccel_data(:,j), rotVel_data(:,j), Qe);
+       deo_data(:,j) = DMP_eo.rotVel2deo(rotVel_data(:,j), Qe);
+       ddeo_data(:,j) = DMP_eo.rotAccel2ddeo(rotAccel_data(:,j), rotVel_data(:,j), Qe);
     end
 
 %             Ts = Time(end) - Time(end-1);

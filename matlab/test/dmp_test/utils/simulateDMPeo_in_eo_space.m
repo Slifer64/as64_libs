@@ -3,10 +3,8 @@ function [Time, Q_data, rotVel_data, rotAccel_data] = simulateDMPeo_in_eo_space(
 
 
 %% set initial values
-can_clock_ptr = dmp_o.can_clock_ptr;
-
 t_end = T;
-can_clock_ptr.setTau(t_end);
+dmp_o.setTau(t_end);
 
 iters = 0;
 Time = [];
@@ -29,7 +27,9 @@ dy = zeros(3,1);
 dz = zeros(3,1);
 
 dmp_o.setQ0(Q0);
-[y, z] = dmp_o.setQg(Qg, Q);
+dmp_o.setQg(Qg);
+y = dmp_o.getY(Q);
+z = dmp_o.getZ(rotVel, Q);
 
 
 eo_data = [];
@@ -58,15 +58,15 @@ while (true)
     dy = dmp_o.getYdot();
     dz = dmp_o.getZdot();
     
-    rotAccel = dmp_o.getRotAccel(Q, Qg, tau_dot, yc_dot);
-    rotAccel2 = dmp_o.calcRotAccel(x, Q, rotVel, Qg, Q0);
+    rotAccel = dmp_o.getRotAccel(Q, tau_dot, yc_dot);
+    rotAccel2 = dmp_o.calcRotAccel(x, Q, rotVel, Qg);
     
 %     disp('=====================================');
 %     rotAccel_err = rotAccel-rotAccel2
 %     if (norm(rotAccel_err)>1e-6), pause; end
 
     %% Update phase variable
-    dx = can_clock_ptr.getPhaseDot(x);
+    dx = dmp_o.phaseDot(x);
 
     %% Stopping criteria   
     if (t>1.5*t_end)

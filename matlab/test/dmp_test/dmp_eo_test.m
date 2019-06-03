@@ -4,7 +4,9 @@ set_matlab_utils_path();
 
 %% Load training data
 
-load('data/train_data3.mat', 'Data');
+path = strrep(mfilename('fullpath'), 'dmp_eo_test','');
+
+load([path 'data/train_data3.mat'], 'Data');
 % load('data/orient_data.mat', 'Data');
 
 Timed = Data.Time;
@@ -52,13 +54,16 @@ disp('DMP simulation...');
 tic
 Q0 = Qd_data(:,1);
 Qgd = Qd_data(:,end);
-ks = 2.0;
+ks = 1.0;
 e0 = ks*quatLog( quatProd( Qgd, quatInv(Q0) ) );
 Qg = quatProd(quatExp(e0), Q0); %quatExp(1.0*quatLog(Qd_data(:,end)));
+Qg = quatProd(rotm2quat(rotx(0))', Qgd);
 T = 1.0*Timed(end);
 dt = Ts;
 
 ks = quatLog( quatProd( Qg, quatInv(Q0) ) ) ./ quatLog( quatProd( Qgd, quatInv(Q0) ) );
+
+ks
 
 [Time, Q_data, vRot_data, dvRot_data] = simulateDMPeo_in_quat_space(dmp_o, Q0, Qg, T, dt);
 toc
@@ -69,7 +74,7 @@ tic
 toc
 
 % Data = struct('Time',Time, 'Quat',Q_data, 'RotVel',vRot_data, 'RotAccel',dvRot_data);
-% save('data/orient_data.mat', 'Data');
+% save([path 'data/orient_data.mat'], 'Data');
 
 %% Plot results
 

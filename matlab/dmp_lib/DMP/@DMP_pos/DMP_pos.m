@@ -28,13 +28,14 @@ classdef DMP_pos < matlab.mixin.Copyable
             this.can_clock_ptr = can_clock_ptr;
             this.shape_attr_gating_ptr = shape_attr_gating_ptr;
 
-            for i=1:3
+            this.dmp = cell(3,1);
+            for i=1:length(this.dmp)
                 if (dmp_type == DMP_TYPE.STD)
                     this.dmp{i} = DMP(N_kernels(i), a_z(i), b_z(i), can_clock_ptr, shape_attr_gating_ptr);
                 elseif (dmp_type == DMP_TYPE.BIO)
                     this.dmp{i} = DMP_bio(N_kernels(i), a_z(i), b_z(i), can_clock_ptr, shape_attr_gating_ptr);
                 else
-                    error('[DMP_pos::DMP_pos]: Unsopported DMP type!');
+                    error('[DMP_pos::DMP_pos]: Unsupported DMP type!');
                 end
             end
 
@@ -52,19 +53,22 @@ classdef DMP_pos < matlab.mixin.Copyable
             
             tau = Time(end);
             this.setTau(tau);
+            
+            n_dim = length(this.dmp);
 
             if (nargout > 0)
-                train_err = zeros(3,1);
-                for i=1:3
+                train_err = zeros(n_dim,1);
+                for i=1:n_dim
                     train_err(i) = this.dmp{i}.train(train_method, Time, Pd_data(i,:), dPd_data(i,:), ddPd_data(i,:));
                 end
             else
-                for i=1:3
+                for i=1:n_dim
                     this.dmp{i}.train(train_method, Time, Pd_data(i,:), dPd_data(i,:), ddPd_data(i,:));
                 end
             end
 
         end
+        
         
         %% Calculates the derivatives of the DMP states. The derivatives can then be
         %% retrieved with 'getXdot', 'getYdot' and 'getZdot'.
@@ -75,16 +79,17 @@ classdef DMP_pos < matlab.mixin.Copyable
         %  @param[in] Yg: Goal position.
         %  @param[in] Y_c: Coupling term for the dynamical equation of the 'y' state.
         %  @param[in] Z_c: Coupling term for the dynamical equation of the 'z' state.
-        function update(this, x, Y, Z, Y0, Yg, Y_c, Z_c)
+        function update(this, x, Y, Z, Yg, Y_c, Z_c)
             
             if (nargin < 7), Y_c=zeros(3,1); end
             if (nargin < 8), Z_c=zeros(3,1); end
             
-            for i=1:3, this.dmp{i}.update(x, Y(i), Z(i), Y0(i), Yg(i), Y_c(i), Z_c(i)); end
+            n_dim = length(this.dmp);
+            for i=1:n_dim, this.dmp{i}.update(x, Y(i), Z(i), Yg(i), Y_c(i), Z_c(i)); end
             
-            this.dZ = zeros(3,1);
-            this.dY = zeros(3,1);
-            for i=1:3
+            this.dZ = zeros(n_dim,1);
+            this.dY = zeros(n_dim,1);
+            for i=1:n_dim
                 this.dY(i) = this.dmp{i}.getYdot();
                 this.dZ(i) = this.dmp{i}.getZdot();    
             end
@@ -92,32 +97,11 @@ classdef DMP_pos < matlab.mixin.Copyable
 
         end
         
-        function ddY = calcYddot(this, x, Y, dY, Y0, Yg, tau_dot, Yc, Zc, Yc_dot)
-            
-            if (nargin < 7), tau_dot = 0; end
-            if (nargin < 8), Yc = zeros(3,1); end
-            if (nargin < 9), Zc = zeros(3,1); end
-            if (nargin < 10), Yc_dot = zeros(3,1); end
-
-            ddY = zeros(3,1);
-            for i=1:3
-               ddY(i) = this.dmp{i}.calcYddot(x, Y(i), dY(i), Y0(i), Yg(i), tau_dot, Yc(i), Zc(i), Yc_dot(i)); 
-            end
-            
-        end
-
         
-        %% Returns the acceleration for the given input state defined by the timestamp,
-        %  the orientation, the angular velocity and acceleration, the initial and target orientation
-        %  and an optinal coupling term.
-        %  @param[in] x: phase variable.
-        %  @param[in] P: Current position.
-        %  @param[in] dP: Current velocity.
-        %  @param[in] P0: Initial position.
-        %  @param[in] Pg: Goal position.
-        %  @param[in] Z_c: Coupling term. (optional, default=arma::vec().zeros(3))
-        %  @return ddP: Acceleration.
-        %
+        function dx = getXdot(this), dx=this.dx; end
+        function dY = getYdot(this), dY=this.dY; end
+        function dZ = getZdot(this), dZ=this.dZ; end
+        
         function Yddot = getYddot(this, tau_dot, Yc_dot)
             
             if (nargin < 2), tau_dot = 0; end
@@ -130,67 +114,76 @@ classdef DMP_pos < matlab.mixin.Copyable
             
         end
         
+        
+        function ddY = calcYddot(this, x, Y, dY, Yg, tau_dot, Yc, Zc, Yc_dot)
+            
+            if (nargin < 6), tau_dot = 0; end
+            if (nargin < 7), Yc = zeros(3,1); end
+            if (nargin < 8), Zc = zeros(3,1); end
+            if (nargin < 9), Yc_dot = zeros(3,1); end
 
+            n_dim = length(this.dmp);
+            ddY = zeros(n_dim,1);
+            for i=1:n_dim
+               ddY(i) = this.dmp{i}.calcYddot(x, Y(i), dY(i), Yg(i), tau_dot, Yc(i), Zc(i), Yc_dot(i)); 
+            end
+            
+        end
+        
+
+        function setY0(this, Y0)
+            
+            for i=1:length(this.dmp), this.dmp{i}.setY0(Y0(i)); end
+
+        end
+
+        
         %% Returns the time scaling factor.
         %  @return: The time scaling factor.
         %
-        function tau = getTau(this)
-
-            tau = this.can_clock_ptr.getTau();
-
-        end
+        function tau = getTau(this), tau = this.can_clock_ptr.getTau(); end
         
         
         %% Sets the time scaling factor.
         %  @param[in] tau: The time scaling factor.
         %
-        function setTau(this, tau)
-
-            this.can_clock_ptr.setTau(tau);
-
-        end
+        function setTau(this, tau), this.can_clock_ptr.setTau(tau); end
         
         
         %% Returns the phase variable corresponding to the given time instant.
         %  @param[in] t: The time instant.
         %  @return: The phase variable for time 't'.
         %
-        function x = phase(this, t)
-            
-            x = this.can_clock_ptr.getPhase(t);
-
-        end
+        function x = phase(this, t), x = this.can_clock_ptr.getPhase(t); end
         
         
         %% Returns the derivative of the phase variable.
         %  @param[in] x: The phase variable.
         %  @return: The derivative of the phase variable.
         %
-        function dx = phaseDot(this, x)
-            
-            dx = this.can_clock_ptr.getPhaseDot(x);
-
-        end
+        function dx = phaseDot(this, x), dx = this.can_clock_ptr.getPhaseDot(x); end
         
-        function dx = getXdot(this), dx=this.dx; end
-        function dY = getYdot(this), dY=this.dY; end
-        function dZ = getZdot(this), dZ=this.dZ; end
+        
         
         function can_clock_ptr = getCanClockPtr(this), can_clock_ptr = this.can_clock_ptr; end
         
     end
     
-    
-    properties  (Access = private)
+    properties  (Access = public)
         
         dmp % 3x1 vector of DMP producing the desired trajectory for each x, y and z dimensions.
 
         can_clock_ptr % handle (pointer) to the canonical clock
         shape_attr_gating_ptr % pointer to gating function for the shape attractor
+
+    end
+    
+    properties  (Access = protected)
         
         dZ
         dY
         dx
+        
     end
     
 end

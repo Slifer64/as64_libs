@@ -1,5 +1,4 @@
 
-io_lib_path = mfilename('fullpath');
-io_lib_path = strrep(io_lib_path, 'import_io_lib','');
+io_lib_path = strrep(mfilename('fullpath'), 'import_io_lib','');
 
 addpath(io_lib_path);

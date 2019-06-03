@@ -1,20 +1,14 @@
-function ddy = calcYddot(this, x, y, dy, y0, g, tau_dot, yc, zc, yc_dot)
+function ddy = calcYddot(this, x, y, dy, g, tau_dot, yc, zc, yc_dot)
 
-    if (nargin < 7), tau_dot = 0; end
-    if (nargin < 8), yc = 0; end
-    if (nargin < 9), zc = 0; end
-    if (nargin < 10), yc_dot = 0; end
-
-    % tau = this.getTau();
-    % z = dy*tau - yc;
-    % this.calcStatesDot(x, y, z, y0, g, yc, zc);
+    if (nargin < 6), tau_dot = 0; end
+    if (nargin < 7), yc = 0; end
+    if (nargin < 8), zc = 0; end
+    if (nargin < 9), yc_dot = 0; end
 
     tau = this.getTau();
     z = dy*tau - yc;
 
-    tau = this.getTau();
-
-    shape_attr = this.shapeAttractor(x, y0, g);
+    shape_attr = this.shapeAttractor(x, g);
     goal_attr = this.goalAttractor(x, y, z, g);
     dz = ( goal_attr + shape_attr + zc) / tau;
 

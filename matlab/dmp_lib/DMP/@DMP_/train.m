@@ -7,30 +7,29 @@ function [train_error, F, Fd] = train(this, train_method, Time, yd_data, dyd_dat
     g = yd_data(:,end);
 
     this.setTau(tau);
-
+    this.setY0(y0);
+    
     x = zeros(1, n_data);
     s = zeros(1, n_data);
     Fd = zeros(1,n_data);
-    Psi = zeros(this.N_kernels, n_data);
+    Psi = zeros(this.numOfKernels(), n_data);
 
     for i=1:n_data
         x(i) = this.phase(Time(i));
-        s(i) = this.forcingTermScaling(y0, g) * this.shapeAttrGating(x(i));
-        Fd(i) = this.calcFd(x(i), yd_data(i), dyd_data(i), ddyd_data(i), y0, g);
+        s(i) = this.forcingTermScaling(g) * this.shapeAttrGating(x(i));
+        Fd(i) = this.calcFd(x(i), yd_data(i), dyd_data(i), ddyd_data(i), g);
         Psi(:,i) = this.kernelFunction(x(i));
     end
 
     if (train_method == DMP_TRAIN.LWR), this.w = LWR(Psi, s, Fd, this.zero_tol);
     elseif (train_method == DMP_TRAIN.LS), this.w = leastSquares(Psi, s, Fd, this.zero_tol);
-    else, error('[DMP::train]: Unsopported training method...');
+    else, error('[DMP_::train]: Unsopported training method...');
     end
-
-
 
     if (nargout > 0)
         F = zeros(size(Fd));
         for i=1:size(F,2)
-            F(i) = this.calcLearnedFd(x(i), y0, g);
+            F(i) = this.calcLearnedFd(x(i), g);
         end
         train_error = norm(F-Fd)/length(F);
     end

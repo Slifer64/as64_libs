@@ -18,40 +18,42 @@ classdef DMP_bio < DMP_
         end
         
         
-        function Fd = calcFd(this, x, y, dy, ddy, y0, g)
+        function shape_attr = shapeAttractor(this, x, g)
+            
+            s_attr_gating = this.shapeAttrGating(x);
+            f_scale = this.forcingTermScaling(g);
+            shape_attr = s_attr_gating * f_scale * (this.forcingTerm(x) - (g-this.y0));
+
+        end
+       
+    end
+    
+    methods  (Access = protected)
+        
+        function Fd = calcFd(this, x, y, dy, ddy, g)
 
             s_attr_gating = this.shapeAttrGating(x);
             tau = this.getTau();
             K = this.a_z * this.b_z;
-            Fd = (ddy*tau^2 - this.goalAttractor(x, y, tau*dy, g) + K*(g-y0)*s_attr_gating);
+            Fd = (ddy*tau^2 - this.goalAttractor(x, y, tau*dy, g) + K*(g-this.y0)*s_attr_gating);
 
         end
         
         
-        function Fd = calcLearnedFd(this, x, y0, g)
+        function Fd = calcLearnedFd(this, x, g)
             
-            s = this.shapeAttrGating(x) * this.forcingTermScaling(y0, g);
-            Fd = this.shapeAttractor(x, y0, g) + s*(g-y0);
+            s = this.shapeAttrGating(x) * this.forcingTermScaling(g);
+            Fd = this.shapeAttractor(x, g) + s*(g-this.y0);
 
         end
         
         
-        function f_scale = forcingTermScaling(this, y0, g)
+        function f_scale = forcingTermScaling(this, g)
 
             f_scale = this.a_z*this.b_z;
 
         end
         
-        
-        function shape_attr = shapeAttractor(this, x, y0, g)
-            
-            s_attr_gating = this.shapeAttrGating(x);
-            f_scale = this.forcingTermScaling(y0, g);
-            shape_attr = s_attr_gating * f_scale * (this.forcingTerm(x) - (g-y0));
-
-        end
-
-
     end
     
 

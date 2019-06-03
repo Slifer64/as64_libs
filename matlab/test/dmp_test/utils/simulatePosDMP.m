@@ -3,8 +3,6 @@ function [Time, P_data, dP_data, ddP_data] = simulatePosDMP(dmp_p, P0, Pg, T, dt
 
 
 %% set initial values
-can_clock_ptr = dmp_p.can_clock_ptr;
-
 t = 0.0;
 
 x = 0.0;
@@ -15,7 +13,7 @@ dP = zeros(3,1);
 ddP = zeros(3,1);
 
 t_end = T;
-can_clock_ptr.setTau(t_end);
+dmp_p.setTau(t_end);
 
 iters = 0;
 Time = [];
@@ -41,7 +39,7 @@ while (true)
     ddP = dmp_p.calcYddot(x, P, dP, Pg);
 
     %% Update phase variable
-    dx = can_clock_ptr.getPhaseDot(x);
+    dx = dmp_p.phaseDot(x);
 
     %% Stopping criteria
     if (t>=t_end) % && norm(y-g)<5e-3 && norm(dy)<5e-3)
