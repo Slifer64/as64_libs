@@ -162,10 +162,20 @@ classdef DMP_pos < matlab.mixin.Copyable
         %  @return: The derivative of the phase variable.
         %
         function dx = phaseDot(this, x), dx = this.can_clock_ptr.getPhaseDot(x); end
+       
         
-        
-        
-        function can_clock_ptr = getCanClockPtr(this), can_clock_ptr = this.can_clock_ptr; end
+        function J = getAcellPartDev_g_tau(this, t, Y, dY, Y0, x, Yg, tau)
+            
+            n_dim = length(this.dmp);
+            J = zeros(n_dim, n_dim+1);
+            
+            for i=1:n_dim
+                C = this.dmp{i}.getAcellPartDev_g_tau(t, Y(i), dY(i), Y0(i), x, Yg(i), tau);
+                J(i,i) = C(1);
+                J(i,end) = C(2);
+            end
+            
+        end
         
     end
     

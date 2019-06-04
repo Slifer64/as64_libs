@@ -97,7 +97,7 @@ target_link_libraries(sim_DMP_Pos_EKF_disc ${LINK_LIBS} )
 # **********************************************************
 
 add_executable(sim_DMP_Orient_EKF_disc
-		src/sim_DMP_Pos_EKF_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		src/sim_DMP_Orient_EKF_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
 		)
 
 add_dependencies(sim_DMP_Orient_EKF_disc

@@ -104,8 +104,11 @@ while (true)
     Sigma_theta_data = [Sigma_theta_data sqrt(diag(P_theta))];
 
     %% DMP simulation
-    dvRot = dmp_o.calcRotAccel(x, Q, vRot, Qg) + Sigma_vn*randn(N_out,1);
+    dmp_o.setTau(tau_hat);
     dvRot_hat = dmp_o.calcRotAccel(x_hat, Q, vRot, Qg_hat);
+    
+    dmp_o.setTau(tau);
+    dvRot = dmp_o.calcRotAccel(x, Q, vRot, Qg) + Sigma_vn*randn(N_out,1);
 
     F_ext = M_r * (dvRot - dvRot_hat);
     Y_out = dvRot;
@@ -190,7 +193,9 @@ function Y_out = oMsrFun(theta, cookie)
 
     x_hat = cookie.t / tau_hat;
     
+    cookie.dmp_o.setTau(tau_hat);
     Y_out = cookie.dmp_o.calcRotAccel(x_hat, Q, cookie.vRot, Qg_hat);
+    cookie.dmp_o.setTau(cookie.tau);
 
 end
 

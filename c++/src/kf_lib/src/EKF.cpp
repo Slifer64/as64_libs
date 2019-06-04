@@ -10,10 +10,9 @@ EKF::EKF(const arma::vec &theta0, const arma::mat &P0, int N_msr,
     arma::vec (*stateTransFun_ptr)(const arma::vec &theta, void *cookie),
     arma::vec (*msrFun_ptr)(const arma::vec &theta, void *cookie))
 {
-  this->init(theta0, P0, N_msr);
-
   this->stateTransFun_ptr = std::bind(stateTransFun_ptr, std::placeholders::_1, std::placeholders::_2);
   this->msrFun_ptr = std::bind(msrFun_ptr, std::placeholders::_1, std::placeholders::_2);
+  this->init(theta0, P0, N_msr);
 }
 
 void EKF::init(const arma::vec &theta0, const arma::mat &P0, int N_msr)
@@ -156,6 +155,7 @@ arma::mat EKF::calcStateTransFunJacob(const arma::vec &theta, void *cookie)
   // compute Jacobian numerically
   arma::mat F_k = arma::mat().zeros(N_params,N_params);
   arma::vec dtheta_j = arma::vec().zeros(N_params);
+
   for (int j=0; j<N_params; j++)
   {
       dtheta_j(j) = this->dtheta(j);

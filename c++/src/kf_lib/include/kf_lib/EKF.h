@@ -54,10 +54,9 @@ public:
      arma::vec (T::*stateTransFun_ptr)(const arma::vec &theta, void *cookie), T *obj_ptr,
      arma::vec (*msrFun_ptr)(const arma::vec &theta, void *cookie))
    {
-     this->init(theta0, P0, N_msr);
-
      this->stateTransFun_ptr = std::bind(stateTransFun_ptr, obj_ptr, std::placeholders::_1, std::placeholders::_2);
      this->msrFun_ptr = std::bind(msrFun_ptr, std::placeholders::_1, std::placeholders::_2);
+     this->init(theta0, P0, N_msr);
    }
 
    /** \brief Extended Kalman Filter constructor.
@@ -77,10 +76,9 @@ public:
      arma::vec (*stateTransFun_ptr)(const arma::vec &theta, void *cookie),
      arma::vec (T::*msrFun_ptr)(const arma::vec &theta, void *cookie), T *obj_ptr)
    {
-     this->init(theta0, P0, N_msr);
-
      this->stateTransFun_ptr = std::bind(stateTransFun_ptr, std::placeholders::_1, std::placeholders::_2);
      this->msrFun_ptr = std::bind(msrFun_ptr, obj_ptr, std::placeholders::_1, std::placeholders::_2);
+     this->init(theta0, P0, N_msr);
    }
 
    /** \brief Extended Kalman Filter constructor.
@@ -101,10 +99,9 @@ public:
      arma::vec (T1::*stateTransFun_ptr)(const arma::vec &theta, void *cookie), T1 *obj1_ptr,
      arma::vec (T2::*msrFun_ptr)(const arma::vec &theta, void *cookie), T2 *obj2_ptr)
    {
-     this->init(theta0, P0, N_msr);
-
      this->stateTransFun_ptr = std::bind(stateTransFun_ptr, obj1_ptr, std::placeholders::_1, std::placeholders::_2);
      this->msrFun_ptr = std::bind(msrFun_ptr, obj2_ptr, std::placeholders::_1, std::placeholders::_2);
+     this->init(theta0, P0, N_msr);
    }
 
   /** \brief Sets the fading memory coefficient.

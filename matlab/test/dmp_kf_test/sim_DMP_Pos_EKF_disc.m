@@ -20,7 +20,7 @@ path = strrep(mfilename('fullpath'), 'sim_DMP_Pos_EKF_disc','');
 load([path 'data/dmp_data.mat'],'dmp_p', 'Yg0', 'Y0', 'tau0');
 
 Dim = length(Y0);
-can_clock_ptr = dmp_p.getCanClockPtr();
+can_clock_ptr = dmp_p.can_clock_ptr;
 can_clock_ptr.setTau(tau0);
 
 %% DMP simulation
@@ -84,7 +84,7 @@ ekf.setParamsConstraints(A_c, b_c);
 ekf.setPartDerivStep(num_diff_step);
 
 ekf.setStateTransFunJacob(@pStateTransFunJacob);
-% ekf.setMsrFunJacob(@pMsrFunJacob);
+ekf.setMsrFunJacob(@pMsrFunJacob);
 
 dmp_p.setY0(Y0);
 
@@ -110,8 +110,11 @@ while (true)
     Sigma_theta_data = [Sigma_theta_data sqrt(diag(P_theta))];
 
     %% DMP simulation  
-    ddY = dmp_p.calcYddot(x, Y, dY, Yg) + Sigma_vn*randn(N_out,1);
+    dmp_p.setTau(tau_hat);
     ddY_hat = dmp_p.calcYddot(x_hat, Y, dY, Yg_hat);
+    
+    dmp_p.setTau(tau);
+    ddY = dmp_p.calcYddot(x, Y, dY, Yg) + Sigma_vn*randn(N_out,1);
 
     F_ext = M_r * (ddY - ddY_hat);
     
@@ -134,7 +137,7 @@ while (true)
     end
 
     %% ========  KF measurement update  ========
-    ekf.correct(Y_out, pMsrCookie(dmp_p, t, Y, dY, Yg, tau, est_goal, est_tau));
+    ekf.correct(Y_out, pMsrCookie(dmp_p, t, Y, dY, Y0, Yg, tau, est_goal, est_tau));
     
     %% ========  KF time update  ========
     ekf.predict();
@@ -154,17 +157,6 @@ while (true)
 
 end
 toc
-
-figure
-hold on;
-plot(Time, Sigma_theta_data(1,:), 'LineWidth',2.0, 'Color','red');
-plot(Time, Sigma_theta_data(2,:), 'LineWidth',2.0, 'Color','green');
-plot(Time, Sigma_theta_data(3,:), 'LineWidth',2.0, 'Color','blue');
-plot(Time, Sigma_theta_data(4,:), 'LineWidth',2.0, 'Color',[0.93 0.69 0.13]);
-legend({'$x$','$y$','$z$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
-title('$\sigma_{\theta}$', 'interpreter','latex', 'fontsize',15);
-xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
-hold off;
 
 plot_pos_estimation_results(Time, Yg, Yg_data, tau, tau_data, Sigma_theta_data, F_data, plot_1sigma, Y_data, dY_data);
 
@@ -195,7 +187,9 @@ function Y_out = pMsrFun(theta, cookie)
 
     x_hat = cookie.t/tau_hat;
     
+    cookie.dmp_p.setTau(tau_hat);
     Y_out = cookie.dmp_p.calcYddot(x_hat, cookie.Y, cookie.dY, Yg_hat);
+    cookie.dmp_p.setTau(cookie.tau);
 
 end
 
@@ -211,13 +205,13 @@ function J = pMsrFunJacob(theta, cookie)
     
     x_hat = cookie.t / tau_hat;
 
-    J = cookie.dmp_p.getAcellPartDev_g_tau(cookie.t, cookie.Y, cookie.dY, x_hat, Yg_hat, tau_hat);
+    J = cookie.dmp_p.getAcellPartDev_g_tau(cookie.t, cookie.Y, cookie.dY, cookie.Y0, x_hat, Yg_hat, tau_hat);
 
 end
 
-function cookie = pMsrCookie(dmp_p, t, Y, dY, Yg, tau, est_goal, est_tau)
+function cookie = pMsrCookie(dmp_p, t, Y, dY, Y0, Yg, tau, est_goal, est_tau)
     
-    cookie = struct('dmp_p',dmp_p, 't',t, 'Y',Y, 'dY',dY, 'Yg',Yg, 'tau',tau, 'est_goal',est_goal, 'est_tau',est_tau);
+    cookie = struct('dmp_p',dmp_p, 't',t, 'Y',Y, 'dY',dY, 'Y0',Y0, 'Yg',Yg, 'tau',tau, 'est_goal',est_goal, 'est_tau',est_tau);
     
 end
 

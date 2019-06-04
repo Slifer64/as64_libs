@@ -15,10 +15,10 @@ Q0_offset = [1 0 0 0]';
 % Qg_offset = rotm2quat(rotx(110)*roty(85)*rotz(20))';
 % time_offset = 5;
 
-% % speed: faster
-% % target: x-y-z near
-% Qg_offset = rotm2quat(rotx(15)*roty(35)*rotz(20))';
-% time_offset = -2.5;
+% speed: faster
+% target: x-y-z near
+Qg_offset = rotm2quat(rotx(15)*roty(35)*rotz(20))';
+time_offset = -2.5;
 
 % % speed: much faster
 % % target: x-z far, y near

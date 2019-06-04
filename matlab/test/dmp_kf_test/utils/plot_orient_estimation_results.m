@@ -1,6 +1,18 @@
 function plot_orient_estimation_results(Time, Qg, Qg_data, tau, tau_data, Sigma_theta_data, F_data, plot_1sigma, Q_data, dQ_data)
 
 
+figure
+hold on;
+plot(Time, Sigma_theta_data(1,:), 'LineWidth',2.0, 'Color','red');
+plot(Time, Sigma_theta_data(2,:), 'LineWidth',2.0, 'Color','green');
+plot(Time, Sigma_theta_data(3,:), 'LineWidth',2.0, 'Color','blue');
+plot(Time, Sigma_theta_data(4,:), 'LineWidth',2.0, 'Color',[0.93 0.69 0.13]);
+legend({'$x$','$y$','$z$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
+title('$\sigma_{\theta}$', 'interpreter','latex', 'fontsize',15);
+xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
+hold off;
+
+
 f_norm = zeros(size(F_data,2),1);
 for i=1:length(f_norm)
     f_norm(i) = norm(F_data(:,i));
