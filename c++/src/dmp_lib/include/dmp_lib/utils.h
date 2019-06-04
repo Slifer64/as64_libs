@@ -19,6 +19,14 @@ namespace as64_
       LS = 11
     };
 
+    enum GatingType
+    {
+      LIN = 0,
+      EXP = 1,
+      SIGMOID = 2,
+      UNKNOWN = 3
+    };
+
 
   } // namespace dmp_
 

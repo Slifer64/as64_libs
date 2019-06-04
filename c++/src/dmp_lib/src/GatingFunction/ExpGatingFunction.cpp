@@ -1,4 +1,5 @@
 #include <dmp_lib/GatingFunction/ExpGatingFunction.h>
+#include <dmp_lib/io/io.h>
 
 namespace as64_
 {
@@ -65,6 +66,12 @@ arma::rowvec ExpGatingFunction::getOutputDot(const arma::rowvec &x) const
 double ExpGatingFunction::getPartDev_1oTau(double t, double x) const
 {
   return -this->a_u * t * this->getOutput(x);
+}
+
+void ExpGatingFunction::exportToFile(std::ostream &out) const
+{
+  dmp_::write_scalar((int)GatingType::EXP, out);
+  out.write((const char *)(dynamic_cast<const ExpGatingFunction *>(this)), sizeof(ExpGatingFunction));
 }
 
 } // namespace dmp_

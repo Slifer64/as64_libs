@@ -1,5 +1,5 @@
 #include <dmp_kf_test/utils.h>
-
+#include <io_lib/io_utils.h>
 #include <math_lib/quaternions.h>
 
 void simulatePosOrientDMP(std::shared_ptr<dmp_::DMP_pos> &dmp_p,
@@ -9,10 +9,6 @@ void simulatePosOrientDMP(std::shared_ptr<dmp_::DMP_pos> &dmp_p,
                           arma::rowvec &Time, arma::mat &P_data, arma::mat &dP_data, arma::mat &ddP_data,
                           arma::mat &Q_data, arma::mat &vRot_data, arma::mat &dvRot_data)
 {
-
-  // set initial values
-  std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_p->can_clock_ptr;
-
   double t = 0.0;
 
   double x = 0.0;
@@ -26,7 +22,8 @@ void simulatePosOrientDMP(std::shared_ptr<dmp_::DMP_pos> &dmp_p,
   arma::vec dvRot = arma::vec().zeros(3);
 
   double t_end = T;
-  can_clock_ptr->setTau(t_end);
+  dmp_p->setTau(t_end);
+  dmp_o->setTau(t_end);
 
   dmp_p->setY0(P0);
   dmp_o->setQ0(Q0);
@@ -48,7 +45,7 @@ void simulatePosOrientDMP(std::shared_ptr<dmp_::DMP_pos> &dmp_p,
     dvRot = dmp_o->calcRotAccel(x, Q, vRot, Qg);
 
     // Update phase variable
-    dx = can_clock_ptr->getPhaseDot(x);
+    dx = dmp_p->phaseDot(x);
 
     // Stopping criteria
     if (t>=t_end) break;
@@ -62,4 +59,55 @@ void simulatePosOrientDMP(std::shared_ptr<dmp_::DMP_pos> &dmp_p,
     vRot = vRot + dvRot*dt;
   }
 
+}
+
+void saveDMPdata(const std::string &dmp_data_file,
+                 const std::shared_ptr<dmp_::DMP_pos> &dmp_p,
+                 const std::shared_ptr<dmp_::DMP_eo> &dmp_o,
+                 const arma::vec &Yg0, const arma::vec &Y0,
+                 const arma::vec &Qg0, const arma::vec &Q0, double tau0)
+{
+  std::ofstream out(dmp_data_file, std::ios::out | std::ios::binary);
+  if (!out) throw std::runtime_error("Failed to create file \"" + dmp_data_file + "\"...");
+  dmp_p->exportToFile(out);
+  dmp_o->exportToFile(out);
+  io_::write_mat(Yg0, out);
+  io_::write_mat(Y0, out);
+  io_::write_mat(Qg0, out);
+  io_::write_mat(Q0, out);
+  io_::write_scalar(tau0, out);
+  out.close();
+}
+
+void loadDMPdata(const std::string &dmp_data_file,
+                 std::shared_ptr<dmp_::DMP_pos> *dmp_p,
+                 std::shared_ptr<dmp_::DMP_eo> *dmp_o,
+                 arma::vec *Yg0, arma::vec *Y0,
+                 arma::vec *Qg0, arma::vec *Q0, double *tau0)
+{
+  std::ifstream in(dmp_data_file, std::ios::in | std::ios::binary);
+  if (!in) throw std::runtime_error("Failed to open file \"" + dmp_data_file + "\"...");
+
+  arma::vec Yg0_2;
+  arma::vec Y0_2;
+  arma::vec Qg0_2;
+  arma::vec Q0_2;
+  double tau0_2;
+
+  std::shared_ptr<dmp_::DMP_pos> dmp_p_2 = dmp_::DMP_pos::importFromFile(in);
+  std::shared_ptr<dmp_::DMP_eo> dmp_o_2 = dmp_::DMP_eo::importFromFile(in);
+  io_::read_mat(Yg0_2, in);
+  io_::read_mat(Y0_2, in);
+  io_::read_mat(Qg0_2, in);
+  io_::read_mat(Q0_2, in);
+  io_::read_scalar(tau0_2, in);
+  in.close();
+
+  if (dmp_p) *dmp_p = dmp_p_2;
+  if (dmp_o) *dmp_o = dmp_o_2;
+  if (Yg0) *Yg0 = Yg0_2;
+  if (Y0) *Y0 = Y0_2;
+  if (Qg0) *Qg0 = Qg0_2;
+  if (Q0) *Q0 = Q0_2;
+  if (tau0) *tau0 = tau0_2;
 }

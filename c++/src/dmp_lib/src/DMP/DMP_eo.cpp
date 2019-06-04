@@ -7,6 +7,7 @@
 #include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
 
 #include <dmp_lib/math/quaternions.h>
+#include <dmp_lib/io/io.h>
 
 namespace as64_
 {
@@ -384,6 +385,43 @@ arma::mat DMP_eo::jacobDotDquatDeo(const arma::vec &Qe, const arma::vec &rotVel)
 
   return dJ_dQ_deo;
 }
+
+
+void DMP_eo::exportToFile(std::ostream &out) const
+{
+  for (int i=0; i<dmp.size(); i++) dmp[i]->exportToFile(out);
+  can_clock_ptr->exportToFile(out);
+  shape_attr_gating_ptr->exportToFile(out);
+
+  dmp_::write_mat(Q0, out);
+  dmp_::write_mat(Qg, out);
+}
+
+std::shared_ptr<DMP_eo> DMP_eo::importFromFile(std::istream &in)
+{
+  std::shared_ptr<DMP_eo> dmp_o(new DMP_eo(dmp_::STD, {30,30,30}, {20,20,20}, {5,5,5}));
+
+  int N_dmps = dmp_o->dmp.size();
+  for (int i=0; i<N_dmps; i++) dmp_o->dmp[i] = DMP_::importFromFile(in);
+  dmp_o->can_clock_ptr = CanonicalClock::importFromFile(in);
+  dmp_o->shape_attr_gating_ptr = GatingFunction::importFromFile(in);
+
+  for (int i=0; i<N_dmps; i++)
+  {
+    dmp_o->dmp[i]->can_clock_ptr = dmp_o->can_clock_ptr;
+    dmp_o->dmp[i]->shape_attr_gating_ptr = dmp_o->shape_attr_gating_ptr;
+  }
+
+  arma::vec Q0, Qg;
+  dmp_::read_mat(Q0, in);
+  dmp_::read_mat(Qg, in);
+
+  dmp_o->setQ0(Q0);
+  dmp_o->setQg(Qg);
+
+  return dmp_o;
+}
+
 
 } // namespace dmp_
 

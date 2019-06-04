@@ -8,7 +8,10 @@
 
 #include <cmath>
 #include <exception>
+#include <fstream>
+#include <memory>
 #include <armadillo>
+#include <dmp_lib/utils.h>
 
 namespace as64_
 {
@@ -49,6 +52,10 @@ public:
    * @return Partial derivative of the gating wrt 1/tau.
    */
   virtual double getPartDev_1oTau(double t, double x) const = 0;
+
+
+  virtual void exportToFile(std::ostream &out) const;
+  static std::shared_ptr<GatingFunction> importFromFile(std::istream &in);
 
 }; // class GatingFunction
 

@@ -30,6 +30,7 @@ add_library(${PROJECT_NAME}
   src/trainMethods/LWR.cpp
 
   src/math/quaternions.cpp
+  src/io/io.cpp
 
   src/DMP/DMP_.cpp
   src/DMP/DMP.cpp

@@ -18,7 +18,10 @@
 #ifndef AS64_DMP_CANONICAL_CLOCK_H
 #define AS64_DMP_CANONICAL_CLOCK_H
 
+#include <fstream>
+#include <exception>
 #include <armadillo>
+#include <boost/shared_ptr.hpp>
 
 namespace as64_
 {
@@ -71,6 +74,9 @@ namespace as64_
        *  @return Vector with the phase variable values at each timestamp in 't'.
        */
       arma::rowvec getPhase(const arma::rowvec &t) const;
+
+      void exportToFile(std::ostream &out) const;
+      static std::shared_ptr<CanonicalClock> importFromFile(std::istream &in);
 
     protected:
       double x0; ///< initial value of the phase variable

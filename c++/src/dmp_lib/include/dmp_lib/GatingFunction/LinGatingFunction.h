@@ -32,6 +32,8 @@ public:
 
   virtual double getPartDev_1oTau(double t, double x) const;
 
+  void exportToFile(std::ostream &out) const;
+
 private:
   double u0; ///< initial value of the gating function
   double a_u; ///< the rate of evolution of the gating function

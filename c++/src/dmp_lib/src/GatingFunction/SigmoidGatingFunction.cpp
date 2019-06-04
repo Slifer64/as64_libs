@@ -1,4 +1,5 @@
 #include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
+#include <dmp_lib/io/io.h>
 
 namespace as64_
 {
@@ -51,6 +52,12 @@ double SigmoidGatingFunction::getPartDev_1oTau(double t, double x) const
 {
   double h = this->getOutput(x);
   return -this->a_u * t * h * (1-h);
+}
+
+void SigmoidGatingFunction::exportToFile(std::ostream &out) const
+{
+  dmp_::write_scalar((int)GatingType::SIGMOID, out);
+  out.write((const char *)(dynamic_cast<const SigmoidGatingFunction *>(this)), sizeof(SigmoidGatingFunction));
 }
 
 } // namespace dmp_

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <memory>
 #include <exception>
+#include <fstream>
 #include <armadillo>
 
 #include <dmp_lib/utils.h>
@@ -18,12 +19,17 @@ namespace as64_
 namespace dmp_
 {
 
+class DMP; // forward declaration
+class DMP_bio; // forward declaration
+class DMP_pos; // forward declaration
 class DMP_eo; // forward declaration
 
 class DMP_
 {
-
-friend class DMP_eo;
+  friend class DMP;
+  friend class DMP_bio;
+  friend class DMP_pos;
+  friend class DMP_eo;
 
 // ====================================================
 // ****************************************************
@@ -149,6 +155,10 @@ public:
   arma::vec getAcellPartDev_g_tau(double t, double y, double dy, double y0,
                                   double x, double g, double tau) const;
 
+
+  virtual void exportToFile(std::ostream &out) const;
+
+  static std::shared_ptr<DMP_> importFromFile(std::istream &in);
 
 // =======================================================
 // *******************************************************

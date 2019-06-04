@@ -8,13 +8,12 @@
 #include <exception>
 
 #include <io_lib/io_utils.h>
+#include <dmp_lib/DMP/DMP_pos.h>
 #include <dmp_lib/DMP/DMP_eo.h>
 #include <dmp_lib/GatingFunction/LinGatingFunction.h>
 #include <dmp_lib/GatingFunction/ExpGatingFunction.h>
 #include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
-
 #include <math_lib/quaternions.h>
-
 #include <dmp_kf_test/utils.h>
 
 
@@ -25,6 +24,7 @@ int main(int argc, char** argv)
   // ===========  Initialize the ROS node  ===============
   ros::init(argc, argv, "train_dmp_node");
   ros::NodeHandle nh_("~");
+
 
   // ===========  Load training data  ===============
   std::string path = ros::package::getPath("dmp_kf_test");
@@ -53,11 +53,12 @@ int main(int argc, char** argv)
 
   int n_data = Timed.size();
   int i_end = n_data-1;
-  Pd_data = Pd_data-arma::repmat(Pd_data.col(i_end), 1, n_data);
-  arma::vec Qgd = Qd_data.col(i_end);
-  for (int j=0; j<n_data; j++) Qd_data.col(j) = math_::quatProd(Qd_data.col(j), math_::quatInv(Qgd));
+//  Pd_data = Pd_data-arma::repmat(Pd_data.col(i_end), 1, n_data);
+//  arma::vec Qgd = Qd_data.col(i_end);
+//  for (int j=0; j<n_data; j++) Qd_data.col(j) = math_::quatProd(Qd_data.col(j), math_::quatInv(Qgd));
 
-  // initialize DMP
+
+  // ===========  initialize DMP  ===============
   arma::vec a_z = 20 * arma::vec().ones(3);
   arma::vec b_z = a_z/4;
   dmp_::TrainMethod train_method = dmp_::TrainMethod::LWR;
@@ -68,6 +69,8 @@ int main(int argc, char** argv)
   std::shared_ptr<dmp_::DMP_pos> dmp_p(new dmp_::DMP_pos(dmp_::TYPE::STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr));
   std::shared_ptr<dmp_::DMP_eo> dmp_o(new dmp_::DMP_eo(dmp_::TYPE::STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr));
 
+
+  // ===========  Train DMP  ===============
   std::cout << "DMP pos training...\n";
   arma::wall_clock timer;
   timer.tic();
@@ -82,53 +85,59 @@ int main(int argc, char** argv)
   std::cout << "offline_train_mse =\n" << offline_train_mse << "\n";
   std::cout << "Elapsed time: " << timer.toc() << " sec\n";
 
-  // DMP simulation
-  std::cout << "DMP simulation...\n";
-  timer.tic();
-  arma::vec P0 = Pd_data.col(0);
-  arma::vec Pg = Pd_data.col(i_end);
-  arma::vec Q0 = Qd_data.col(0);
-  Qgd = Qd_data.col(i_end);
-  double ks = 1.0;
-  double kt = 1.0;
-  arma::vec e0 = ks*math_::quatLog( math_::quatProd( Qgd, math_::quatInv(Q0) ) );
-  arma::vec Qg = math_::quatProd(math_::quatExp(e0), Q0);
-  double T = kt*Timed(i_end);
-  double dt = Ts;
 
-  arma::rowvec Time;
-  arma::mat P_data;
-  arma::mat dP_data;
-  arma::mat ddP_data;
-  arma::mat Q_data;
-  arma::mat vRot_data;
-  arma::mat dvRot_data;
+  // ===========  save dmp data  ===============
+  arma::vec Ygd = Pd_data.col(i_end);
+  arma::vec Y0d = Pd_data.col(0);
+  arma::vec Qgd = Qd_data.col(i_end);
+  arma::vec Q0d = Qd_data.col(0);
+  double taud = Timed(i_end);
+  std::string dmp_data_file = path + "/matlab/data/dmp_data.bin";
+  saveDMPdata(dmp_data_file, dmp_p, dmp_o, Ygd, Y0d, Qgd, Q0d, taud);
 
-  simulatePosOrientDMP(dmp_p, dmp_o, P0, Q0, Pg, Qg, T, dt,
-                       Time, P_data, dP_data, ddP_data, Q_data, vRot_data, dvRot_data);
+  dmp_p->printParams();
 
-  std::cout << "Elapsed time: " << timer.toc() << " sec\n";
-
-//  Yg0 = Pd_data(:,end);
-//  Y0 = Pd_data(:,1);
-//  Qg0 = Qd_data(:,end);
-//  Q0 = Qd_data(:,1);
-//  tau0 = Timed(end);
-//  save([path 'data/dmp_data.mat'],'dmp_p','dmp_o', 'Yg0', 'Y0', 'Qg0', 'Q0', 'tau0');
-
-  // ===========  write results  ===============
-  std::string sim_data_file = path + "/matlab/data/sim_data.bin";
-  std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
-  if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
-  io_::write_mat(Time, out, true);
-  io_::write_mat(P_data, out, true);
-  io_::write_mat(dP_data, out, true);
-  io_::write_mat(ddP_data, out, true);
-  io_::write_mat(Q_data, out, true);
-  io_::write_mat(vRot_data, out, true);
-  io_::write_mat(dvRot_data, out, true);
-  io_::write_mat(Qg, out, true);
-  out.close();
+//  // DMP simulation
+//  std::cout << "DMP simulation...\n";
+//  timer.tic();
+//  arma::vec P0 = Pd_data.col(0);
+//  arma::vec Pg = Pd_data.col(i_end);
+//  arma::vec Q0 = Qd_data.col(0);
+//  Qgd = Qd_data.col(i_end);
+//  double ks = 1.0;
+//  double kt = 1.0;
+//  arma::vec e0 = ks*math_::quatLog( math_::quatProd( Qgd, math_::quatInv(Q0) ) );
+//  arma::vec Qg = math_::quatProd(math_::quatExp(e0), Q0);
+//  double T = kt*Timed(i_end);
+//  double dt = Ts;
+//
+//  arma::rowvec Time;
+//  arma::mat P_data;
+//  arma::mat dP_data;
+//  arma::mat ddP_data;
+//  arma::mat Q_data;
+//  arma::mat vRot_data;
+//  arma::mat dvRot_data;
+//
+//  simulatePosOrientDMP(dmp_p, dmp_o, P0, Q0, Pg, Qg, T, dt,
+//                       Time, P_data, dP_data, ddP_data, Q_data, vRot_data, dvRot_data);
+//
+//  std::cout << "Elapsed time: " << timer.toc() << " sec\n";
+//
+//
+//  // ===========  write results  ===============
+//  std::string sim_data_file = path + "/matlab/data/sim_data.bin";
+//  std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
+//  if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
+//  io_::write_mat(Time, out, true);
+//  io_::write_mat(P_data, out, true);
+//  io_::write_mat(dP_data, out, true);
+//  io_::write_mat(ddP_data, out, true);
+//  io_::write_mat(Q_data, out, true);
+//  io_::write_mat(vRot_data, out, true);
+//  io_::write_mat(dvRot_data, out, true);
+//  io_::write_mat(Qg, out, true);
+//  out.close();
 
 
   // ===========  Shutdown ROS node  ==================

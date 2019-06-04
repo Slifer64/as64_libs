@@ -1,7 +1,10 @@
 #include <dmp_lib/DMP/DMP_.h>
 #include <dmp_lib/trainMethods/LeastSquares.h>
 #include <dmp_lib/trainMethods/LWR.h>
+#include <dmp_lib/io/io.h>
 
+#include <dmp_lib/DMP/DMP.h>
+#include <dmp_lib/DMP/DMP_bio.h>
 
 namespace as64_
 {
@@ -240,6 +243,32 @@ arma::vec DMP_::getAcellPartDev_g_tau(double t, double y, double dy, double y0,
 
   return dC_dtheta;
 }
+
+
+void DMP_::exportToFile(std::ostream &out) const
+{
+  throw std::runtime_error("[DMP_::exportToFile]: The object must be assigned a derived class pointer!");
+}
+
+
+std::shared_ptr<DMP_> DMP_::importFromFile(std::istream &in)
+{
+  int type_int;
+  dmp_::read_scalar(type_int, in);
+  dmp_::TYPE type = static_cast<dmp_::TYPE>(type_int);
+
+  switch (type)
+  {
+    case TYPE::STD:
+      return DMP::importFromFile(in);
+    case TYPE::BIO:
+      return DMP_bio::importFromFile(in);
+    default:
+      throw std::runtime_error("[DMP_::importFromfile]: Cannot import unsupported dmp type.");
+  }
+
+}
+
 
 } // namespace dmp_
 

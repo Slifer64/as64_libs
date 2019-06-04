@@ -2,18 +2,6 @@
 
   <node pkg="dmp_kf_test" type="trainDMP" name="trainDMP" output="screen">
 
-    <rosparam>
-      dmp_type: "STD" # {STD, BIO}
-      gating_type: "sigmoid" # {lin, exp, sigmoid}
-      train_data_file: "dmp_eo_train_data.bin"
-      sim_data_file: "dmp_eo_sim_data.bin"
-      a_z: [20, 20, 20]
-      # b_z: [5, 5, 5]
-      N_kernels: [40, 40, 40]
-      train_method: "LS" # {LWR, LS}
-      ks: 2.0
-      kt: 1.0
-    </rosparam>
 
   </node>
 

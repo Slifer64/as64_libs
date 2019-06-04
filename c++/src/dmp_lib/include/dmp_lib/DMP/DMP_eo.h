@@ -114,6 +114,10 @@ public:
   double phaseDot(double x) const;
 
 
+  void exportToFile(std::ostream &out) const;
+
+  static std::shared_ptr<DMP_eo> importFromFile(std::istream &in);
+
 // ===========================================================
 // ***********************************************************
 // ************      Static Public Functions      ************

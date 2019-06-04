@@ -6,6 +6,8 @@
 #include <dmp_lib/GatingFunction/ExpGatingFunction.h>
 #include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
 
+#include <dmp_lib/io/io.h>
+
 namespace as64_
 {
 
@@ -129,6 +131,32 @@ double DMP_pos::phase(double t) const
 double DMP_pos::phaseDot(double x) const
 {
   return this->can_clock_ptr->getPhaseDot(x);
+}
+
+
+void DMP_pos::exportToFile(std::ostream &out) const
+{
+  for (int i=0; i<dmp.size(); i++) dmp[i]->exportToFile(out);
+  can_clock_ptr->exportToFile(out);
+  shape_attr_gating_ptr->exportToFile(out);
+}
+
+std::shared_ptr<DMP_pos> DMP_pos::importFromFile(std::istream &in)
+{
+  std::shared_ptr<DMP_pos> dmp_p(new DMP_pos(dmp_::STD, {30,30,30}, {20,20,20}, {5,5,5}));
+
+  int N_dmps = dmp_p->dmp.size();
+  for (int i=0; i<N_dmps; i++) dmp_p->dmp[i] = DMP_::importFromFile(in);
+  dmp_p->can_clock_ptr = CanonicalClock::importFromFile(in);
+  dmp_p->shape_attr_gating_ptr = GatingFunction::importFromFile(in);
+
+  for (int i=0; i<N_dmps; i++)
+  {
+    dmp_p->dmp[i]->can_clock_ptr = dmp_p->can_clock_ptr;
+    dmp_p->dmp[i]->shape_attr_gating_ptr = dmp_p->shape_attr_gating_ptr;
+  }
+
+  return dmp_p;
 }
 
 

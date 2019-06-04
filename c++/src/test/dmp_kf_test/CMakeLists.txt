@@ -62,6 +62,21 @@ add_dependencies(trainDMP
 target_link_libraries(trainDMP ${LINK_LIBS} )
 
 
+# ******************************************
+# ************   Sim DMP  ******************
+# ******************************************
+
+add_executable(simDMP
+		src/simDMP.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		)
+
+add_dependencies(simDMP
+		${${PROJECT_NAME}_EXPORTED_TARGETS}
+		${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(simDMP ${LINK_LIBS} )
+
+
 # *******************************************************
 # ************   sim_DMP_Pos_EKF_disc  ******************
 # *******************************************************

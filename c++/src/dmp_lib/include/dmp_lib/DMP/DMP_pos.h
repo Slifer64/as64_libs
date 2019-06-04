@@ -130,6 +130,33 @@ public:
   double phaseDot(double x) const;
 
 
+  void exportToFile(std::ostream &out) const;
+
+  static std::shared_ptr<DMP_pos> importFromFile(std::istream &in);
+
+
+  void printParams() const
+  {
+    std::cerr << "==========================================\n";
+    std::cerr << "==========================================\n";
+    std::cerr << "[DMP_pos::printParams]: Printing params:\n";
+    for (int i=0;i <dmp.size(); i++)
+    {
+      std::cerr << "===> DMP " << i << ":\n";
+      std::cerr << "N_kernels = \n" << dmp[i]->N_kernels << "\n";
+      std::cerr << "a_z = \n" << dmp[i]->a_z << "\n";
+      std::cerr << "b_z = \n" << dmp[i]->b_z << "\n";
+      std::cerr << "tau = \n" << dmp[i]->getTau() << "\n";
+      std::cerr << "y0 = \n" << dmp[i]->y0 << "\n";
+      std::cerr << "w = \n" << dmp[i]->w.t() << "\n";
+      std::cerr << "c = \n" << dmp[i]->c.t() << "\n";
+      std::cerr << "h = \n" << dmp[i]->h.t() << "\n";
+    }
+    std::cerr << "==========================================\n";
+    std::cerr << "==========================================\n";
+
+  }
+
 // ======================================================
 // ******************************************************
 // ************      Public Properties      *************

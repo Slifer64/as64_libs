@@ -1,4 +1,5 @@
 #include <dmp_lib/GatingFunction/LinGatingFunction.h>
+#include <dmp_lib/io/io.h>
 
 namespace as64_
 {
@@ -44,6 +45,12 @@ arma::rowvec LinGatingFunction::getOutputDot(const arma::rowvec &x) const
 double LinGatingFunction::getPartDev_1oTau(double t, double x) const
 {
   return -this->a_u * t * this->getOutput(x);
+}
+
+void LinGatingFunction::exportToFile(std::ostream &out) const
+{
+  dmp_::write_scalar((int)GatingType::LIN, out);
+  out.write((const char *)(dynamic_cast<const LinGatingFunction *>(this)), sizeof(LinGatingFunction));
 }
 
 } // namespace dmp_

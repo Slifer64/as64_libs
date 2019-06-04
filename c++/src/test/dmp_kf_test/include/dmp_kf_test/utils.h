@@ -18,4 +18,16 @@ void simulatePosOrientDMP(std::shared_ptr<dmp_::DMP_pos> &dmp_p,
                           arma::rowvec &Time, arma::mat &P_data, arma::mat &dP_data, arma::mat &ddP_data,
                           arma::mat &Q_data, arma::mat &vRot_data, arma::mat &dvRot_data);
 
+void saveDMPdata(const std::string &dmp_data_file,
+                 const std::shared_ptr<dmp_::DMP_pos> &dmp_p,
+                 const std::shared_ptr<dmp_::DMP_eo> &dmp_o,
+                 const arma::vec &Yg0, const arma::vec &Y0,
+                 const arma::vec &Qg0, const arma::vec &Q0, double tau0);
+
+void loadDMPdata(const std::string &dmp_data_file,
+                 std::shared_ptr<dmp_::DMP_pos> *dmp_p=0,
+                 std::shared_ptr<dmp_::DMP_eo> *dmp_o=0,
+                 arma::vec *Yg0=0, arma::vec *Y0=0,
+                 arma::vec *Qg0=0, arma::vec *Q0=0, double *tau0=0);
+
 #endif // DMP_KF_TEST_UTILS_H

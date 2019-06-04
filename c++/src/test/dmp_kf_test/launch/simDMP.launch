@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="dmp_kf_test" type="simDMP" name="simDMP" output="screen">
+
+
+  </node>
+
+</launch>

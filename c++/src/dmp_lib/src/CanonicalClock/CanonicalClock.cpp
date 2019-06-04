@@ -48,6 +48,19 @@ double CanonicalClock::getTau() const
   return this->tau;
 }
 
+void CanonicalClock::exportToFile(std::ostream &out) const
+{
+  out.write((const char *)(this), sizeof(CanonicalClock));
+}
+
+std::shared_ptr<CanonicalClock> CanonicalClock::importFromFile(std::istream &in)
+{
+  CanonicalClock can_clock;
+  in.read((char *)(&can_clock), sizeof(CanonicalClock));
+
+  return std::shared_ptr<CanonicalClock>(new CanonicalClock(can_clock));
+}
+
 } // namespace dmp_
 
 } // namespace as64_
