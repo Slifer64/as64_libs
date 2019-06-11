@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: singular_value_filter_test
-Description: Description of singular_value_filter_test
-Version: 0.0.0
-Cflags: -I/usr/local/include
-Libs: -L/usr/local/lib 
-Requires: roscpp

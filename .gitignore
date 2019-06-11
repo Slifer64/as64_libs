@@ -147,7 +147,7 @@ CATKIN_IGNORE
 
 
 # CLion
-src/.idea/
-src/cmake-build-debug/
+c++/src/cmake-build-debug/
+c++/src/cmake-build-debug/
 
 

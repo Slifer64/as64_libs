@@ -97,49 +97,6 @@ int main(int argc, char** argv)
 
   dmp_p->printParams();
 
-//  // DMP simulation
-//  std::cout << "DMP simulation...\n";
-//  timer.tic();
-//  arma::vec P0 = Pd_data.col(0);
-//  arma::vec Pg = Pd_data.col(i_end);
-//  arma::vec Q0 = Qd_data.col(0);
-//  Qgd = Qd_data.col(i_end);
-//  double ks = 1.0;
-//  double kt = 1.0;
-//  arma::vec e0 = ks*math_::quatLog( math_::quatProd( Qgd, math_::quatInv(Q0) ) );
-//  arma::vec Qg = math_::quatProd(math_::quatExp(e0), Q0);
-//  double T = kt*Timed(i_end);
-//  double dt = Ts;
-//
-//  arma::rowvec Time;
-//  arma::mat P_data;
-//  arma::mat dP_data;
-//  arma::mat ddP_data;
-//  arma::mat Q_data;
-//  arma::mat vRot_data;
-//  arma::mat dvRot_data;
-//
-//  simulatePosOrientDMP(dmp_p, dmp_o, P0, Q0, Pg, Qg, T, dt,
-//                       Time, P_data, dP_data, ddP_data, Q_data, vRot_data, dvRot_data);
-//
-//  std::cout << "Elapsed time: " << timer.toc() << " sec\n";
-//
-//
-//  // ===========  write results  ===============
-//  std::string sim_data_file = path + "/matlab/data/sim_data.bin";
-//  std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
-//  if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
-//  io_::write_mat(Time, out, true);
-//  io_::write_mat(P_data, out, true);
-//  io_::write_mat(dP_data, out, true);
-//  io_::write_mat(ddP_data, out, true);
-//  io_::write_mat(Q_data, out, true);
-//  io_::write_mat(vRot_data, out, true);
-//  io_::write_mat(dvRot_data, out, true);
-//  io_::write_mat(Qg, out, true);
-//  out.close();
-
-
   // ===========  Shutdown ROS node  ==================
   ros::shutdown();
 

@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: ppc_joint_limit_avoid_test
-Description: Description of ppc_joint_limit_avoid_test
-Version: 0.0.0
-Cflags: -I/usr/local/include
-Libs: -L/usr/local/lib 
-Requires: roscpp
