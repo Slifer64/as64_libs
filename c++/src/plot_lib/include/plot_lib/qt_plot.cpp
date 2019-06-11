@@ -1,0 +1,551 @@
+#include "qt_plot.h"
+#include <QDebug>
+
+
+// ===========================================================
+
+namespace as64_
+{
+
+namespace pl_
+{
+
+std::shared_ptr<QtPlot> QtPlot::QtPlot_;
+bool QtPlot::initialized = false;
+int QtPlot::fig_count = 0;
+std::map<Color, QColor> QtPlot::color;
+const int QtPlot::N_COLORS = 13;
+
+void QtPlot::init(QWidget *parent)
+{
+  if (!initialized)
+  {
+    QtPlot::color[BLUE] = QColor(0, 0, 255);
+    QtPlot::color[GREEN] = QColor(0, 255, 0);
+    QtPlot::color[BROWN] = QColor(153, 51, 0);
+    QtPlot::color[MAGENTA] = QColor(255, 0, 255);
+    QtPlot::color[CYAN] = QColor(0, 255, 255);
+    QtPlot::color[RED] = QColor(255, 0, 0);
+    QtPlot::color[YELLOW] = QColor(230, 230, 0);
+    QtPlot::color[LIGHT_BROWN] = QColor(217, 84, 26);
+    QtPlot::color[PURPLE] = QColor(125, 46, 143);
+    QtPlot::color[MUSTARD] = QColor(237, 176, 33);
+    QtPlot::color[PINK] = QColor(255, 153, 199);
+    QtPlot::color[BLACK] = QColor(0, 0, 0);
+    QtPlot::color[GREY] = QColor(200, 200, 200);
+
+    QtPlot::QtPlot_.reset(new QtPlot(parent));
+    QtPlot::QtPlot_->moveToThread( QApplication::instance()->thread() );
+    initialized = true;
+  }
+}
+
+QColor QtPlot::getQColor(Color c)
+{
+  return (QtPlot::color.find(static_cast<Color>(c)))->second;
+}
+
+Figure *QtPlot::figure()
+{
+  Figure *fig;
+  QtPlot::QtPlot_->figureSignal(&fig);
+  QtPlot::QtPlot_->sem.wait();
+  
+  return fig;
+}
+
+QtPlot::QtPlot(QWidget *parent)
+{
+  QObject::connect(this, SIGNAL(figureSignal(Figure **)), this, SLOT(figureSlot(Figure **)));
+}
+
+QtPlot::~QtPlot()
+{
+  std::cerr << "[QtPlot::~QtPlot]: deleting self...\n";
+}
+
+void QtPlot::figureSlot(Figure **fig)
+{
+  // qDebug() << "[QtPlot::figureSlot]: " << QThread::currentThread() << "\n";
+  *fig = new Figure(this);
+  QtPlot::QtPlot_->sem.notify();
+  QtPlot::fig_count++;
+}
+
+
+// ===========================================================
+
+Axes::Axes(Figure *parent): QCustomPlot(parent)
+{
+  // qDebug() << "[Axes::Figure]: " << QThread::currentThread() << "\n";
+
+  this->parent = parent;
+
+  qRegisterMetaType<QVector<QString>>("QVector<QString>");
+
+  QObject::connect(this, &Axes::holdSignal, this, &Axes::holdSlot);
+  QObject::connect(this, &Axes::gridSignal, this, &Axes::gridSlot);
+  QObject::connect(this, &Axes::setTitleSignal, this, &Axes::setTitleSlot);
+  QObject::connect(this, &Axes::setXLabelSignal, this, &Axes::setXLabelSlot);
+  QObject::connect(this, &Axes::setYLabelSignal, this, &Axes::setYLabelSlot);
+  QObject::connect(this, &Axes::setLegendSignal, this, &Axes::setLegendSlot);
+  QObject::connect(this, SIGNAL(plotSignal(const void *, const void *)), this, SLOT(plotSlot(const void *, const void *)) );
+  QObject::connect(this, &Axes::drawnowSignal, this, &Axes::drawnowSlot);
+
+  this->resize(667, 452);
+
+  this->setAttribute(Qt::WA_DeleteOnClose);
+
+  // cplot = new QCustomPlot;
+  // set locale to english, so we get english decimal separator:
+  this->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom));
+  // Allow user to drag axis ranges with mouse, zoom with mouse wheel and select graphs by clicking:
+  this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+
+  color_ind = 0;
+
+  hold(false);
+  grid(false);
+
+  this->show();
+}
+
+Axes::~Axes()
+{
+  std::cerr << "[Axes::~Axes]: deleting self...\n";
+    // delete this;
+}
+
+void Axes::hold(bool set)
+{
+  holdSignal(set);
+  sem.wait();
+}
+
+void Axes::grid(bool set)
+{
+  gridSignal(set);
+  sem.wait();
+}
+
+Graph *Axes::plot(const arma::vec &data)
+{
+  arma::vec x_data(data.size());
+  for (int i=0; i<data.size(); i++) x_data(i) = i;
+  return plot(x_data, data);
+}
+
+Graph *Axes::plot(const arma::vec &x_data, const arma::vec &y_data)
+{
+  int n_data = x_data.size();
+
+  if (y_data.size() != n_data) throw std::runtime_error("[Axes::plot]: Incompatible sizes between x_data and y_data");
+
+  QVector<double> qx_data(n_data);
+  QVector<double> qy_data(n_data);
+  for (int i=0; i<n_data; i++)
+  {
+    qx_data[i] = x_data(i);
+    qy_data[i] = y_data(i);
+  }
+
+  plotSignal(reinterpret_cast<const void *>(&qx_data), reinterpret_cast<const void *>(&qy_data));
+  sem.wait();
+
+  return last_graph;
+}
+
+Graph *Axes::plot(const arma::rowvec &data)
+{
+  arma::vec data2 = data.t();
+  return plot(data2);
+}
+
+Graph *Axes::plot(const arma::rowvec &x_data, const arma::rowvec &y_data)
+{
+  arma::vec x_data2 = x_data.t();
+  arma::vec y_data2 = y_data.t();
+  return plot(x_data2, y_data2);
+}
+
+
+void Axes::setTitle(const std::string &title)
+{
+  setTitleSignal(QString(title.c_str()));
+  sem.wait();
+}
+
+void Axes::setXLabel(const std::string &label)
+{
+  setXLabelSignal(QString(label.c_str()));
+  sem.wait();
+}
+
+void Axes::setYLabel(const std::string &label)
+{
+  setYLabelSignal(QString(label.c_str()));
+  sem.wait();
+}
+
+void Axes::setLegend(const std::vector<std::string> &legend_labels)
+{
+  QVector<QString> qlegend_labels(legend_labels.size());
+  for (int i=0; i<legend_labels.size(); i++) qlegend_labels[i] = legend_labels[i].c_str();
+  setLegendSignal(qlegend_labels);
+  sem.wait();
+}
+
+void Axes::plotSlot(const void *x_data, const void *y_data)
+{
+  // qDebug() << "[Axes::plotSlot]: " << QThread::currentThread() << "\n";
+  const QVector<double> &qx_data = *reinterpret_cast<const QVector<double> *>(x_data);
+  const QVector<double> &qy_data = *reinterpret_cast<const QVector<double> *>(y_data);
+
+  if (!hold_on)
+  {
+    this->clearGraphs();
+    color_ind = 0;
+  }
+
+  QCPGraph *graph = new QCPGraph(this->xAxis, this->yAxis);
+  // graph->setLineStyle(QCPGraph::lsLine); // connect points with straight lines
+  graph->setData(qx_data, qy_data);
+
+  graphs.push_back( new Graph(graph, this) );
+  last_graph = graphs.back();
+  last_graph->setColor(static_cast<Color>(color_ind));
+  color_ind = (color_ind+1)%QtPlot::N_COLORS;
+  last_graph->setLineStyle(SolidLine);
+  last_graph->setLineWidth(2.0);
+  last_graph->setMarkerStyle(ssDot);
+  last_graph->setMarkerSize(2.0);
+  //graph->setPen(QPen(QBrush(c), 2.0, Qt::SolidLine)); // line color blue for first graph
+  // graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDot, 4)); // set marker type and size. The width is determined by the linewidth
+  this->rescaleAxes();
+
+  sem.notify();
+}
+
+void Axes::drawnow()
+{
+  drawnowSignal();
+  sem.wait();
+}
+
+void Axes::holdSlot(bool set)
+{
+  // qDebug() << "[Axes::holdSlot]: " << QThread::currentThread() << "\n";
+  hold_on = set;
+  sem.notify();
+}
+
+void Axes::gridSlot(bool set)
+{
+  // qDebug() << "[Axes::gridSlot]: " << QThread::currentThread() << "\n";
+  this->xAxis->grid()->setVisible(set);
+  this->yAxis->grid()->setVisible(set);
+  sem.notify();
+}
+
+void Axes::setTitleSlot(const QString &title)
+{
+  // qDebug() << "[Axes::setTitleSlot]: " << QThread::currentThread() << "\n";
+  int fontsize = 16;
+  QString font_family = "Arial";
+  this->plotLayout()->insertRow(0);
+  this->plotLayout()->addElement(0, 0, new QCPTextElement(this, title, QFont(font_family, fontsize, QFont::Normal)));
+  sem.notify();
+}
+
+void Axes::setXLabelSlot(const QString &label)
+{
+  // qDebug() << "[Axes::setXLabelSlot]: " << QThread::currentThread() << "\n";
+  int fontsize = 14;
+  QString font_family = "Arial";
+  QCPAxis *x_axis = this->xAxis;
+  x_axis->setLabel(label);
+  x_axis->setLabelColor(QColor(0,0,0));
+  x_axis->setLabelFont(QFont(font_family, fontsize, QFont::Normal));
+  sem.notify();
+}
+
+void Axes::setYLabelSlot(const QString &label)
+{
+  // qDebug() << "[Axes::setYLabelSlot]: " << QThread::currentThread() << "\n";
+  int fontsize = 14;
+  QString font_family = "Arial";
+
+  QCPAxis *y_axis = this->yAxis;
+  y_axis->setLabel(label);
+  y_axis->setLabelColor(QColor(0,0,0));
+  y_axis->setLabelFont(QFont(font_family, fontsize, QFont::Normal));
+  sem.notify();
+}
+
+void Axes::setLegendSlot(const QVector<QString> &legend_labels)
+{
+  // qDebug() << "[Axes::setLegendSlot]: " << QThread::currentThread() << "\n";
+  int fontsize = 14;
+  QString font_family = "Arial";
+
+  int n_graphs = this->graphCount();
+  int n_labels = legend_labels.size();
+
+  if (n_labels > n_graphs)
+  {
+      qDebug() << "Extra legend labels will be ignored.";
+      n_labels = n_graphs;
+  }
+
+  for (int i=0; i<n_labels; i++) this->graph(i)->setName(legend_labels[i]);
+
+  this->legend->setVisible(true);
+  this->legend->setFont(QFont(font_family, fontsize, QFont::Normal));
+  this->legend->setBrush(QBrush(QColor(255,255,255,230)));
+  this->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom|Qt::AlignRight);
+  sem.notify();
+}
+
+void Axes::drawnowSlot()
+{
+  // qDebug() << "[Axes::drawnowSlot]: " << QThread::currentThread() << "\n";
+  this->replot();
+  sem.notify();
+}
+
+// ======================================================
+
+Figure::Figure(QWidget *parent) : QMainWindow(parent)
+{
+  QObject::connect(this, &Figure::setAxesSignal, this, &Figure::setAxesSlot);
+  QObject::connect(this, &Figure::clearAxesSignal, this, &Figure::clearAxesSlot);
+
+  // this->moveToThread( QApplication::instance()->thread() );
+
+  central_widget = new QWidget(this);
+  this->setCentralWidget(central_widget);
+
+  QPalette pal = palette();
+  pal.setColor(QPalette::Background, Qt::white);
+  central_widget->setAutoFillBackground(true);
+  central_widget->setPalette(pal);
+
+  if (this->objectName().isEmpty()) this->setObjectName(QStringLiteral("Figure"));
+  this->resize(500, 400);
+  grid_layout = new QGridLayout(central_widget);
+  grid_layout->setObjectName(QStringLiteral("gridLayout"));
+
+  this->setWindowTitle(QString("Figure ") + QString().setNum(QtPlot::fig_count+1));
+  this->setAttribute(Qt::WA_QuitOnClose, true);
+
+  setAxes(1,1);
+
+  // this->setWindowTitle(QApplication::translate("PlotDialog", "Dialog", 0));
+  show();
+}
+
+Figure::~Figure()
+{
+  std::cerr << "[Figure::~Figure]: deleting self...\n";
+  clearAxes();
+  // delete grid_layout;
+  QtPlot::fig_count--;
+}
+
+void Figure::closeEvent(QCloseEvent *event)
+{
+  delete this;
+}
+
+Axes *Figure::getAxes(int k)
+{
+  return axes[k];
+}
+
+Axes *Figure::getAxes(int row, int col)
+{
+  return axes[col + row*n2];
+}
+
+void Figure::setAxes(int n1, int n2)
+{
+  setAxesSignal(n1,n2);
+  sem.wait();
+}
+
+void Figure::clearAxes(int k)
+{
+  clearAxesSignal(k);
+  sem.wait();
+}
+
+void Figure::setAxesSlot(int n1, int n2)
+{
+  this->n1 = n1;
+  this->n2 = n2;
+
+  clearAxes();
+  delete grid_layout;
+  grid_layout = new QGridLayout(central_widget);
+  // this->setLayout(grid_layout);
+
+  axes.resize(n1*n2);
+  for (int i=0; i<n1; i++)
+  {
+    for (int j=0; j<n2; j++)
+    {
+      int k = getAxesIndex(i,j);
+      axes[k] = new Axes;
+      grid_layout->addWidget(axes[k], i, j, 1, 1);
+    }
+  }
+
+  sem.notify();
+}
+
+void Figure::clearAxesSlot(int k)
+{
+  if (k < 0)
+  {
+    for (int i=0;i<axes.size();i++) delete axes[i];
+  }
+  else
+  {
+    axes.erase(axes.begin()+k);
+  }
+
+  sem.notify();
+}
+
+// =========================================================
+
+Graph::Graph(QCPGraph *qcp_graph, Axes *parent)
+{
+  QObject::connect(this, &Graph::setColorSignal, this, &Graph::setColorSlot);
+  QObject::connect(this, &Graph::setLineStyleSignal, this, &Graph::setLineStyleSlot);
+  QObject::connect(this, &Graph::setLineWidthSignal, this, &Graph::setLineWidthSlot);
+  QObject::connect(this, &Graph::setMarkerStyleSignal, this, &Graph::setMarkerStyleSlot);
+  QObject::connect(this, &Graph::setMarkerSizeSignal, this, &Graph::setMarkerSizeSlot);
+
+  this->qcp_graph = qcp_graph;
+}
+
+Graph::~Graph()
+{
+
+}
+
+void Graph::setProperty() {}
+
+void Graph::setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value)
+{
+  if (p == pl_::Color_) setColor(p_value);
+  else std::cerr << "[Graph::setPropertyHelper::Color_]: ** Invalid graph property **\n";
+}
+
+void Graph::setPropertyHelper(pl_::PROPERTY p, double p_value)
+{
+  if (p == pl_::LineWidth_) setLineWidth(p_value);
+  else if (p == pl_::MarkerSize_) setMarkerSize(p_value);
+  else std::cerr << "[Graph::setPropertyHelper::LineWidth_|MarkerSize_]: ** Invalid graph property **\n";
+}
+
+void Graph::setPropertyHelper(pl_::PROPERTY p, pl_::LineStyle p_value)
+{
+  if (p == pl_::LineStyle_) setLineStyle(p_value);
+  else std::cerr << "[Graph::setPropertyHelper::LineStyle_]: ** Invalid graph property **\n";
+}
+
+void Graph::setPropertyHelper(pl_::PROPERTY p, pl_::MarkerStyle p_value)
+{
+  if (p == pl_::MarkerStyle_) setMarkerStyle(p_value);
+  else std::cerr << "[Graph::setPropertyHelper::MarkerStyle_]: ** Invalid graph property **\n";
+}
+
+void Graph::setColor(Color color)
+{
+  setColorSignal(color);
+  sem.wait();
+}
+
+void Graph::setLineStyle(LineStyle style)
+{
+  setLineStyleSignal(style);
+  sem.wait();
+}
+
+void Graph::setLineWidth(double width)
+{
+  setLineWidthSignal(width);
+  sem.wait();
+}
+
+void Graph::setMarkerStyle(MarkerStyle type)
+{
+  setMarkerStyleSignal(type);
+  sem.wait();
+}
+
+void Graph::setMarkerSize(double size)
+{
+  setMarkerSizeSignal(size);
+  sem.wait();
+}
+
+void Graph::setColorSlot(int color)
+{
+  QPen pen = qcp_graph->pen();
+  pen.setColor(QtPlot::getQColor(static_cast<Color>(color)));
+  qcp_graph->setPen(pen);
+
+  sem.notify();
+}
+
+void Graph::setLineStyleSlot(int style)
+{
+  if (style == NoLine)
+  {
+    qcp_graph->setLineStyle(QCPGraph::lsNone);
+  }
+  else
+  {
+    qcp_graph->setLineStyle(QCPGraph::lsLine);
+    QPen pen = qcp_graph->pen();
+    pen.setStyle(static_cast<Qt::PenStyle>(style));
+    qcp_graph->setPen(pen);
+  }
+
+  sem.notify();
+}
+
+void Graph::setLineWidthSlot(double width)
+{
+  QPen pen = qcp_graph->pen();
+  pen.setWidth(width);
+  qcp_graph->setPen(pen);
+
+  sem.notify();
+}
+
+void Graph::setMarkerStyleSlot(int type)
+{
+  QCPScatterStyle marker = qcp_graph->scatterStyle();
+  marker.setShape( static_cast<QCPScatterStyle::ScatterShape>(type));
+  qcp_graph->setScatterStyle(marker);
+
+  sem.notify();
+}
+
+void Graph::setMarkerSizeSlot(double size)
+{
+  QCPScatterStyle marker = qcp_graph->scatterStyle();
+  marker.setSize(size);
+  qcp_graph->setScatterStyle(marker);
+
+  sem.notify();
+}
+
+
+} // namespace pl_
+
+} // namespace as64_
