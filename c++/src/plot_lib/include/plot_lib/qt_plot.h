@@ -194,13 +194,13 @@ public:
     return graph;
   }
 
-  void setTitle(const std::string &title);
+  void title(const std::string &title);
 
-  void setXLabel(const std::string &label);
+  void xlabel(const std::string &label);
 
-  void setYLabel(const std::string &label);
+  void ylabel(const std::string &label);
 
-  void setLegend(const std::vector<std::string> &legend_labels);
+  void legend(const std::vector<std::string> &legend_labels);
 
   void drawnow();
 
@@ -308,6 +308,7 @@ public:
   ~QtPlot();
 
   static void init(QWidget *parent = 0);
+  static void terminate();
 
   static Figure *figure();
 
@@ -320,6 +321,7 @@ public:
 signals:
 
   void figureSignal(Figure **);
+  void terminateSignal();
 
 private slots:
 
@@ -328,7 +330,7 @@ private slots:
 private:
   static bool initialized;
   Semaphore sem;
-  static std::shared_ptr<QtPlot> QtPlot_;
+  static QtPlot *QtPlot_;
   static std::map<Color, QColor> color;
 };
 

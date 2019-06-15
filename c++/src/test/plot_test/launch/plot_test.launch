@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="plot_test" type="plot_test" name="plot_test" output="screen">
+    <rosparam>
+    </rosparam>
+  </node>
+
+</launch>

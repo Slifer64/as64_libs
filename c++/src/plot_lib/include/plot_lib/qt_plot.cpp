@@ -1,5 +1,8 @@
 #include "qt_plot.h"
 #include <QDebug>
+#include <QCoreApplication>
+
+#include <thread>
 
 
 // ===========================================================
@@ -10,7 +13,7 @@ namespace as64_
 namespace pl_
 {
 
-std::shared_ptr<QtPlot> QtPlot::QtPlot_;
+QtPlot *QtPlot::QtPlot_;
 bool QtPlot::initialized = false;
 int QtPlot::fig_count = 0;
 std::map<Color, QColor> QtPlot::color;
@@ -20,24 +23,55 @@ void QtPlot::init(QWidget *parent)
 {
   if (!initialized)
   {
-    QtPlot::color[BLUE] = QColor(0, 0, 255);
-    QtPlot::color[GREEN] = QColor(0, 255, 0);
-    QtPlot::color[BROWN] = QColor(153, 51, 0);
-    QtPlot::color[MAGENTA] = QColor(255, 0, 255);
-    QtPlot::color[CYAN] = QColor(0, 255, 255);
-    QtPlot::color[RED] = QColor(255, 0, 0);
-    QtPlot::color[YELLOW] = QColor(230, 230, 0);
-    QtPlot::color[LIGHT_BROWN] = QColor(217, 84, 26);
-    QtPlot::color[PURPLE] = QColor(125, 46, 143);
-    QtPlot::color[MUSTARD] = QColor(237, 176, 33);
-    QtPlot::color[PINK] = QColor(255, 153, 199);
-    QtPlot::color[BLACK] = QColor(0, 0, 0);
-    QtPlot::color[GREY] = QColor(200, 200, 200);
+    // if (!QCoreApplication::instance()) throw std::runtime_error("[QtPlot::init]: There is no QApplication...");
 
-    QtPlot::QtPlot_.reset(new QtPlot(parent));
-    QtPlot::QtPlot_->moveToThread( QApplication::instance()->thread() );
+    if (!QCoreApplication::instance())
+    {
+      Semaphore sem;
+
+      std::thread([&sem]()
+      {
+        int argc = 0;
+        char **argv = 0;
+        QApplication app(argc, argv);
+        QThread::currentThread()->setPriority(QThread::LowestPriority);
+        app.setQuitOnLastWindowClosed(false);
+//        QMainWindow *win = new QMainWindow();
+//        win->setVisible(false);
+        QtPlot::QtPlot_ = new QtPlot();
+        QObject::connect(QtPlot_, SIGNAL(terminateSignal()), &app, SLOT(quit()));
+        sem.notify();
+        app.exec();
+
+        std::cerr << "[QtPlot::init::thread]: Finished exec!\n";
+
+        //delete (win);
+        delete (QtPlot_);
+      }).detach();
+
+      sem.wait();
+    }
+    else
+    {
+      if (QCoreApplication::instance()->thread()->currentThreadId() != QThread::currentThread())
+      {
+        throw std::runtime_error("[QtPlot::init]: Must be called from the QApplication thread!");
+      }
+      QtPlot::QtPlot_ = new QtPlot(parent);
+      // QtPlot::QtPlot_->moveToThread( QApplication::instance()->thread() );
+    }
+
     initialized = true;
   }
+  else
+  {
+    std::cerr << "\033[1m" << "\033[33m" << "[WARNING]: QtPlot has already been initialized!\033[0m";
+  }
+}
+
+void QtPlot::terminate()
+{
+  QtPlot::QtPlot_->terminateSignal();
 }
 
 QColor QtPlot::getQColor(Color c)
@@ -47,6 +81,8 @@ QColor QtPlot::getQColor(Color c)
 
 Figure *QtPlot::figure()
 {
+  if (!QtPlot::initialized) throw std::runtime_error("[QtPlot::figure]: QtPlot has not been initialized...");
+
   Figure *fig;
   QtPlot::QtPlot_->figureSignal(&fig);
   QtPlot::QtPlot_->sem.wait();
@@ -56,12 +92,26 @@ Figure *QtPlot::figure()
 
 QtPlot::QtPlot(QWidget *parent)
 {
+  QtPlot::color[BLUE] = QColor(0, 0, 255);
+  QtPlot::color[GREEN] = QColor(0, 255, 0);
+  QtPlot::color[BROWN] = QColor(153, 51, 0);
+  QtPlot::color[MAGENTA] = QColor(255, 0, 255);
+  QtPlot::color[CYAN] = QColor(0, 255, 255);
+  QtPlot::color[RED] = QColor(255, 0, 0);
+  QtPlot::color[YELLOW] = QColor(230, 230, 0);
+  QtPlot::color[LIGHT_BROWN] = QColor(217, 84, 26);
+  QtPlot::color[PURPLE] = QColor(125, 46, 143);
+  QtPlot::color[MUSTARD] = QColor(237, 176, 33);
+  QtPlot::color[PINK] = QColor(255, 153, 199);
+  QtPlot::color[BLACK] = QColor(0, 0, 0);
+  QtPlot::color[GREY] = QColor(200, 200, 200);
+
   QObject::connect(this, SIGNAL(figureSignal(Figure **)), this, SLOT(figureSlot(Figure **)));
 }
 
 QtPlot::~QtPlot()
 {
-  std::cerr << "[QtPlot::~QtPlot]: deleting self...\n";
+   std::cerr << "[QtPlot::~QtPlot]: deleting self...\n";
 }
 
 void QtPlot::figureSlot(Figure **fig)
@@ -112,7 +162,7 @@ Axes::Axes(Figure *parent): QCustomPlot(parent)
 
 Axes::~Axes()
 {
-  std::cerr << "[Axes::~Axes]: deleting self...\n";
+  // std::cerr << "[Axes::~Axes]: deleting self...\n";
     // delete this;
 }
 
@@ -169,29 +219,35 @@ Graph *Axes::plot(const arma::rowvec &x_data, const arma::rowvec &y_data)
 }
 
 
-void Axes::setTitle(const std::string &title)
+void Axes::title(const std::string &title)
 {
   setTitleSignal(QString(title.c_str()));
   sem.wait();
 }
 
-void Axes::setXLabel(const std::string &label)
+void Axes::xlabel(const std::string &label)
 {
   setXLabelSignal(QString(label.c_str()));
   sem.wait();
 }
 
-void Axes::setYLabel(const std::string &label)
+void Axes::ylabel(const std::string &label)
 {
   setYLabelSignal(QString(label.c_str()));
   sem.wait();
 }
 
-void Axes::setLegend(const std::vector<std::string> &legend_labels)
+void Axes::legend(const std::vector<std::string> &legend_labels)
 {
   QVector<QString> qlegend_labels(legend_labels.size());
   for (int i=0; i<legend_labels.size(); i++) qlegend_labels[i] = legend_labels[i].c_str();
   setLegendSignal(qlegend_labels);
+  sem.wait();
+}
+
+void Axes::drawnow()
+{
+  drawnowSignal();
   sem.wait();
 }
 
@@ -224,12 +280,6 @@ void Axes::plotSlot(const void *x_data, const void *y_data)
   this->rescaleAxes();
 
   sem.notify();
-}
-
-void Axes::drawnow()
-{
-  drawnowSignal();
-  sem.wait();
 }
 
 void Axes::holdSlot(bool set)
@@ -299,9 +349,9 @@ void Axes::setLegendSlot(const QVector<QString> &legend_labels)
 
   for (int i=0; i<n_labels; i++) this->graph(i)->setName(legend_labels[i]);
 
-  this->legend->setVisible(true);
-  this->legend->setFont(QFont(font_family, fontsize, QFont::Normal));
-  this->legend->setBrush(QBrush(QColor(255,255,255,230)));
+  this->QCustomPlot::legend->setVisible(true);
+  this->QCustomPlot::legend->setFont(QFont(font_family, fontsize, QFont::Normal));
+  this->QCustomPlot::legend->setBrush(QBrush(QColor(255,255,255,230)));
   this->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom|Qt::AlignRight);
   sem.notify();
 }
@@ -346,7 +396,7 @@ Figure::Figure(QWidget *parent) : QMainWindow(parent)
 
 Figure::~Figure()
 {
-  std::cerr << "[Figure::~Figure]: deleting self...\n";
+   std::cerr << "[Figure::~Figure]: deleting self...\n";
   clearAxes();
   // delete grid_layout;
   QtPlot::fig_count--;
@@ -370,7 +420,9 @@ Axes *Figure::getAxes(int row, int col)
 void Figure::setAxes(int n1, int n2)
 {
   setAxesSignal(n1,n2);
+  std::cerr << "[Figure::setAxes]: Sem wait...\n";
   sem.wait();
+  std::cerr << "[Figure::setAxes]: Notified!\n";
 }
 
 void Figure::clearAxes(int k)
@@ -400,6 +452,7 @@ void Figure::setAxesSlot(int n1, int n2)
     }
   }
 
+  std::cerr << "[Figure::setAxesSlot]: Sending notification...\n";
   sem.notify();
 }
 
