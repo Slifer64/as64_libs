@@ -18,8 +18,9 @@ void Semaphore::notify()
 void Semaphore::wait()
 {
   std::unique_lock<decltype(mutex_)> lock(mutex_);
-  while(!count_) // Handle spurious wake-ups.
-    condition_.wait(lock);
+
+  // Handle spurious wake-ups.
+  while(!count_) condition_.wait(lock);
   // --count_;
   count_ = false;
 }

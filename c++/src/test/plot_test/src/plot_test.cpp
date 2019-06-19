@@ -35,10 +35,10 @@ int main(int argc, char** argv)
 
   // ===========  Init Qt plot  ==================
 
+  std::cerr << "file: " << __FILE__ << "\nfunction: " << __FUNCTION__ << "\nline: " << __LINE__ << "\n";
+
   std::cerr << "[main]: Calling init...\n";
-
   pl_::QtPlot::init();
-
   std::cerr << "[main]: Init DONE!\n";
 
   pl_::Figure *fig;
@@ -46,22 +46,15 @@ int main(int argc, char** argv)
   pl_::Graph *graph;
 
   // ===========  Plot data  ==================
-//   std::cerr << "[main]: Creating figure...\n";
   fig = pl_::QtPlot::figure();
-//  std::cerr << "[main]: Created figure!\n";
-
-//  std::cerr << "[main]: Creating axes...\n";
   fig->setAxes(3,1);
-//  std::cerr << "[main]: Creatied axes!\n";
 
   std::vector<std::string> py_labels = {"x", "y", "z"};
   for (int i=0; i<3; i++)
   {
     ax = fig->getAxes(i);
     ax->hold(true);
-//    std::cerr << "[main]: Plotting P_data " + i << "...\n";
     ax->plot(Time, P_data.row(i), pl_::Color_,pl_::BLUE, pl_::LineStyle_,pl_::SolidLine);
-//    std::cerr << "[main]: Plotting Pd_data " + i << "...\n";
     ax->plot(Timed, Pd_data.row(i), pl_::Color_,pl_::GREEN, pl_::LineStyle_,pl_::DashLine);
     // graph->setColor(pl_::GREEN);
     // graph->setLineStyle(pl_::DashLine);
@@ -72,12 +65,9 @@ int main(int argc, char** argv)
       ax->title("Cartesian Position [m]");
     }
     if (i==2) ax->xlabel("time [s]");
-//    std::cerr << "[main]: Drawing now...\n";
     ax->drawnow();
-//    std::cerr << "[main]: Drawn!\n";
   }
 
-  std::cerr << "[main]: Ok 46\n!\n";
 
   fig = pl_::QtPlot::figure();
   fig->setAxes(2,3);

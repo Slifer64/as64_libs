@@ -49,7 +49,7 @@ void QtPlot::init(QWidget *parent)
         delete (QtPlot_);
       }).detach();
 
-      sem.wait();
+       sem.wait();
     }
     else
     {
@@ -85,8 +85,6 @@ Figure *QtPlot::figure()
 
   Figure *fig;
   QtPlot::QtPlot_->figureSignal(&fig);
-  QtPlot::QtPlot_->sem.wait();
-  
   return fig;
 }
 
@@ -106,19 +104,17 @@ QtPlot::QtPlot(QWidget *parent)
   QtPlot::color[BLACK] = QColor(0, 0, 0);
   QtPlot::color[GREY] = QColor(200, 200, 200);
 
-  QObject::connect(this, SIGNAL(figureSignal(Figure **)), this, SLOT(figureSlot(Figure **)));
+  QObject::connect(this, SIGNAL(figureSignal(Figure **)), this, SLOT(figureSlot(Figure **)), Qt::BlockingQueuedConnection);
 }
 
 QtPlot::~QtPlot()
 {
-   std::cerr << "[QtPlot::~QtPlot]: deleting self...\n";
+   // std::cerr << "[QtPlot::~QtPlot]: deleting self...\n";
 }
 
 void QtPlot::figureSlot(Figure **fig)
 {
-  // qDebug() << "[QtPlot::figureSlot]: " << QThread::currentThread() << "\n";
   *fig = new Figure(this);
-  QtPlot::QtPlot_->sem.notify();
   QtPlot::fig_count++;
 }
 
@@ -133,14 +129,14 @@ Axes::Axes(Figure *parent): QCustomPlot(parent)
 
   qRegisterMetaType<QVector<QString>>("QVector<QString>");
 
-  QObject::connect(this, &Axes::holdSignal, this, &Axes::holdSlot);
-  QObject::connect(this, &Axes::gridSignal, this, &Axes::gridSlot);
-  QObject::connect(this, &Axes::setTitleSignal, this, &Axes::setTitleSlot);
-  QObject::connect(this, &Axes::setXLabelSignal, this, &Axes::setXLabelSlot);
-  QObject::connect(this, &Axes::setYLabelSignal, this, &Axes::setYLabelSlot);
-  QObject::connect(this, &Axes::setLegendSignal, this, &Axes::setLegendSlot);
-  QObject::connect(this, SIGNAL(plotSignal(const void *, const void *)), this, SLOT(plotSlot(const void *, const void *)) );
-  QObject::connect(this, &Axes::drawnowSignal, this, &Axes::drawnowSlot);
+  QObject::connect(this, &Axes::holdSignal, this, &Axes::holdSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Axes::gridSignal, this, &Axes::gridSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Axes::setTitleSignal, this, &Axes::setTitleSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Axes::setXLabelSignal, this, &Axes::setXLabelSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Axes::setYLabelSignal, this, &Axes::setYLabelSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Axes::setLegendSignal, this, &Axes::setLegendSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, SIGNAL(plotSignal(const void *, const void *)), this, SLOT(plotSlot(const void *, const void *)), Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Axes::drawnowSignal, this, &Axes::drawnowSlot, Qt::BlockingQueuedConnection);
 
   this->resize(667, 452);
 
@@ -154,8 +150,8 @@ Axes::Axes(Figure *parent): QCustomPlot(parent)
 
   color_ind = 0;
 
-  hold(false);
-  grid(false);
+  holdSlot(false);
+  gridSlot(false);
 
   this->show();
 }
@@ -169,13 +165,11 @@ Axes::~Axes()
 void Axes::hold(bool set)
 {
   holdSignal(set);
-  sem.wait();
 }
 
 void Axes::grid(bool set)
 {
   gridSignal(set);
-  sem.wait();
 }
 
 Graph *Axes::plot(const arma::vec &data)
@@ -200,7 +194,6 @@ Graph *Axes::plot(const arma::vec &x_data, const arma::vec &y_data)
   }
 
   plotSignal(reinterpret_cast<const void *>(&qx_data), reinterpret_cast<const void *>(&qy_data));
-  sem.wait();
 
   return last_graph;
 }
@@ -222,19 +215,16 @@ Graph *Axes::plot(const arma::rowvec &x_data, const arma::rowvec &y_data)
 void Axes::title(const std::string &title)
 {
   setTitleSignal(QString(title.c_str()));
-  sem.wait();
 }
 
 void Axes::xlabel(const std::string &label)
 {
   setXLabelSignal(QString(label.c_str()));
-  sem.wait();
 }
 
 void Axes::ylabel(const std::string &label)
 {
   setYLabelSignal(QString(label.c_str()));
-  sem.wait();
 }
 
 void Axes::legend(const std::vector<std::string> &legend_labels)
@@ -242,13 +232,11 @@ void Axes::legend(const std::vector<std::string> &legend_labels)
   QVector<QString> qlegend_labels(legend_labels.size());
   for (int i=0; i<legend_labels.size(); i++) qlegend_labels[i] = legend_labels[i].c_str();
   setLegendSignal(qlegend_labels);
-  sem.wait();
 }
 
 void Axes::drawnow()
 {
   drawnowSignal();
-  sem.wait();
 }
 
 void Axes::plotSlot(const void *x_data, const void *y_data)
@@ -269,42 +257,34 @@ void Axes::plotSlot(const void *x_data, const void *y_data)
 
   graphs.push_back( new Graph(graph, this) );
   last_graph = graphs.back();
-  last_graph->setColor(static_cast<Color>(color_ind));
+  last_graph->setColorSlot(static_cast<Color>(color_ind));
   color_ind = (color_ind+1)%QtPlot::N_COLORS;
-  last_graph->setLineStyle(SolidLine);
-  last_graph->setLineWidth(2.0);
-  last_graph->setMarkerStyle(ssDot);
-  last_graph->setMarkerSize(2.0);
+  last_graph->setLineStyleSlot(SolidLine);
+  last_graph->setLineWidthSlot(2.0);
+  last_graph->setMarkerStyleSlot(ssDot);
+  last_graph->setMarkerSizeSlot(2.0);
   //graph->setPen(QPen(QBrush(c), 2.0, Qt::SolidLine)); // line color blue for first graph
   // graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDot, 4)); // set marker type and size. The width is determined by the linewidth
   this->rescaleAxes();
-
-  sem.notify();
 }
 
 void Axes::holdSlot(bool set)
 {
-  // qDebug() << "[Axes::holdSlot]: " << QThread::currentThread() << "\n";
   hold_on = set;
-  sem.notify();
 }
 
 void Axes::gridSlot(bool set)
 {
-  // qDebug() << "[Axes::gridSlot]: " << QThread::currentThread() << "\n";
   this->xAxis->grid()->setVisible(set);
   this->yAxis->grid()->setVisible(set);
-  sem.notify();
 }
 
 void Axes::setTitleSlot(const QString &title)
 {
-  // qDebug() << "[Axes::setTitleSlot]: " << QThread::currentThread() << "\n";
   int fontsize = 16;
   QString font_family = "Arial";
   this->plotLayout()->insertRow(0);
   this->plotLayout()->addElement(0, 0, new QCPTextElement(this, title, QFont(font_family, fontsize, QFont::Normal)));
-  sem.notify();
 }
 
 void Axes::setXLabelSlot(const QString &label)
@@ -316,12 +296,10 @@ void Axes::setXLabelSlot(const QString &label)
   x_axis->setLabel(label);
   x_axis->setLabelColor(QColor(0,0,0));
   x_axis->setLabelFont(QFont(font_family, fontsize, QFont::Normal));
-  sem.notify();
 }
 
 void Axes::setYLabelSlot(const QString &label)
 {
-  // qDebug() << "[Axes::setYLabelSlot]: " << QThread::currentThread() << "\n";
   int fontsize = 14;
   QString font_family = "Arial";
 
@@ -329,7 +307,6 @@ void Axes::setYLabelSlot(const QString &label)
   y_axis->setLabel(label);
   y_axis->setLabelColor(QColor(0,0,0));
   y_axis->setLabelFont(QFont(font_family, fontsize, QFont::Normal));
-  sem.notify();
 }
 
 void Axes::setLegendSlot(const QVector<QString> &legend_labels)
@@ -353,22 +330,19 @@ void Axes::setLegendSlot(const QVector<QString> &legend_labels)
   this->QCustomPlot::legend->setFont(QFont(font_family, fontsize, QFont::Normal));
   this->QCustomPlot::legend->setBrush(QBrush(QColor(255,255,255,230)));
   this->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom|Qt::AlignRight);
-  sem.notify();
 }
 
 void Axes::drawnowSlot()
 {
-  // qDebug() << "[Axes::drawnowSlot]: " << QThread::currentThread() << "\n";
   this->replot();
-  sem.notify();
 }
 
 // ======================================================
 
 Figure::Figure(QWidget *parent) : QMainWindow(parent)
 {
-  QObject::connect(this, &Figure::setAxesSignal, this, &Figure::setAxesSlot);
-  QObject::connect(this, &Figure::clearAxesSignal, this, &Figure::clearAxesSlot);
+  QObject::connect(this, &Figure::setAxesSignal, this, &Figure::setAxesSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Figure::clearAxesSignal, this, &Figure::clearAxesSlot, Qt::BlockingQueuedConnection);
 
   // this->moveToThread( QApplication::instance()->thread() );
 
@@ -388,7 +362,7 @@ Figure::Figure(QWidget *parent) : QMainWindow(parent)
   this->setWindowTitle(QString("Figure ") + QString().setNum(QtPlot::fig_count+1));
   this->setAttribute(Qt::WA_QuitOnClose, true);
 
-  setAxes(1,1);
+  setAxesSlot(1,1);
 
   // this->setWindowTitle(QApplication::translate("PlotDialog", "Dialog", 0));
   show();
@@ -396,8 +370,8 @@ Figure::Figure(QWidget *parent) : QMainWindow(parent)
 
 Figure::~Figure()
 {
-   std::cerr << "[Figure::~Figure]: deleting self...\n";
-  clearAxes();
+  // std::cerr << "[Figure::~Figure]: deleting self...\n";
+  clearAxesSlot();
   // delete grid_layout;
   QtPlot::fig_count--;
 }
@@ -420,15 +394,11 @@ Axes *Figure::getAxes(int row, int col)
 void Figure::setAxes(int n1, int n2)
 {
   setAxesSignal(n1,n2);
-  std::cerr << "[Figure::setAxes]: Sem wait...\n";
-  sem.wait();
-  std::cerr << "[Figure::setAxes]: Notified!\n";
 }
 
 void Figure::clearAxes(int k)
 {
   clearAxesSignal(k);
-  sem.wait();
 }
 
 void Figure::setAxesSlot(int n1, int n2)
@@ -436,7 +406,7 @@ void Figure::setAxesSlot(int n1, int n2)
   this->n1 = n1;
   this->n2 = n2;
 
-  clearAxes();
+  clearAxesSlot();
   delete grid_layout;
   grid_layout = new QGridLayout(central_widget);
   // this->setLayout(grid_layout);
@@ -451,9 +421,6 @@ void Figure::setAxesSlot(int n1, int n2)
       grid_layout->addWidget(axes[k], i, j, 1, 1);
     }
   }
-
-  std::cerr << "[Figure::setAxesSlot]: Sending notification...\n";
-  sem.notify();
 }
 
 void Figure::clearAxesSlot(int k)
@@ -466,19 +433,17 @@ void Figure::clearAxesSlot(int k)
   {
     axes.erase(axes.begin()+k);
   }
-
-  sem.notify();
 }
 
 // =========================================================
 
 Graph::Graph(QCPGraph *qcp_graph, Axes *parent)
 {
-  QObject::connect(this, &Graph::setColorSignal, this, &Graph::setColorSlot);
-  QObject::connect(this, &Graph::setLineStyleSignal, this, &Graph::setLineStyleSlot);
-  QObject::connect(this, &Graph::setLineWidthSignal, this, &Graph::setLineWidthSlot);
-  QObject::connect(this, &Graph::setMarkerStyleSignal, this, &Graph::setMarkerStyleSlot);
-  QObject::connect(this, &Graph::setMarkerSizeSignal, this, &Graph::setMarkerSizeSlot);
+  QObject::connect(this, &Graph::setColorSignal, this, &Graph::setColorSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Graph::setLineStyleSignal, this, &Graph::setLineStyleSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Graph::setLineWidthSignal, this, &Graph::setLineWidthSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Graph::setMarkerStyleSignal, this, &Graph::setMarkerStyleSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Graph::setMarkerSizeSignal, this, &Graph::setMarkerSizeSlot, Qt::BlockingQueuedConnection);
 
   this->qcp_graph = qcp_graph;
 }
@@ -518,31 +483,26 @@ void Graph::setPropertyHelper(pl_::PROPERTY p, pl_::MarkerStyle p_value)
 void Graph::setColor(Color color)
 {
   setColorSignal(color);
-  sem.wait();
 }
 
 void Graph::setLineStyle(LineStyle style)
 {
   setLineStyleSignal(style);
-  sem.wait();
 }
 
 void Graph::setLineWidth(double width)
 {
   setLineWidthSignal(width);
-  sem.wait();
 }
 
 void Graph::setMarkerStyle(MarkerStyle type)
 {
   setMarkerStyleSignal(type);
-  sem.wait();
 }
 
 void Graph::setMarkerSize(double size)
 {
   setMarkerSizeSignal(size);
-  sem.wait();
 }
 
 void Graph::setColorSlot(int color)
@@ -550,8 +510,6 @@ void Graph::setColorSlot(int color)
   QPen pen = qcp_graph->pen();
   pen.setColor(QtPlot::getQColor(static_cast<Color>(color)));
   qcp_graph->setPen(pen);
-
-  sem.notify();
 }
 
 void Graph::setLineStyleSlot(int style)
@@ -567,8 +525,6 @@ void Graph::setLineStyleSlot(int style)
     pen.setStyle(static_cast<Qt::PenStyle>(style));
     qcp_graph->setPen(pen);
   }
-
-  sem.notify();
 }
 
 void Graph::setLineWidthSlot(double width)
@@ -576,8 +532,6 @@ void Graph::setLineWidthSlot(double width)
   QPen pen = qcp_graph->pen();
   pen.setWidth(width);
   qcp_graph->setPen(pen);
-
-  sem.notify();
 }
 
 void Graph::setMarkerStyleSlot(int type)
@@ -585,8 +539,6 @@ void Graph::setMarkerStyleSlot(int type)
   QCPScatterStyle marker = qcp_graph->scatterStyle();
   marker.setShape( static_cast<QCPScatterStyle::ScatterShape>(type));
   qcp_graph->setScatterStyle(marker);
-
-  sem.notify();
 }
 
 void Graph::setMarkerSizeSlot(double size)
@@ -594,8 +546,6 @@ void Graph::setMarkerSizeSlot(double size)
   QCPScatterStyle marker = qcp_graph->scatterStyle();
   marker.setSize(size);
   qcp_graph->setScatterStyle(marker);
-
-  sem.notify();
 }
 
 

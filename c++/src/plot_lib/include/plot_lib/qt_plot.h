@@ -100,6 +100,8 @@ class Graph : public QWidget {
 
 Q_OBJECT
 
+friend Axes;
+
 public:
   Graph(QCPGraph *qcp_graph, Axes *parent = 0);
 
@@ -155,8 +157,6 @@ private:
 
   Axes *parent;
   QCPGraph *qcp_graph;
-
-  Semaphore sem;
 };
 
 class Axes : public QCustomPlot {
@@ -252,8 +252,6 @@ private:
   int color_ind;
 
   Graph *last_graph;
-
-  Semaphore sem;
 };
 
 class Figure : public QMainWindow {
@@ -295,8 +293,6 @@ private:
   int n2;
 
   int getAxesIndex(int i, int j) { return j + i * n2; }
-
-  Semaphore sem;
 };
 
 class QtPlot : public QWidget {
@@ -329,7 +325,6 @@ private slots:
 
 private:
   static bool initialized;
-  Semaphore sem;
   static QtPlot *QtPlot_;
   static std::map<Color, QColor> color;
 };

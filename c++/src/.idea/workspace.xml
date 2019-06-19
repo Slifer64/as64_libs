@@ -10,22 +10,23 @@
       <config projectName="Project" targetName="robo_lib" />
       <config projectName="Project" targetName="geometry_msgs_generate_messages_cpp" />
       <config projectName="Project" targetName="bh282_robot_test" />
-      <config projectName="Project" targetName="dmp_lib" />
+      <config projectName="Project" targetName="math_lib" />
       <config projectName="Project" targetName="sensor_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="sim_DMP_Orient_EKF_disc" />
       <config projectName="Project" targetName="ppc_joint_limit_avoid_test" />
       <config projectName="Project" targetName="std_msgs_generate_messages_cpp" />
       <config projectName="Project" targetName="rosgraph_msgs_generate_messages_cpp" />
       <config projectName="Project" targetName="sensor_msgs_generate_messages_py" />
       <config projectName="Project" targetName="geometry_msgs_generate_messages_lisp" />
       <config projectName="Project" targetName="simDMP" />
-      <config projectName="Project" targetName="plot_lib" />
+      <config projectName="Project" targetName="term_color_test" />
       <config projectName="Project" targetName="singular_value_filter_test" />
       <config projectName="Project" targetName="lwr4p_bh282_robot_test" />
       <config projectName="Project" targetName="trainDMP" />
       <config projectName="Project" targetName="lwr4p" />
       <config projectName="Project" targetName="std_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="math_lib" />
+      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="dmp_pos_test" />
       <config projectName="Project" targetName="xml_parser_test" />
       <config projectName="Project" targetName="bhand" />
       <config projectName="Project" targetName="clean_test_results" />
@@ -34,22 +35,21 @@
       <config projectName="Project" targetName="plot_lib_autogen" />
       <config projectName="Project" targetName="misc_lib" />
       <config projectName="Project" targetName="doxygen" />
-      <config projectName="Project" targetName="multi_bh282_robots_test" />
+      <config projectName="Project" targetName="plot_lib" />
       <config projectName="Project" targetName="dmp_eo_test" />
       <config projectName="Project" targetName="file_io_test" />
       <config projectName="Project" targetName="io_lib" />
       <config projectName="Project" targetName="sim_DMP_Pos_EKF_disc" />
       <config projectName="Project" targetName="roscpp_generate_messages_cpp" />
       <config projectName="Project" targetName="sensor_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="std_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="dmp_lib" />
       <config projectName="Project" targetName="lwr4p_robot_test" />
       <config projectName="Project" targetName="run_tests" />
-      <config projectName="Project" targetName="dmp_pos_test" />
+      <config projectName="Project" targetName="std_msgs_generate_messages_py" />
       <config projectName="Project" targetName="tests" />
       <config projectName="Project" targetName="kf_lib" />
-      <config projectName="Project" targetName="sim_DMP_Orient_EKF_disc" />
-      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="term_color_test" />
+      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="multi_bh282_robots_test" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -61,6 +61,8 @@
     <list default="true" id="d1133b4c-b815-4a9a-94f7-a3e2e82abd3a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h" beforeDir="false" afterPath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot_lib/src/source_list/utils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/plot_lib/src/source_list/utils.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/plot_test/src/plot_test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/test/plot_test/src/plot_test.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -75,11 +77,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/plot_test/src/plot_test.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="990">
-              <caret line="87" column="16" selection-start-line="87" selection-start-column="16" selection-end-line="87" selection-end-column="16" />
+            <state relative-caret-position="550">
+              <caret line="40" column="22" lean-forward="true" selection-start-line="40" selection-start-column="22" selection-end-line="40" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -87,64 +89,86 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="402" column="1" lean-forward="true" selection-start-line="402" selection-start-column="1" selection-end-line="402" selection-end-column="1" />
+            <state relative-caret-position="372">
+              <caret line="21" column="34" selection-start-line="21" selection-start-column="34" selection-end-line="21" selection-end-column="34" />
               <folding>
-                <element signature="e#347#1399#0" />
-                <element signature="e#1270#1336#0" />
-                <element signature="e#1338#1437#0" />
-                <element signature="e#1439#1680#0" />
-                <element signature="e#1682#2411#0" />
-                <element signature="e#2544#2622#0" />
-                <element signature="e#2493#2696#0" />
-                <element signature="e#2763#4109#0" />
-                <element signature="e#4111#4203#0" />
-                <element signature="e#4205#4267#0" />
-                <element signature="e#4269#4331#0" />
-                <element signature="e#4333#4490#0" />
-                <element signature="e#4492#5014#0" />
-                <element signature="e#5016#5115#0" />
-                <element signature="e#5117#5295#0" />
-                <element signature="e#5881#7036#0" />
-                <element signature="e#7097#7238#0" />
-                <element signature="e#7240#7444#0" />
-                <element signature="e#7446#7798#0" />
-                <element signature="e#7800#8169#0" />
-                <element signature="e#8171#8541#0" />
-                <element signature="e#8543#9327#0" />
-                <element signature="e#9329#9469#0" />
-                <element signature="e#10513#10654#0" />
-                <element signature="e#10656#10718#0" />
-                <element signature="e#10720#10770#0" />
-                <element signature="e#10772#10844#0" />
-                <element signature="e#10926#10995#0" />
-                <element signature="e#11425#11599#0" />
-                <element signature="e#11663#12174#0" />
-                <element signature="e#12176#12196#0" />
-                <element signature="e#12228#12431#0" />
-                <element signature="e#12433#12714#0" />
-                <element signature="e#12716#12935#0" />
-                <element signature="e#12937#13164#0" />
-                <element signature="e#13166#13242#0" />
-                <element signature="e#13244#13332#0" />
-                <element signature="e#13334#13419#0" />
-                <element signature="e#13421#13513#0" />
-                <element signature="e#13515#13600#0" />
-                <element signature="e#13602#13777#0" />
-                <element signature="e#13779#14092#0" />
-                <element signature="e#14094#14237#0" />
-                <element signature="e#14239#14462#0" />
-                <element signature="e#14464#14643#0" />
+                <element signature="e#347#1743#0" />
+                <element signature="e#1745#1811#0" />
+                <element signature="e#1813#1912#0" />
+                <element signature="e#1914#2158#0" />
+                <element signature="e#2160#2919#0" />
+                <element signature="e#2921#2999#0" />
+                <element signature="e#3001#3207#0" />
+                <element signature="e#3274#4859#0" />
+                <element signature="e#4861#4953#0" />
+                <element signature="e#4955#5020#0" />
+                <element signature="e#5022#5087#0" />
+                <element signature="e#5089#5246#0" />
+                <element signature="e#5248#5773#0" />
+                <element signature="e#5775#5874#0" />
+                <element signature="e#5876#6054#0" />
+                <element signature="e#6057#6162#0" />
+                <element signature="e#6164#6271#0" />
+                <element signature="e#6273#6380#0" />
+                <element signature="e#6382#6650#0" />
+                <element signature="e#6652#6712#0" />
+                <element signature="e#6714#7872#0" />
+                <element signature="e#7874#8018#0" />
+                <element signature="e#7644#7851#0" />
+                <element signature="e#8229#8584#0" />
+                <element signature="e#8586#8958#0" />
+                <element signature="e#8960#9333#0" />
+                <element signature="e#9335#10122#0" />
+                <element signature="e#10124#10267#0" />
+                <element signature="e#10328#11369#0" />
+                <element signature="e#11371#11512#0" />
+                <element signature="e#11514#11576#0" />
+                <element signature="e#11578#11628#0" />
+                <element signature="e#11630#11702#0" />
+                <element signature="e#11704#11888#0" />
+                <element signature="e#11890#12013#0" />
+                <element signature="e#12015#12511#0" />
+                <element signature="e#12513#12690#0" />
+                <element signature="e#12754#13415#0" />
+                <element signature="e#13417#13437#0" />
+                <element signature="e#13469#13672#0" />
+                <element signature="e#13674#13955#0" />
+                <element signature="e#13957#14176#0" />
+                <element signature="e#14178#14405#0" />
+                <element signature="e#14407#14486#0" />
+                <element signature="e#14488#14579#0" />
+                <element signature="e#14581#14669#0" />
+                <element signature="e#14671#14766#0" />
+                <element signature="e#14768#14856#0" />
+                <element signature="e#14858#15036#0" />
+                <element signature="e#15038#15354#0" />
+                <element signature="e#15356#15502#0" />
+                <element signature="e#15504#15730#0" />
+                <element signature="e#15732#15914#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/utils.h">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/plot_lib/src/source_list/utils.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="242">
+              <caret line="11" column="26" selection-start-line="11" selection-start-column="18" selection-end-line="11" selection-end-column="26" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="857">
-              <caret line="303" lean-forward="true" selection-start-line="303" selection-end-line="303" />
+            <state relative-caret-position="277">
+              <caret line="315" lean-forward="true" selection-start-line="315" selection-end-line="315" />
             </state>
           </provider>
         </entry>
@@ -155,9 +179,17 @@
     <findStrings>
       <find>io_test</find>
       <find>closeEvent</find>
+      <find>legend</find>
+      <find>::connect</find>
+      <find>sem.</find>
+      <find>std::cerr</find>
+      <find>Semaphore</find>
+      <find>sem</find>
     </findStrings>
     <replaceStrings>
       <replace>plot_test</replace>
+      <replace>// sem.</replace>
+      <replace>// Semaphore</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -169,6 +201,7 @@
         <option value="$PROJECT_DIR$/test/plot_test/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/test/plot_test/package.xml" />
         <option value="$PROJECT_DIR$/test/plot_test/launch/plot_test.launch" />
+        <option value="$PROJECT_DIR$/plot_lib/src/source_list/utils.cpp" />
         <option value="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h" />
         <option value="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" />
         <option value="$PROJECT_DIR$/test/plot_test/src/plot_test.cpp" />
@@ -194,7 +227,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -219,6 +251,19 @@
               <item name="plot_lib" type="462c0819:PsiDirectoryNode" />
               <item name="include" type="462c0819:PsiDirectoryNode" />
               <item name="plot_lib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="plot_lib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="src" type="b2602c69:ProjectViewProjectNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="plot_lib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="source_list" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="src" type="b2602c69:ProjectViewProjectNode" />
@@ -256,10 +301,12 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -519,54 +566,54 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="CMake Application._catkin_empty_exported_target" />
+      <item itemvalue="CMake Application.bh282_robot_test" />
+      <item itemvalue="CMake Application.bhand" />
       <item itemvalue="CMake Application.clean_test_results" />
+      <item itemvalue="CMake Application.dmp_eo_test" />
+      <item itemvalue="CMake Application.dmp_lib" />
+      <item itemvalue="CMake Application.dmp_pos_test" />
+      <item itemvalue="CMake Application.dmp_test" />
       <item itemvalue="CMake Application.download_extra_data" />
       <item itemvalue="CMake Application.doxygen" />
-      <item itemvalue="CMake Application.run_tests" />
-      <item itemvalue="CMake Application.tests" />
-      <item itemvalue="CMake Application._catkin_empty_exported_target" />
-      <item itemvalue="CMake Application.dmp_lib" />
-      <item itemvalue="CMake Application.io_lib" />
-      <item itemvalue="CMake Application.kf_lib" />
-      <item itemvalue="CMake Application.math_lib" />
-      <item itemvalue="CMake Application.misc_lib" />
-      <item itemvalue="CMake Application.plot_lib" />
-      <item itemvalue="CMake Application.plot_lib_autogen" />
-      <item itemvalue="CMake Application.robo_lib" />
-      <item itemvalue="CMake Application.bhand" />
+      <item itemvalue="CMake Application.file_io_test" />
       <item itemvalue="CMake Application.geometry_msgs_generate_messages_cpp" />
       <item itemvalue="CMake Application.geometry_msgs_generate_messages_lisp" />
       <item itemvalue="CMake Application.geometry_msgs_generate_messages_py" />
+      <item itemvalue="CMake Application.io_lib" />
+      <item itemvalue="CMake Application.kf_lib" />
+      <item itemvalue="CMake Application.lwr4p" />
+      <item itemvalue="CMake Application.lwr4p_bh282_robot_test" />
+      <item itemvalue="CMake Application.lwr4p_robot_test" />
+      <item itemvalue="CMake Application.math_lib" />
+      <item itemvalue="CMake Application.misc_lib" />
+      <item itemvalue="CMake Application.multi_bh282_robots_test" />
+      <item itemvalue="CMake Application.multi_lwr4p_robots_test" />
+      <item itemvalue="CMake Application.plot_lib" />
+      <item itemvalue="CMake Application.plot_lib_autogen" />
+      <item itemvalue="CMake Application.ppc_joint_limit_avoid_test" />
+      <item itemvalue="CMake Application.robo_lib" />
       <item itemvalue="CMake Application.roscpp_generate_messages_cpp" />
       <item itemvalue="CMake Application.roscpp_generate_messages_lisp" />
       <item itemvalue="CMake Application.roscpp_generate_messages_py" />
       <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_cpp" />
       <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_lisp" />
       <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_py" />
+      <item itemvalue="CMake Application.run_tests" />
       <item itemvalue="CMake Application.sensor_msgs_generate_messages_cpp" />
       <item itemvalue="CMake Application.sensor_msgs_generate_messages_lisp" />
       <item itemvalue="CMake Application.sensor_msgs_generate_messages_py" />
+      <item itemvalue="CMake Application.simDMP" />
+      <item itemvalue="CMake Application.sim_DMP_Orient_EKF_disc" />
+      <item itemvalue="CMake Application.sim_DMP_Pos_EKF_disc" />
+      <item itemvalue="CMake Application.singular_value_filter_test" />
       <item itemvalue="CMake Application.std_msgs_generate_messages_cpp" />
       <item itemvalue="CMake Application.std_msgs_generate_messages_lisp" />
       <item itemvalue="CMake Application.std_msgs_generate_messages_py" />
-      <item itemvalue="CMake Application.lwr4p" />
-      <item itemvalue="CMake Application.bh282_robot_test" />
-      <item itemvalue="CMake Application.multi_bh282_robots_test" />
-      <item itemvalue="CMake Application.sim_DMP_Orient_EKF_disc" />
-      <item itemvalue="CMake Application.sim_DMP_Pos_EKF_disc" />
-      <item itemvalue="CMake Application.simDMP" />
-      <item itemvalue="CMake Application.trainDMP" />
-      <item itemvalue="CMake Application.dmp_eo_test" />
-      <item itemvalue="CMake Application.dmp_pos_test" />
-      <item itemvalue="CMake Application.dmp_test" />
-      <item itemvalue="CMake Application.file_io_test" />
       <item itemvalue="CMake Application.term_color_test" />
+      <item itemvalue="CMake Application.tests" />
+      <item itemvalue="CMake Application.trainDMP" />
       <item itemvalue="CMake Application.xml_parser_test" />
-      <item itemvalue="CMake Application.lwr4p_bh282_robot_test" />
-      <item itemvalue="CMake Application.lwr4p_robot_test" />
-      <item itemvalue="CMake Application.multi_lwr4p_robots_test" />
-      <item itemvalue="CMake Application.ppc_joint_limit_avoid_test" />
-      <item itemvalue="CMake Application.singular_value_filter_test" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -581,17 +628,18 @@
       <updated>1560593307364</updated>
       <workItem from="1560593308990" duration="5566000" />
       <workItem from="1560601175164" duration="4187000" />
+      <workItem from="1560964562898" duration="5143000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9753000" />
+    <option name="totallyTimeSpent" value="14896000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1983" y="24" width="1850" height="1056" extended-state="4" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25277162" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25554323" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -637,71 +685,89 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/utils.h">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plot_lib/src/source_list/utils.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="11" column="26" selection-start-line="11" selection-start-column="18" selection-end-line="11" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="315" lean-forward="true" selection-start-line="315" selection-end-line="315" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="402" column="1" lean-forward="true" selection-start-line="402" selection-start-column="1" selection-end-line="402" selection-end-column="1" />
+        <state relative-caret-position="372">
+          <caret line="21" column="34" selection-start-line="21" selection-start-column="34" selection-end-line="21" selection-end-column="34" />
           <folding>
-            <element signature="e#347#1399#0" />
-            <element signature="e#1270#1336#0" />
-            <element signature="e#1338#1437#0" />
-            <element signature="e#1439#1680#0" />
-            <element signature="e#1682#2411#0" />
-            <element signature="e#2544#2622#0" />
-            <element signature="e#2493#2696#0" />
-            <element signature="e#2763#4109#0" />
-            <element signature="e#4111#4203#0" />
-            <element signature="e#4205#4267#0" />
-            <element signature="e#4269#4331#0" />
-            <element signature="e#4333#4490#0" />
-            <element signature="e#4492#5014#0" />
-            <element signature="e#5016#5115#0" />
-            <element signature="e#5117#5295#0" />
-            <element signature="e#5881#7036#0" />
-            <element signature="e#7097#7238#0" />
-            <element signature="e#7240#7444#0" />
-            <element signature="e#7446#7798#0" />
-            <element signature="e#7800#8169#0" />
-            <element signature="e#8171#8541#0" />
-            <element signature="e#8543#9327#0" />
-            <element signature="e#9329#9469#0" />
-            <element signature="e#10513#10654#0" />
-            <element signature="e#10656#10718#0" />
-            <element signature="e#10720#10770#0" />
-            <element signature="e#10772#10844#0" />
-            <element signature="e#10926#10995#0" />
-            <element signature="e#11425#11599#0" />
-            <element signature="e#11663#12174#0" />
-            <element signature="e#12176#12196#0" />
-            <element signature="e#12228#12431#0" />
-            <element signature="e#12433#12714#0" />
-            <element signature="e#12716#12935#0" />
-            <element signature="e#12937#13164#0" />
-            <element signature="e#13166#13242#0" />
-            <element signature="e#13244#13332#0" />
-            <element signature="e#13334#13419#0" />
-            <element signature="e#13421#13513#0" />
-            <element signature="e#13515#13600#0" />
-            <element signature="e#13602#13777#0" />
-            <element signature="e#13779#14092#0" />
-            <element signature="e#14094#14237#0" />
-            <element signature="e#14239#14462#0" />
-            <element signature="e#14464#14643#0" />
+            <element signature="e#347#1743#0" />
+            <element signature="e#1745#1811#0" />
+            <element signature="e#1813#1912#0" />
+            <element signature="e#1914#2158#0" />
+            <element signature="e#2160#2919#0" />
+            <element signature="e#2921#2999#0" />
+            <element signature="e#3001#3207#0" />
+            <element signature="e#3274#4859#0" />
+            <element signature="e#4861#4953#0" />
+            <element signature="e#4955#5020#0" />
+            <element signature="e#5022#5087#0" />
+            <element signature="e#5089#5246#0" />
+            <element signature="e#5248#5773#0" />
+            <element signature="e#5775#5874#0" />
+            <element signature="e#5876#6054#0" />
+            <element signature="e#6057#6162#0" />
+            <element signature="e#6164#6271#0" />
+            <element signature="e#6273#6380#0" />
+            <element signature="e#6382#6650#0" />
+            <element signature="e#6652#6712#0" />
+            <element signature="e#6714#7872#0" />
+            <element signature="e#7874#8018#0" />
+            <element signature="e#7644#7851#0" />
+            <element signature="e#8229#8584#0" />
+            <element signature="e#8586#8958#0" />
+            <element signature="e#8960#9333#0" />
+            <element signature="e#9335#10122#0" />
+            <element signature="e#10124#10267#0" />
+            <element signature="e#10328#11369#0" />
+            <element signature="e#11371#11512#0" />
+            <element signature="e#11514#11576#0" />
+            <element signature="e#11578#11628#0" />
+            <element signature="e#11630#11702#0" />
+            <element signature="e#11704#11888#0" />
+            <element signature="e#11890#12013#0" />
+            <element signature="e#12015#12511#0" />
+            <element signature="e#12513#12690#0" />
+            <element signature="e#12754#13415#0" />
+            <element signature="e#13417#13437#0" />
+            <element signature="e#13469#13672#0" />
+            <element signature="e#13674#13955#0" />
+            <element signature="e#13957#14176#0" />
+            <element signature="e#14178#14405#0" />
+            <element signature="e#14407#14486#0" />
+            <element signature="e#14488#14579#0" />
+            <element signature="e#14581#14669#0" />
+            <element signature="e#14671#14766#0" />
+            <element signature="e#14768#14856#0" />
+            <element signature="e#14858#15036#0" />
+            <element signature="e#15038#15354#0" />
+            <element signature="e#15356#15502#0" />
+            <element signature="e#15504#15730#0" />
+            <element signature="e#15732#15914#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/plot_test/src/plot_test.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="990">
-          <caret line="87" column="16" selection-start-line="87" selection-start-column="16" selection-end-line="87" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="857">
-          <caret line="303" lean-forward="true" selection-start-line="303" selection-end-line="303" />
+        <state relative-caret-position="550">
+          <caret line="40" column="22" lean-forward="true" selection-start-line="40" selection-start-column="22" selection-end-line="40" selection-end-column="22" />
         </state>
       </provider>
     </entry>
