@@ -248,6 +248,8 @@ Axes::Axes(Figure *parent): QCustomPlot(parent)
 
   legend_ = new Legend(this->QCustomPlot::legend, this);
   title_ = 0;
+  x_ax_label = new AxisLabel(this->xAxis);
+  y_ax_label = new AxisLabel(this->yAxis);
 
   qRegisterMetaType<QVector<QString>>("QVector<QString>");
 
@@ -339,14 +341,16 @@ TextLabel *Axes::title(const std::string &title_text)
   return this->title_;
 }
 
-void Axes::xlabel(const std::string &label)
+AxisLabel *Axes::xlabel(const std::string &label)
 {
   setXLabelSignal(QString(label.c_str()));
+  return x_ax_label;
 }
 
-void Axes::ylabel(const std::string &label)
+AxisLabel *Axes::ylabel(const std::string &label)
 {
   setYLabelSignal(QString(label.c_str()));
+  return y_ax_label;
 }
 
 Legend *Axes::legend(const std::vector<std::string> &legend_labels)
@@ -416,24 +420,15 @@ void Axes::setTitleSlot(const QString &title)
 
 void Axes::setXLabelSlot(const QString &label)
 {
-  // qDebug() << "[Axes::setXLabelSlot]: " << QThread::currentThread() << "\n";
-  int fontsize = 14;
-  QString font_family = "Arial";
-  QCPAxis *x_axis = this->xAxis;
-  x_axis->setLabel(label);
-  x_axis->setLabelColor(QColor(0,0,0));
-  x_axis->setLabelFont(QFont(font_family, fontsize, QFont::Normal));
+  x_ax_label->setTextSlot(label);
+  x_ax_label->setColorSlot(QColor(0,0,0));
+  // x_axis->setLabelFont(QFont(font_family, fontsize, QFont::Normal));
 }
 
 void Axes::setYLabelSlot(const QString &label)
 {
-  int fontsize = 14;
-  QString font_family = "Arial";
-
-  QCPAxis *y_axis = this->yAxis;
-  y_axis->setLabel(label);
-  y_axis->setLabelColor(QColor(0,0,0));
-  y_axis->setLabelFont(QFont(font_family, fontsize, QFont::Normal));
+  y_ax_label->setTextSlot(label);
+  y_ax_label->setColorSlot(QColor(0,0,0));
 }
 
 void Axes::setLegendSlot(const QVector<QString> &legend_labels)
@@ -746,6 +741,116 @@ void Legend::setPropertyHelper(pl_::PROPERTY p, FontWeight p_value)
 {
   if (p == pl_::FontWeight_) setFontWeight(p_value);
   else std::cerr << "[Legend::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+
+// ===============================================
+// =============   Axis Label   ==================
+// ===============================================
+
+AxisLabel::AxisLabel(QCPAxis *qcp_axis)
+{
+  this->qcp_axis = qcp_axis;
+
+  QObject::connect(this, &AxisLabel::setTextSignal, this, &AxisLabel::setTextSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &AxisLabel::setColorSignal, this, &AxisLabel::setColorSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &AxisLabel::setFontSizeSignal, this, &AxisLabel::setFontSizeSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &AxisLabel::setFontFamilySignal, this, &AxisLabel::setFontFamilySlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &AxisLabel::setFontWeightSignal, this, &AxisLabel::setFontWeightSlot, Qt::BlockingQueuedConnection);
+
+}
+
+void AxisLabel::setText(const std::string &s)
+{
+  setTextSignal(QString(s.c_str()));
+}
+
+void AxisLabel::setColor(Color c)
+{
+  setColor(QtPlot::getQColor(static_cast<Color>(c)));
+}
+
+void AxisLabel::setColor(const QColor &c)
+{
+  setColorSignal(c);
+}
+
+void AxisLabel::setFontSize(int size)
+{
+  setFontSizeSignal(size);
+}
+
+void AxisLabel::setFontFamily(const std::string &family)
+{
+  setFontFamilySignal(QString(family.c_str()));
+}
+
+void AxisLabel::setFontWeight(FontWeight fweight)
+{
+  setFontWeightSignal(fweight);
+}
+
+void AxisLabel::setProperty() {}
+
+void AxisLabel::setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value)
+{
+  if (p == pl_::Color_) setColor(p_value);
+  else std::cerr << "[AxisLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void AxisLabel::setPropertyHelper(pl_::PROPERTY p, const QColor &p_value)
+{
+  if (p == pl_::Color_) setColor(p_value);
+  else std::cerr << "[AxisLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void AxisLabel::setPropertyHelper(pl_::PROPERTY p, int p_value)
+{
+  if (p == pl_::FontSize_) setFontSize(p_value);
+  else std::cerr << "[AxisLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void AxisLabel::setPropertyHelper(pl_::PROPERTY p, const std::string &p_value)
+{
+  if (p == pl_::FontFamily_) setFontFamily(p_value);
+  else std::cerr << "[AxisLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void AxisLabel::setPropertyHelper(pl_::PROPERTY p, FontWeight p_value)
+{
+  if (p == pl_::FontWeight_) setFontWeight(p_value);
+  else std::cerr << "[AxisLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void AxisLabel::setTextSlot(const QString &s)
+{
+  qcp_axis->setLabel(s);
+}
+
+void AxisLabel::setColorSlot(const QColor &c)
+{
+  qcp_axis->setLabelColor(c);
+}
+
+void AxisLabel::setFontSizeSlot(int size)
+{
+  QFont font = qcp_axis->labelFont();
+  font.setPointSize(size);
+  qcp_axis->setLabelFont(font);
+}
+
+void AxisLabel::setFontFamilySlot(const QString &family)
+{
+  QFont font = qcp_axis->labelFont();
+  font.setFamily(family);
+  qcp_axis->setLabelFont(font);
+}
+
+void AxisLabel::setFontWeightSlot(FontWeight fweight)
+{
+  QFont font = qcp_axis->labelFont();
+  font.setWeight(fweight);
+  qcp_axis->setLabelFont(font);
 }
 
 

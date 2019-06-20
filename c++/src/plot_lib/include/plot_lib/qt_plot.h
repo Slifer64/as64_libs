@@ -97,73 +97,6 @@ enum FontWeight {
 };
 
 
-// ==========================================
-// =============   Legend  ==================
-// ==========================================
-
-class Legend : public QWidget
-{
-
-Q_OBJECT
-
-friend Axes;
-
-public:
-  Legend(QCPLegend *qcp_legend, Axes *axes);
-
-  template<typename T, typename... Arguments>
-  void setProperty(PROPERTY p, T p_value, Arguments... parameters)
-  {
-    setPropertyHelper(p, p_value);
-    setProperty(parameters...);
-  }
-
-  void setLabels(const std::vector<std::string> &labels);
-
-  void setColor(Color c);
-  void setColor(const QColor &c);
-  void setFontSize(int size);
-  void setFontFamily(const std::string &family);
-  void setFontWeight(FontWeight fweight);
-  void setVisible(bool set);
-  void setBgColor(const QColor &color);
-  void setAlignment(Qt::Alignment alignment);
-
-signals:
-  void setLabelsSignal(const QVector<QString> &labels);
-  void setColorSignal(const QColor &c);
-  void setFontSizeSignal(int size);
-  void setFontFamilySignal(const QString &family);
-  void setFontWeightSignal(FontWeight fweight);
-
-  void setVisibleSignal(bool set);
-  void setBgColorSignal(const QColor &color);
-  void setAlignmentSignal(Qt::Alignment alignment);
-
-private slots:
-  void setLabelsSlot(const QVector<QString> &labels);
-  void setColorSlot(const QColor &c);
-  void setFontSizeSlot(int size);
-  void setFontFamilySlot(const QString &family);
-  void setFontWeightSlot(FontWeight fweight);
-
-  void setVisibleSlot(bool set);
-  void setBgColorSlot(const QColor &color);
-  void setAlignmentSlot(Qt::Alignment alignment);
-
-private:
-  void setProperty();
-  void setPropertyHelper(PROPERTY p, Color p_value);
-  void setPropertyHelper(pl_::PROPERTY p, const QColor &p_value);
-  void setPropertyHelper(PROPERTY p, int p_value);
-  void setPropertyHelper(PROPERTY p, const std::string &p_value);
-  void setPropertyHelper(PROPERTY p, FontWeight p_value);
-
-  QCPLegend *qcp_legend;
-  Axes *axes;
-};
-
-
 // ===============================================
 // =============   Text Label   ==================
 // ===============================================
@@ -215,6 +148,133 @@ private:
   QCPTextElement *qcp_text;
 };
 
+
+// ===============================================
+// =============   Axis Label   ==================
+// ===============================================
+
+class AxisLabel : public QWidget
+{
+
+Q_OBJECT
+
+friend Axes;
+
+public:
+  AxisLabel(QCPAxis *qcp_axis);
+
+  template<typename T, typename... Arguments>
+  void setProperty(PROPERTY p, T p_value, Arguments... parameters)
+  {
+    setPropertyHelper(p, p_value);
+    setProperty(parameters...);
+  }
+
+  void setText(const std::string &s);
+  void setColor(Color c);
+  void setColor(const QColor &c);
+  void setFontSize(int size);
+  void setFontFamily(const std::string &family);
+  void setFontWeight(FontWeight fweight);
+
+signals:
+  void setTextSignal(const QString &s);
+  void setColorSignal(const QColor &c);
+  void setFontSizeSignal(int size);
+  void setFontFamilySignal(const QString &family);
+  void setFontWeightSignal(FontWeight fweight);
+
+private slots:
+  void setTextSlot(const QString &s);
+  void setColorSlot(const QColor &c);
+  void setFontSizeSlot(int size);
+  void setFontFamilySlot(const QString &family);
+  void setFontWeightSlot(FontWeight fweight);
+
+private:
+  void setProperty();
+  void setPropertyHelper(PROPERTY p, Color p_value);
+  void setPropertyHelper(pl_::PROPERTY p, const QColor &p_value);
+  void setPropertyHelper(PROPERTY p, int p_value);
+  void setPropertyHelper(PROPERTY p, const std::string &p_value);
+  void setPropertyHelper(PROPERTY p, FontWeight p_value);
+
+  QCPAxis *qcp_axis;
+};
+
+
+// ==========================================
+// =============   Legend  ==================
+// ==========================================
+
+class Legend : public QWidget
+{
+
+Q_OBJECT
+
+  friend Axes;
+
+public:
+  Legend(QCPLegend *qcp_legend, Axes *axes);
+
+  template<typename T, typename... Arguments>
+  void setProperty(PROPERTY p, T p_value, Arguments... parameters)
+  {
+    setPropertyHelper(p, p_value);
+    setProperty(parameters...);
+  }
+
+  void setLabels(const std::vector<std::string> &labels);
+
+  void setColor(Color c);
+  void setColor(const QColor &c);
+  void setFontSize(int size);
+  void setFontFamily(const std::string &family);
+  void setFontWeight(FontWeight fweight);
+
+  void setVisible(bool set);
+  void setBgColor(const QColor &color);
+  void setAlignment(Qt::Alignment alignment);
+
+//  void setColor(Color c, int i);
+//  void setColor(const QColor &c, int i);
+//  void setFontSize(int size, int i);
+//  void setFontFamily(const std::string &family, int i);
+//  void setFontWeight(FontWeight fweight, int i);
+
+signals:
+  void setLabelsSignal(const QVector<QString> &labels);
+  void setColorSignal(const QColor &c);
+  void setFontSizeSignal(int size);
+  void setFontFamilySignal(const QString &family);
+  void setFontWeightSignal(FontWeight fweight);
+
+  void setVisibleSignal(bool set);
+  void setBgColorSignal(const QColor &color);
+  void setAlignmentSignal(Qt::Alignment alignment);
+
+private slots:
+  void setLabelsSlot(const QVector<QString> &labels);
+  void setColorSlot(const QColor &c);
+  void setFontSizeSlot(int size);
+  void setFontFamilySlot(const QString &family);
+  void setFontWeightSlot(FontWeight fweight);
+
+  void setVisibleSlot(bool set);
+  void setBgColorSlot(const QColor &color);
+  void setAlignmentSlot(Qt::Alignment alignment);
+
+private:
+  void setProperty();
+  void setPropertyHelper(PROPERTY p, Color p_value);
+  void setPropertyHelper(pl_::PROPERTY p, const QColor &p_value);
+  void setPropertyHelper(PROPERTY p, int p_value);
+  void setPropertyHelper(PROPERTY p, const std::string &p_value);
+  void setPropertyHelper(PROPERTY p, FontWeight p_value);
+
+  QCPLegend *qcp_legend;
+  Axes *axes;
+};
 
 // ==========================================
 // =============   Graph   ==================
@@ -338,9 +398,25 @@ public:
 
   TextLabel *title(const std::string &title_text);
 
-  void xlabel(const std::string &label);
+  AxisLabel *xlabel(const std::string &label);
 
-  void ylabel(const std::string &label);
+  template<typename... Arguments>
+  AxisLabel *xlabel(const std::string &label, Arguments... properties)
+  {
+    AxisLabel *axis_label = this->xlabel(label);
+    axis_label->setProperty(properties...);
+    return axis_label;
+  }
+
+  AxisLabel *ylabel(const std::string &label);
+
+  template<typename... Arguments>
+  AxisLabel *ylabel(const std::string &label, Arguments... properties)
+  {
+    AxisLabel *axis_label = this->ylabel(label);
+    axis_label->setProperty(properties...);
+    return axis_label;
+  }
 
   template<typename... Arguments>
   Legend *legend(const std::vector<std::string> &legend_labels, Arguments... properties)
@@ -404,6 +480,8 @@ private:
   Graph *last_graph;
   TextLabel *title_;
   Legend *legend_;
+  AxisLabel *x_ax_label;
+  AxisLabel *y_ax_label;
 };
 
 // ===========================================

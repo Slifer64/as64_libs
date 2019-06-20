@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     ax->plot(Timed, Pd_data.row(i), pl_::Color_,pl_::GREEN, pl_::LineStyle_,pl_::DashLine);
     // graph->setColor(pl_::GREEN);
     // graph->setLineStyle(pl_::DashLine);
-    ax->ylabel(py_labels[i]);
+    ax->ylabel(py_labels[i], pl_::FontSize_,14);
     if (i==0)
     {
       pl_::Legend *legend_elem = ax->legend({"sim", "demo"}, pl_::Color_,QColor(40,120,200), pl_::FontSize_,15, pl_::FontWeight_,pl_::DemiBold, pl_::FontFamily_,std::string("Ubuntu"));
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
       // title_label->setText("Cartesian Position [m]");
       // title_label->setProperty(pl_::Color_,QColor(250,50,80), pl_::FontSize_,20, pl_::FontWeight_,pl_::Bold, pl_::FontFamily_,std::string("Ubuntu"));
     }
-    if (i==2) ax->xlabel("time [s]");
+    if (i==2) ax->xlabel("time [s]", pl_::FontSize_,14);
     ax->drawnow();
   }
 
