@@ -53,7 +53,7 @@ void QtPlot::init(QWidget *parent)
     }
     else
     {
-      if (QCoreApplication::instance()->thread()->currentThreadId() != QThread::currentThread())
+      if (QCoreApplication::instance()->thread()->currentThreadId() != QThread::currentThread()->currentThreadId())
       {
         throw std::runtime_error("[QtPlot::init]: Must be called from the QApplication thread!");
       }
@@ -65,7 +65,7 @@ void QtPlot::init(QWidget *parent)
   }
   else
   {
-    std::cerr << "\033[1m" << "\033[33m" << "[WARNING]: QtPlot has already been initialized!\033[0m";
+    std::cerr << "\033[1m" << "\033[33m" << "[WARNING]: QtPlot has already been initialized!\033[0m\n";
   }
 }
 

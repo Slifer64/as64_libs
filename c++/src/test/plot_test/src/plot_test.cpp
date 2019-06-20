@@ -6,19 +6,66 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <thread>
+#include <condition_variable>
+#include <mutex>
 #include <signal.h>
 
 #include <plot_lib/qt_plot.h>
 
 using namespace as64_;
 
+std::condition_variable qt_init_cond;
+bool qt_init_flag;
+std::mutex qt_init_mtx;
+
+void runQTthread()
+{
+  int argc = 0;
+  char **argv = 0;
+  QApplication app(argc, argv);
+  QThread::currentThread()->setPriority(QThread::LowestPriority);
+  app.setQuitOnLastWindowClosed(false);
+  //QMainWindow *win = new QMainWindow();
+  //win->setVisible(false);
+
+  pl_::QtPlot::init();
+
+  {
+    std::lock_guard<std::mutex> lck(qt_init_mtx);
+    qt_init_flag = true;
+    qt_init_cond.notify_one();
+  }
+
+
+  app.exec();
+
+  std::cerr << "[runQTthread]: Finished exec!\n";
+  //delete (win);
+}
+
 int main(int argc, char** argv)
 {
   // ===========  Initialize the ROS node  ==================
-  ros::init(argc, argv, "IO_test_node");
+  ros::init(argc, argv, "plot_test_node");
   ros::NodeHandle nh_("~");
 
   std::string path = ros::package::getPath("plot_test") + "/";
+
+  // ===========  Launch Qt Thread  ==================
+  bool launch_qt_thread;
+  if (!nh_.getParam("launch_qt_thread",launch_qt_thread)) launch_qt_thread = false;
+  if (launch_qt_thread)
+  {
+    qt_init_flag = false;
+    std::thread(runQTthread).detach();
+    {
+      std::unique_lock<std::mutex> lck(qt_init_mtx);
+      while (!qt_init_flag) qt_init_cond.wait(lck);
+      qt_init_flag = false;
+    }
+  }
+
 
   // ===========  Create data  ==================
   int n_data = 1000;
@@ -34,12 +81,9 @@ int main(int argc, char** argv)
   }
 
   // ===========  Init Qt plot  ==================
-
-  std::cerr << "file: " << __FILE__ << "\nfunction: " << __FUNCTION__ << "\nline: " << __LINE__ << "\n";
-
-  std::cerr << "[main]: Calling init...\n";
+  //std::cerr << "[" << __FUNCTION__ << "]: Calling init...\n";
   pl_::QtPlot::init();
-  std::cerr << "[main]: Init DONE!\n";
+  //std::cerr << "[" << __FUNCTION__ << "]: Init DONE!\n";
 
   pl_::Figure *fig;
   pl_::Axes *ax;

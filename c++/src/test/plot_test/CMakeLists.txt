@@ -35,9 +35,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-# *******************************************
+# *********************************************
 # ************   Plot test   ******************
-# *******************************************
+# *********************************************
 
 add_executable(plot_test
   src/plot_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
@@ -51,4 +51,5 @@ target_link_libraries(plot_test
   ${catkin_LIBRARIES}
   plot_lib
 )
+
 

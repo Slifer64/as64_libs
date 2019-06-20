@@ -2,6 +2,7 @@
 
   <node pkg="plot_test" type="plot_test" name="plot_test" output="screen">
     <rosparam>
+      launch_qt_thread: false
     </rosparam>
   </node>
 
