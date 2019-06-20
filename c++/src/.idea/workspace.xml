@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" line="594" />
+    <bookmark url="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" line="634" />
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
@@ -85,8 +85,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/plot_test/src/plot_test.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="624">
-              <caret line="113" column="56" selection-start-line="113" selection-start-column="56" selection-end-line="113" selection-end-column="56" />
+            <state relative-caret-position="384">
+              <caret line="115" column="51" selection-start-line="115" selection-start-column="51" selection-end-line="115" selection-end-column="51" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -120,8 +120,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-509">
-              <caret line="160" column="12" selection-start-line="160" selection-start-column="12" selection-end-line="160" selection-end-column="12" />
+            <state relative-caret-position="349">
+              <caret line="505" column="49" lean-forward="true" selection-start-line="505" selection-start-column="2" selection-end-line="505" selection-end-column="49" />
               <folding>
                 <element signature="e#1769#2957#1" />
                 <element signature="e#3100#4471#1" />
@@ -140,26 +140,26 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="810">
-              <caret line="432" lean-forward="true" selection-start-line="432" selection-end-line="432" />
+            <state relative-caret-position="794">
+              <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
               <folding>
-                <element signature="e#347#1738#0" />
-                <element signature="e#1740#1806#0" />
-                <element signature="e#1808#1907#0" />
-                <element signature="e#1932#1989#0" />
-                <element signature="e#1909#2116#0" />
-                <element signature="e#2118#2877#0" />
-                <element signature="e#2879#2960#0" />
-                <element signature="e#2962#3053#0" />
-                <element signature="e#4201#5246#0" />
-                <element signature="e#5248#5395#0" />
-                <element signature="e#5397#5459#0" />
-                <element signature="e#5461#5511#0" />
-                <element signature="e#5513#5585#0" />
-                <element signature="e#5587#5651#0" />
-                <element signature="e#5653#5708#0" />
-                <element signature="e#5710#6123#0" />
-                <element signature="e#6125#6282#0" />
+                <element signature="e#407#1819#0" />
+                <element signature="e#1821#1887#0" />
+                <element signature="e#1889#1988#0" />
+                <element signature="e#1990#2094#0" />
+                <element signature="e#2407#3575#0" />
+                <element signature="e#3577#3658#0" />
+                <element signature="e#3660#3751#0" />
+                <element signature="e#5054#5201#0" />
+                <element signature="e#5203#5265#0" />
+                <element signature="e#5267#5317#0" />
+                <element signature="e#5319#5391#0" />
+                <element signature="e#5393#5457#0" />
+                <element signature="e#5459#5514#0" />
+                <element signature="e#5907#5947#0" />
+                <element signature="e#5613#6026#0" />
+                <element signature="e#6028#6185#0" />
+                <element signature="e#3120#4713#0" />
                 <element signature="e#4715#4807#0" />
                 <element signature="e#4809#4857#0" />
                 <element signature="e#4859#4907#0" />
@@ -168,12 +168,16 @@
                 <element signature="e#5578#5677#0" />
                 <element signature="e#5679#5857#0" />
                 <element signature="e#5860#5948#0" />
+                <element signature="e#5950#6040#0" />
+                <element signature="e#6042#6132#0" />
                 <element signature="e#6134#6385#0" />
                 <element signature="e#6387#6430#0" />
                 <element signature="e#6432#7590#0" />
                 <element signature="e#7592#7642#0" />
                 <element signature="e#7644#7757#0" />
                 <element signature="e#7759#8016#0" />
+                <element signature="e#8018#8371#0" />
+                <element signature="e#8373#8647#0" />
                 <element signature="e#8649#9417#0" />
                 <element signature="e#9419#9465#0" />
                 <element signature="e#11671#12332#0" />
@@ -729,12 +733,12 @@
       <workItem from="1560593308990" duration="5566000" />
       <workItem from="1560601175164" duration="4187000" />
       <workItem from="1560964562898" duration="5143000" />
-      <workItem from="1561015510894" duration="17523000" />
+      <workItem from="1561015510894" duration="18800000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="32419000" />
+    <option name="totallyTimeSpent" value="33696000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="24" width="1845" height="1056" extended-state="4" />
@@ -796,13 +800,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/plot_test/launch/plot_test.launch">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="4" column="29" selection-start-line="4" selection-start-column="29" selection-end-line="4" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/plot_lib/src/source_list/utils.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
@@ -810,28 +807,46 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="349">
+          <caret line="505" column="49" lean-forward="true" selection-start-line="505" selection-start-column="2" selection-end-line="505" selection-end-column="49" />
+          <folding>
+            <element signature="e#1769#2957#1" />
+            <element signature="e#3100#4471#1" />
+            <element signature="e#5196#5219#0" expanded="true" />
+            <element signature="e#5458#5481#0" expanded="true" />
+            <element signature="e#9465#9488#0" expanded="true" />
+            <element signature="e#9457#9694#0" />
+            <element signature="e#9743#9766#0" expanded="true" />
+            <element signature="e#9735#9961#0" />
+            <element signature="e#7223#7246#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="810">
-          <caret line="432" lean-forward="true" selection-start-line="432" selection-end-line="432" />
+        <state relative-caret-position="794">
+          <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
           <folding>
-            <element signature="e#347#1738#0" />
-            <element signature="e#1740#1806#0" />
-            <element signature="e#1808#1907#0" />
-            <element signature="e#1932#1989#0" />
-            <element signature="e#1909#2116#0" />
-            <element signature="e#2118#2877#0" />
-            <element signature="e#2879#2960#0" />
-            <element signature="e#2962#3053#0" />
-            <element signature="e#4201#5246#0" />
-            <element signature="e#5248#5395#0" />
-            <element signature="e#5397#5459#0" />
-            <element signature="e#5461#5511#0" />
-            <element signature="e#5513#5585#0" />
-            <element signature="e#5587#5651#0" />
-            <element signature="e#5653#5708#0" />
-            <element signature="e#5710#6123#0" />
-            <element signature="e#6125#6282#0" />
+            <element signature="e#407#1819#0" />
+            <element signature="e#1821#1887#0" />
+            <element signature="e#1889#1988#0" />
+            <element signature="e#1990#2094#0" />
+            <element signature="e#2407#3575#0" />
+            <element signature="e#3577#3658#0" />
+            <element signature="e#3660#3751#0" />
+            <element signature="e#5054#5201#0" />
+            <element signature="e#5203#5265#0" />
+            <element signature="e#5267#5317#0" />
+            <element signature="e#5319#5391#0" />
+            <element signature="e#5393#5457#0" />
+            <element signature="e#5459#5514#0" />
+            <element signature="e#5907#5947#0" />
+            <element signature="e#5613#6026#0" />
+            <element signature="e#6028#6185#0" />
+            <element signature="e#3120#4713#0" />
             <element signature="e#4715#4807#0" />
             <element signature="e#4809#4857#0" />
             <element signature="e#4859#4907#0" />
@@ -840,12 +855,16 @@
             <element signature="e#5578#5677#0" />
             <element signature="e#5679#5857#0" />
             <element signature="e#5860#5948#0" />
+            <element signature="e#5950#6040#0" />
+            <element signature="e#6042#6132#0" />
             <element signature="e#6134#6385#0" />
             <element signature="e#6387#6430#0" />
             <element signature="e#6432#7590#0" />
             <element signature="e#7592#7642#0" />
             <element signature="e#7644#7757#0" />
             <element signature="e#7759#8016#0" />
+            <element signature="e#8018#8371#0" />
+            <element signature="e#8373#8647#0" />
             <element signature="e#8649#9417#0" />
             <element signature="e#9419#9465#0" />
             <element signature="e#11671#12332#0" />
@@ -928,28 +947,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
+    <entry file="file://$PROJECT_DIR$/test/plot_test/launch/plot_test.launch">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-509">
-          <caret line="160" column="12" selection-start-line="160" selection-start-column="12" selection-end-line="160" selection-end-column="12" />
-          <folding>
-            <element signature="e#1769#2957#1" />
-            <element signature="e#3100#4471#1" />
-            <element signature="e#5196#5219#0" expanded="true" />
-            <element signature="e#5458#5481#0" expanded="true" />
-            <element signature="e#9465#9488#0" expanded="true" />
-            <element signature="e#9457#9694#0" />
-            <element signature="e#9743#9766#0" expanded="true" />
-            <element signature="e#9735#9961#0" />
-            <element signature="e#7223#7246#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="96">
+          <caret line="4" column="29" selection-start-line="4" selection-start-column="29" selection-end-line="4" selection-end-column="29" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/plot_test/src/plot_test.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="624">
-          <caret line="113" column="56" selection-start-line="113" selection-start-column="56" selection-end-line="113" selection-end-column="56" />
+        <state relative-caret-position="384">
+          <caret line="115" column="51" selection-start-line="115" selection-start-column="51" selection-end-line="115" selection-end-column="51" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
           </folding>

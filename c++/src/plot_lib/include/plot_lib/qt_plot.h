@@ -498,24 +498,28 @@ public:
   ~Figure();
 
   Axes *getAxes(int k);
-
   Axes *getAxes(int row, int col);
-
   void setAxes(int n1, int n2);
-
   void clearAxes(int k = -1);
+  void setTitle(const std::string &title_);
+  void resize(int w, int h);
+  void setPosition(int i1, int i2, int w, int h);
 
 signals:
 
   void setAxesSignal(int n1, int n2);
-
   void clearAxesSignal(int k = -1);
+  void setTitleSignal(const QString &title_);
+  void resizeSignal(int w, int h);
+  void setPositionSignal(int i1, int i2, int w, int h);
 
 private slots:
 
   void setAxesSlot(int n1, int n2);
-
   void clearAxesSlot(int k = -1);
+  void setTitleSlot(const QString &title_);
+  void resizeSlot(int w, int h);
+  void setPositionSlot(int i1, int i2, int w, int h);
 
   void closeEvent(QCloseEvent *event) override;
 
@@ -544,7 +548,7 @@ public:
   static void init(QWidget *parent = 0);
   static void terminate();
 
-  static Figure *figure();
+  static Figure *figure(const std::string &title_="", const std::vector<int> position={500, 400});
 
   static int fig_count;
 

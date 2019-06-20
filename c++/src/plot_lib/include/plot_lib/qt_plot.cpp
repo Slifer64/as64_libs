@@ -85,12 +85,19 @@ std::string QtPlot::getPropertyName(pl_::PROPERTY p)
   return QtPlot::property_name.find(p)->second;
 }
 
-Figure *QtPlot::figure()
+Figure *QtPlot::figure(const std::string &title_, const std::vector<int> position)
 {
   if (!QtPlot::initialized) throw std::runtime_error("[QtPlot::figure]: QtPlot has not been initialized...");
 
   Figure *fig;
   QtPlot::QtPlot_->figureSignal(&fig);
+
+  if (!title_.empty()) fig->setTitle(title_);
+
+  if (position.size() == 2) fig->resize(position[0], position[1]);
+  else if (position.size() == 4) fig->setPosition(position[0], position[1], position[2], position[3]);
+  else throw std::runtime_error("[QtPlot::figure]: \"position\" must have size 2 or 4...");
+
   return fig;
 }
 
@@ -143,6 +150,9 @@ Figure::Figure(QWidget *parent) : QMainWindow(parent)
 {
   QObject::connect(this, &Figure::setAxesSignal, this, &Figure::setAxesSlot, Qt::BlockingQueuedConnection);
   QObject::connect(this, &Figure::clearAxesSignal, this, &Figure::clearAxesSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Figure::setTitleSignal, this, &Figure::setTitleSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Figure::resizeSignal, this, &Figure::resizeSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Figure::setPositionSignal, this, &Figure::setPositionSlot, Qt::BlockingQueuedConnection);
 
   // this->moveToThread( QApplication::instance()->thread() );
 
@@ -155,7 +165,7 @@ Figure::Figure(QWidget *parent) : QMainWindow(parent)
   central_widget->setPalette(pal);
 
   if (this->objectName().isEmpty()) this->setObjectName(QStringLiteral("Figure"));
-  this->resize(500, 400);
+  QMainWindow::resize(500, 400);
   grid_layout = new QGridLayout(central_widget);
   grid_layout->setObjectName(QStringLiteral("gridLayout"));
 
@@ -201,6 +211,22 @@ void Figure::clearAxes(int k)
   clearAxesSignal(k);
 }
 
+void Figure::setTitle(const std::string &title_)
+{
+  setTitleSignal(QString(title_.c_str()));
+}
+
+void Figure::resize(int w, int h)
+{
+  resizeSignal(w,h);
+}
+
+void Figure::setPosition(int i1, int i2, int w, int h)
+{
+  setPositionSignal(i1, i2, w, h);
+}
+
+
 void Figure::setAxesSlot(int n1, int n2)
 {
   this->n1 = n1;
@@ -235,6 +261,20 @@ void Figure::clearAxesSlot(int k)
   }
 }
 
+void Figure::setTitleSlot(const QString &title_)
+{
+  this->setWindowTitle(title_);
+}
+
+void Figure::resizeSlot(int w, int h)
+{
+  QMainWindow::resize(w,h);
+}
+
+void Figure::setPositionSlot(int i1, int i2, int w, int h)
+{
+  setGeometry(i1, i2, w, h);
+}
 
 // =========================================
 // =============   Axes   ==================

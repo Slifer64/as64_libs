@@ -37,7 +37,6 @@ void runQTthread()
     qt_init_cond.notify_one();
   }
 
-
   app.exec();
 
   std::cerr << "[runQTthread]: Finished exec!\n";
@@ -81,16 +80,14 @@ int main(int argc, char** argv)
   }
 
   // ===========  Init Qt plot  ==================
-  //std::cerr << "[" << __FUNCTION__ << "]: Calling init...\n";
   pl_::QtPlot::init();
-  //std::cerr << "[" << __FUNCTION__ << "]: Init DONE!\n";
 
   pl_::Figure *fig;
   pl_::Axes *ax;
   pl_::Graph *graph;
 
   // ===========  Plot data  ==================
-  fig = pl_::QtPlot::figure();
+  fig = pl_::QtPlot::figure("My first figure", {600, 700});
   fig->setAxes(3,1);
 
   std::vector<std::string> py_labels = {"x", "y", "z"};
@@ -116,7 +113,7 @@ int main(int argc, char** argv)
   }
 
 
-  fig = pl_::QtPlot::figure();
+  fig = pl_::QtPlot::figure("My second figure", {750, 500, 700, 500});
   fig->setAxes(2,3);
 
   for (int j=0; j<3; j++)
