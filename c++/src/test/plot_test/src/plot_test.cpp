@@ -106,7 +106,9 @@ int main(int argc, char** argv)
     if (i==0)
     {
       ax->legend({"sim", "demo"});
-      ax->title("Cartesian Position [m]");
+      pl_::TextLabel *title_label = ax->title("Cartesian Position [m]", pl_::Color_,QColor(250,50,80), pl_::FontSize_,20, pl_::FontWeight_,pl_::Bold, pl_::FontFamily_,std::string("Ubuntu"));
+      // title_label->setText("Cartesian Position [m]");
+      // title_label->setProperty(pl_::Color_,QColor(250,50,80), pl_::FontSize_,20, pl_::FontWeight_,pl_::Bold, pl_::FontFamily_,std::string("Ubuntu"));
     }
     if (i==2) ax->xlabel("time [s]");
     ax->drawnow();

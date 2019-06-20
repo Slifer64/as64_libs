@@ -96,6 +96,115 @@ enum FontWeight {
   Black = 87
 };
 
+
+// ==========================================
+// =============   Legend  ==================
+// ==========================================
+
+//class Legend : public QWidget
+//{
+//
+//Q_OBJECT
+//
+//public:
+//  Legend(QCPLegend  *qcp_legend);
+//
+//  template<typename T, typename... Arguments>
+//  void setProperty(PROPERTY p, T p_value, Arguments... parameters)
+//  {
+//    setPropertyHelper(p, p_value);
+//    setProperty(parameters...);
+//  }
+//
+//  void setText(const std::string &s);
+//  void setColor(Color c);
+//  void setColor(const QColor &c);
+//  void setFontSize(int size);
+//  void setFontFamily(const std::string &family);
+//  void setFontWeight(FontWeight fweight);
+//
+//signals:
+//  void setTextSignal(const QString &s);
+//  void setColorSignal(const QColor &c);
+//  void setFontSizeSignal(int size);
+//  void setFontFamilySignal(const QString &family);
+//  void setFontWeightSignal(FontWeight fweight);
+//
+//private slots:
+//  void setTextSlot(const QString &s);
+//  void setColorSlot(const QColor &c);
+//  void setFontSizeSlot(int size);
+//  void setFontFamilySlot(const QString &family);
+//  void setFontWeightSlot(FontWeight fweight);
+//
+//private:
+//  void setProperty();
+//  void setPropertyHelper(PROPERTY p, Color p_value);
+//  void setPropertyHelper(pl_::PROPERTY p, const QColor &p_value);
+//  void setPropertyHelper(PROPERTY p, int p_value);
+//  void setPropertyHelper(PROPERTY p, const std::string &p_value);
+//  void setPropertyHelper(PROPERTY p, FontWeight p_value);
+//
+//  QCPLegend *qcp_legend;
+//};
+
+
+// ===============================================
+// =============   Text Label   ==================
+// ===============================================
+
+class TextLabel : public QWidget
+{
+
+Q_OBJECT
+
+public:
+  TextLabel(QCPTextElement *qcp_text);
+
+  template<typename T, typename... Arguments>
+  void setProperty(PROPERTY p, T p_value, Arguments... parameters)
+  {
+    setPropertyHelper(p, p_value);
+    setProperty(parameters...);
+  }
+
+  void setText(const std::string &s);
+  void setColor(Color c);
+  void setColor(const QColor &c);
+  void setFontSize(int size);
+  void setFontFamily(const std::string &family);
+  void setFontWeight(FontWeight fweight);
+
+signals:
+  void setTextSignal(const QString &s);
+  void setColorSignal(const QColor &c);
+  void setFontSizeSignal(int size);
+  void setFontFamilySignal(const QString &family);
+  void setFontWeightSignal(FontWeight fweight);
+
+private slots:
+  void setTextSlot(const QString &s);
+  void setColorSlot(const QColor &c);
+  void setFontSizeSlot(int size);
+  void setFontFamilySlot(const QString &family);
+  void setFontWeightSlot(FontWeight fweight);
+
+private:
+  void setProperty();
+  void setPropertyHelper(PROPERTY p, Color p_value);
+  void setPropertyHelper(pl_::PROPERTY p, const QColor &p_value);
+  void setPropertyHelper(PROPERTY p, int p_value);
+  void setPropertyHelper(PROPERTY p, const std::string &p_value);
+  void setPropertyHelper(PROPERTY p, FontWeight p_value);
+
+  QCPTextElement *qcp_text;
+};
+
+
+// ==========================================
+// =============   Graph   ==================
+// ==========================================
+
 class Graph : public QWidget {
 
 Q_OBJECT
@@ -116,6 +225,8 @@ public:
 
   void setColor(Color color);
 
+  void setColor(const QColor &color);
+
   void setLineStyle(LineStyle style);
 
   void setLineWidth(double width);
@@ -126,7 +237,7 @@ public:
 
 signals:
 
-  void setColorSignal(int color);
+  void setColorSignal(const QColor &color);
 
   void setLineStyleSignal(int style);
 
@@ -138,7 +249,7 @@ signals:
 
 private slots:
 
-  void setColorSlot(int color);
+  void setColorSlot(const QColor &color);
 
   void setLineStyleSlot(int style);
 
@@ -151,6 +262,7 @@ private slots:
 private:
   void setProperty();
   void setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value);
+  void setPropertyHelper(pl_::PROPERTY p, const QColor &p_value);
   void setPropertyHelper(pl_::PROPERTY p, double p_value);
   void setPropertyHelper(pl_::PROPERTY p, pl_::LineStyle p_value);
   void setPropertyHelper(pl_::PROPERTY p, pl_::MarkerStyle p_value);
@@ -158,6 +270,11 @@ private:
   Axes *parent;
   QCPGraph *qcp_graph;
 };
+
+
+// =========================================
+// =============   Axes   ==================
+// =========================================
 
 class Axes : public QCustomPlot {
 Q_OBJECT
@@ -194,7 +311,15 @@ public:
     return graph;
   }
 
-  void title(const std::string &title);
+  template<typename... Arguments>
+  TextLabel *title(const std::string &title_text, Arguments... properties)
+  {
+    TextLabel *title_label = this->title(title_text);
+    title_label->setProperty(properties...);
+    return title_label;
+  }
+
+  TextLabel *title(const std::string &title_text);
 
   void xlabel(const std::string &label);
 
@@ -252,7 +377,12 @@ private:
   int color_ind;
 
   Graph *last_graph;
+  TextLabel *title_elem;
 };
+
+// ===========================================
+// =============   Figure   ==================
+// ===========================================
 
 class Figure : public QMainWindow {
 Q_OBJECT
@@ -294,6 +424,10 @@ private:
 
   int getAxesIndex(int i, int j) { return j + i * n2; }
 };
+
+
+// ===========================================
+// ===========================================
 
 class QtPlot : public QWidget {
 Q_OBJECT
