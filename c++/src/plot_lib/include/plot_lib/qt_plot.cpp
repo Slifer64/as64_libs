@@ -17,6 +17,7 @@ QtPlot *QtPlot::QtPlot_;
 bool QtPlot::initialized = false;
 int QtPlot::fig_count = 0;
 std::map<Color, QColor> QtPlot::color;
+std::map<pl_::PROPERTY, std::string> QtPlot::property_name;
 const int QtPlot::N_COLORS = 13;
 
 void QtPlot::init(QWidget *parent)
@@ -79,6 +80,11 @@ QColor QtPlot::getQColor(Color c)
   return (QtPlot::color.find(static_cast<Color>(c)))->second;
 }
 
+std::string QtPlot::getPropertyName(pl_::PROPERTY p)
+{
+  return QtPlot::property_name.find(p)->second;
+}
+
 Figure *QtPlot::figure()
 {
   if (!QtPlot::initialized) throw std::runtime_error("[QtPlot::figure]: QtPlot has not been initialized...");
@@ -103,6 +109,15 @@ QtPlot::QtPlot(QWidget *parent)
   QtPlot::color[PINK] = QColor(255, 153, 199);
   QtPlot::color[BLACK] = QColor(0, 0, 0);
   QtPlot::color[GREY] = QColor(200, 200, 200);
+
+  QtPlot::property_name[Color_] = "Color";
+  QtPlot::property_name[LineWidth_] = "LineWidth";
+  QtPlot::property_name[LineStyle_] = "LineStyle";
+  QtPlot::property_name[MarkerSize_] = "MarkerSize";
+  QtPlot::property_name[MarkerStyle_] = "MarkerStyle";
+  QtPlot::property_name[FontSize_] = "FontSize";
+  QtPlot::property_name[FontWeight_] = "FontWeight";
+  QtPlot::property_name[FontFamily_] = "FontFamily";
 
   QObject::connect(this, SIGNAL(figureSignal(Figure **)), this, SLOT(figureSlot(Figure **)), Qt::BlockingQueuedConnection);
 }
@@ -231,6 +246,9 @@ Axes::Axes(Figure *parent): QCustomPlot(parent)
 
   this->parent = parent;
 
+  legend_ = new Legend(this->QCustomPlot::legend, this);
+  title_ = 0;
+
   qRegisterMetaType<QVector<QString>>("QVector<QString>");
 
   QObject::connect(this, &Axes::holdSignal, this, &Axes::holdSlot, Qt::BlockingQueuedConnection);
@@ -315,11 +333,10 @@ Graph *Axes::plot(const arma::rowvec &x_data, const arma::rowvec &y_data)
   return plot(x_data2, y_data2);
 }
 
-
 TextLabel *Axes::title(const std::string &title_text)
 {
   setTitleSignal(QString(title_text.c_str()));
-  return this->title_elem;
+  return this->title_;
 }
 
 void Axes::xlabel(const std::string &label)
@@ -332,11 +349,13 @@ void Axes::ylabel(const std::string &label)
   setYLabelSignal(QString(label.c_str()));
 }
 
-void Axes::legend(const std::vector<std::string> &legend_labels)
+Legend *Axes::legend(const std::vector<std::string> &legend_labels)
 {
   QVector<QString> qlegend_labels(legend_labels.size());
   for (int i=0; i<legend_labels.size(); i++) qlegend_labels[i] = legend_labels[i].c_str();
   setLegendSignal(qlegend_labels);
+
+  return this->legend_;
 }
 
 void Axes::drawnow()
@@ -392,7 +411,7 @@ void Axes::setTitleSlot(const QString &title)
   QCPTextElement *qcp_title = new QCPTextElement(this, title, QFont(font_family, fontsize, QFont::Normal));
   this->plotLayout()->addElement(0, 0, qcp_title);
 
-  this->title_elem = new TextLabel(qcp_title);
+  this->title_ = new TextLabel(qcp_title);
 }
 
 void Axes::setXLabelSlot(const QString &label)
@@ -420,24 +439,17 @@ void Axes::setYLabelSlot(const QString &label)
 void Axes::setLegendSlot(const QVector<QString> &legend_labels)
 {
   // qDebug() << "[Axes::setLegendSlot]: " << QThread::currentThread() << "\n";
-  int fontsize = 14;
-  QString font_family = "Arial";
 
-  int n_graphs = this->graphCount();
-  int n_labels = legend_labels.size();
+  legend_->setLabelsSlot(legend_labels);
+  legend_->setVisibleSlot(true);
+  legend_->setBgColorSlot(QColor(255,255,255,230));
+  legend_->setAlignmentSlot(Qt::AlignBottom|Qt::AlignRight);
 
-  if (n_labels > n_graphs)
-  {
-      qDebug() << "Extra legend labels will be ignored.";
-      n_labels = n_graphs;
-  }
-
-  for (int i=0; i<n_labels; i++) this->graph(i)->setName(legend_labels[i]);
-
-  this->QCustomPlot::legend->setVisible(true);
-  this->QCustomPlot::legend->setFont(QFont(font_family, fontsize, QFont::Normal));
-  this->QCustomPlot::legend->setBrush(QBrush(QColor(255,255,255,230)));
-  this->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom|Qt::AlignRight);
+  // int fontsize = 14;
+  // QString font_family = "Arial";
+  // qcp_legend->setFont(QFont(font_family, fontsize, QFont::Normal));
+  // qcp_legend->setBrush(QBrush(QColor(255,255,255,230)));
+  // this->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom|Qt::AlignRight);
 }
 
 void Axes::drawnowSlot()
@@ -472,37 +484,37 @@ void Graph::setProperty() {}
 void Graph::setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value)
 {
   if (p == pl_::Color_) setColor(p_value);
-  else std::cerr << "[Graph::setPropertyHelper::Color_]: ** Invalid graph property **\n";
+  else std::cerr << "[Graph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void Graph::setPropertyHelper(pl_::PROPERTY p, const QColor &p_value)
 {
   if (p == pl_::Color_) setColor(p_value);
-  else std::cerr << "[Graph::setPropertyHelper::Color_]: ** Invalid graph property **\n";
+  else std::cerr << "[Graph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void Graph::setPropertyHelper(pl_::PROPERTY p, double p_value)
 {
   if (p == pl_::LineWidth_) setLineWidth(p_value);
   else if (p == pl_::MarkerSize_) setMarkerSize(p_value);
-  else std::cerr << "[Graph::setPropertyHelper::LineWidth_|MarkerSize_]: ** Invalid graph property **\n";
+  else std::cerr << "[Graph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void Graph::setPropertyHelper(pl_::PROPERTY p, pl_::LineStyle p_value)
 {
   if (p == pl_::LineStyle_) setLineStyle(p_value);
-  else std::cerr << "[Graph::setPropertyHelper::LineStyle_]: ** Invalid graph property **\n";
+  else std::cerr << "[Graph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void Graph::setPropertyHelper(pl_::PROPERTY p, pl_::MarkerStyle p_value)
 {
   if (p == pl_::MarkerStyle_) setMarkerStyle(p_value);
-  else std::cerr << "[Graph::setPropertyHelper::MarkerStyle_]: ** Invalid graph property **\n";
+  else std::cerr << "[Graph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void Graph::setColor(Color color)
 {
-  setColorSignal(QtPlot::getQColor(static_cast<Color>(color)));
+  setColor(QtPlot::getQColor(static_cast<Color>(color)));
 }
 
 void Graph::setColor(const QColor &color)
@@ -574,6 +586,170 @@ void Graph::setMarkerSizeSlot(double size)
 }
 
 
+// ===========================================
+// =============   Legend   ==================
+// ===========================================
+
+Legend::Legend(QCPLegend *qcp_legend, Axes *axes)
+{
+  this->qcp_legend = qcp_legend;
+  this->axes = axes;
+
+  QObject::connect(this, &Legend::setAlignmentSignal, this, &Legend::setAlignmentSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Legend::setBgColorSignal, this, &Legend::setBgColorSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Legend::setVisibleSignal, this, &Legend::setVisibleSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Legend::setLabelsSignal, this, &Legend::setLabelsSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Legend::setColorSignal, this, &Legend::setColorSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Legend::setFontSizeSignal, this, &Legend::setFontSizeSlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Legend::setFontFamilySignal, this, &Legend::setFontFamilySlot, Qt::BlockingQueuedConnection);
+  QObject::connect(this, &Legend::setFontWeightSignal, this, &Legend::setFontWeightSlot, Qt::BlockingQueuedConnection);
+}
+
+void Legend::setLabels(const std::vector<std::string> &labels)
+{
+  QVector<QString> qlabels(labels.size());
+  for (int i=0; i<labels.size(); i++) qlabels[i] = labels[i].c_str();
+  setLabelsSignal(qlabels);
+}
+
+void Legend::setColor(Color c)
+{
+  setColor(QtPlot::getQColor(static_cast<Color>(c)));
+}
+
+void Legend::setColor(const QColor &c)
+{
+  setColorSignal(c);
+}
+
+void Legend::setFontSize(int size)
+{
+  setFontSizeSignal(size);
+}
+
+void Legend::setFontFamily(const std::string &family)
+{
+  setFontFamilySignal(QString(family.c_str()));
+}
+
+void Legend::setFontWeight(FontWeight fweight)
+{
+  setFontWeightSignal(fweight);
+}
+
+void Legend::setVisible(bool set)
+{
+  setVisibleSignal(set);
+}
+
+void Legend::setBgColor(const QColor &color)
+{
+  setBgColorSignal(color);
+}
+
+void Legend::setAlignment(Qt::Alignment alignment)
+{
+  setAlignmentSignal(alignment);
+}
+
+
+void Legend::setLabelsSlot(const QVector<QString> &labels)
+{
+  int n_graphs = axes->graphCount();
+  int n_labels = labels.size();
+
+  if (n_labels > n_graphs)
+  {
+    std::cerr << "[Legend::setLabelsSlot]: Extra legend labels will be ignored...\n";
+    n_labels = n_graphs;
+  }
+
+  for (int i=0; i<n_labels; i++) axes->graph(i)->setName(labels[i]);
+
+  // qcp_legend->setVisible(true);
+  // qcp_legend->setBrush(QBrush(QColor(255,255,255,230)));
+  // int fontsize = 14;
+  // QString font_family = "Arial";
+  // qcp_legend->setFont(QFont(font_family, fontsize, QFont::Normal));
+  // axes->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom|Qt::AlignRight);
+}
+
+void Legend::setColorSlot(const QColor &c)
+{
+  qcp_legend->setTextColor(c);
+}
+
+void Legend::setFontSizeSlot(int size)
+{
+  QFont font = qcp_legend->font();
+  font.setPointSize(size);
+  qcp_legend->setFont(font);
+}
+
+void Legend::setFontFamilySlot(const QString &family)
+{
+  QFont font = qcp_legend->font();
+  font.setFamily(family);
+  qcp_legend->setFont(font);
+}
+
+void Legend::setFontWeightSlot(FontWeight fweight)
+{
+  QFont font = qcp_legend->font();
+  font.setWeight(fweight);
+  qcp_legend->setFont(font);
+}
+
+void Legend::setVisibleSlot(bool set)
+{
+  this->qcp_legend->setVisible(set);
+}
+
+void Legend::setBgColorSlot(const QColor &color)
+{
+  this->qcp_legend->setBrush(color);
+}
+
+void Legend::setAlignmentSlot(Qt::Alignment alignment)
+{
+  axes->axisRect()->insetLayout()->setInsetAlignment(0, alignment);
+}
+
+void Legend::setProperty()
+{}
+
+void Legend::setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value)
+{
+  if (p == pl_::Color_) setColor(p_value);
+  else std::cerr << "[Legend::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void Legend::setPropertyHelper(pl_::PROPERTY p, const QColor &p_value)
+{
+  if (p == pl_::Color_) setColor(p_value);
+  else std::cerr << "[Legend::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void Legend::setPropertyHelper(pl_::PROPERTY p, int p_value)
+{
+  if (p == pl_::FontSize_) setFontSize(p_value);
+  else std::cerr << "[Legend::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void Legend::setPropertyHelper(pl_::PROPERTY p, const std::string &p_value)
+{
+  if (p == pl_::FontFamily_) setFontFamily(p_value);
+  else std::cerr << "[Legend::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+void Legend::setPropertyHelper(pl_::PROPERTY p, FontWeight p_value)
+{
+  if (p == pl_::FontWeight_) setFontWeight(p_value);
+  else std::cerr << "[Legend::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
+}
+
+
+
 // ===============================================
 // =============   Text Label   ==================
 // ===============================================
@@ -597,7 +773,7 @@ void TextLabel::setText(const std::string &s)
 
 void TextLabel::setColor(Color c)
 {
-  setColorSignal(QtPlot::getQColor(static_cast<Color>(c)));
+  setColor(QtPlot::getQColor(static_cast<Color>(c)));
 }
 
 void TextLabel::setColor(const QColor &c)
@@ -625,31 +801,31 @@ void TextLabel::setProperty() {}
 void TextLabel::setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value)
 {
   if (p == pl_::Color_) setColor(p_value);
-  else std::cerr << "** Invalid text property **\n";
+  else std::cerr << "[TextLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void TextLabel::setPropertyHelper(pl_::PROPERTY p, const QColor &p_value)
 {
   if (p == pl_::Color_) setColor(p_value);
-  else std::cerr << "** Invalid text property **\n";
+  else std::cerr << "[TextLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void TextLabel::setPropertyHelper(pl_::PROPERTY p, int p_value)
 {
   if (p == pl_::FontSize_) setFontSize(p_value);
-  else std::cerr << "** Invalid text property **\n";
+  else std::cerr << "[TextLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void TextLabel::setPropertyHelper(pl_::PROPERTY p, const std::string &p_value)
 {
   if (p == pl_::FontFamily_) setFontFamily(p_value);
-  else std::cerr << "** Invalid text property **\n";
+  else std::cerr << "[TextLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void TextLabel::setPropertyHelper(pl_::PROPERTY p, FontWeight p_value)
 {
   if (p == pl_::FontWeight_) setFontWeight(p_value);
-  else std::cerr << "** Invalid text property **\n";
+  else std::cerr << "[TextLabel::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
 }
 
 void TextLabel::setTextSlot(const QString &s)
@@ -685,6 +861,6 @@ void TextLabel::setFontWeightSlot(FontWeight fweight)
 
 
 
-  } // namespace pl_
+} // namespace pl_
 
 } // namespace as64_

@@ -105,7 +105,8 @@ int main(int argc, char** argv)
     ax->ylabel(py_labels[i]);
     if (i==0)
     {
-      ax->legend({"sim", "demo"});
+      pl_::Legend *legend_elem = ax->legend({"sim", "demo"}, pl_::Color_,QColor(40,120,200), pl_::FontSize_,15, pl_::FontWeight_,pl_::DemiBold, pl_::FontFamily_,std::string("Ubuntu"));
+      legend_elem->setAlignment(Qt::AlignRight | Qt::AlignTop);
       pl_::TextLabel *title_label = ax->title("Cartesian Position [m]", pl_::Color_,QColor(250,50,80), pl_::FontSize_,20, pl_::FontWeight_,pl_::Bold, pl_::FontFamily_,std::string("Ubuntu"));
       // title_label->setText("Cartesian Position [m]");
       // title_label->setProperty(pl_::Color_,QColor(250,50,80), pl_::FontSize_,20, pl_::FontWeight_,pl_::Bold, pl_::FontFamily_,std::string("Ubuntu"));
