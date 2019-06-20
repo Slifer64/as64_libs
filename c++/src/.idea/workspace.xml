@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" line="634" />
+    <bookmark url="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" line="636" />
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
@@ -65,9 +65,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d1133b4c-b815-4a9a-94f7-a3e2e82abd3a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h" beforeDir="false" afterPath="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/plot_test/src/plot_test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/test/plot_test/src/plot_test.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -82,11 +81,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/plot_test/src/plot_test.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="115" column="51" selection-start-line="115" selection-start-column="51" selection-end-line="115" selection-end-column="51" />
+            <state relative-caret-position="120">
+              <caret line="35" column="24" selection-start-line="35" selection-start-column="24" selection-end-line="35" selection-end-column="24" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -120,11 +119,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="505" column="49" lean-forward="true" selection-start-line="505" selection-start-column="2" selection-end-line="505" selection-end-column="49" />
+            <state relative-caret-position="1607">
+              <caret line="368" column="13" selection-start-line="368" selection-start-column="9" selection-end-line="368" selection-end-column="13" />
               <folding>
                 <element signature="e#1769#2957#1" />
-                <element signature="e#3100#4471#1" />
                 <element signature="e#5196#5219#0" expanded="true" />
                 <element signature="e#5458#5481#0" expanded="true" />
                 <element signature="e#9465#9488#0" expanded="true" />
@@ -137,19 +135,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="794">
-              <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
+            <state relative-caret-position="384">
+              <caret line="109" column="44" selection-start-line="109" selection-start-column="44" selection-end-line="109" selection-end-column="44" />
               <folding>
                 <element signature="e#407#1819#0" />
                 <element signature="e#1821#1887#0" />
                 <element signature="e#1889#1988#0" />
                 <element signature="e#1990#2094#0" />
-                <element signature="e#2407#3575#0" />
+                <element signature="e#2096#2602#0" />
                 <element signature="e#3577#3658#0" />
                 <element signature="e#3660#3751#0" />
+                <element signature="e#3897#5052#0" />
                 <element signature="e#5054#5201#0" />
                 <element signature="e#5203#5265#0" />
                 <element signature="e#5267#5317#0" />
@@ -172,7 +171,6 @@
                 <element signature="e#6042#6132#0" />
                 <element signature="e#6134#6385#0" />
                 <element signature="e#6387#6430#0" />
-                <element signature="e#6432#7590#0" />
                 <element signature="e#7592#7642#0" />
                 <element signature="e#7644#7757#0" />
                 <element signature="e#7759#8016#0" />
@@ -193,7 +191,6 @@
                 <element signature="e#13464#13535#0" />
                 <element signature="e#13537#13615#0" />
                 <element signature="e#13617#13688#0" />
-                <element signature="e#13690#13848#0" />
                 <element signature="e#13850#14146#0" />
                 <element signature="e#14148#14274#0" />
                 <element signature="e#14276#14482#0" />
@@ -276,6 +273,8 @@
       <find>Legend</find>
       <find>title_elem</find>
       <find>legend_elem</find>
+      <find>::</find>
+      <find>plot</find>
     </findStrings>
     <replaceStrings>
       <replace>plot_test</replace>
@@ -296,8 +295,8 @@
         <option value="$PROJECT_DIR$/test/plot_test/launch/plot_test2.launch" />
         <option value="$PROJECT_DIR$/test/plot_test/launch/plot_test.launch" />
         <option value="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h" />
-        <option value="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" />
         <option value="$PROJECT_DIR$/test/plot_test/src/plot_test.cpp" />
+        <option value="$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp" />
       </list>
     </option>
   </component>
@@ -368,14 +367,6 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="plot_test" type="462c0819:PsiDirectoryNode" />
-              <item name="launch" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="src" type="b2602c69:ProjectViewProjectNode" />
-              <item name="src" type="47feb1d3:ProjectViewModuleNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="plot_test" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -388,7 +379,7 @@
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/test/plot_test/launch" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../projects/dmp_se3_kf/src" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -733,12 +724,12 @@
       <workItem from="1560593308990" duration="5566000" />
       <workItem from="1560601175164" duration="4187000" />
       <workItem from="1560964562898" duration="5143000" />
-      <workItem from="1561015510894" duration="18800000" />
+      <workItem from="1561015510894" duration="21512000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="33696000" />
+    <option name="totallyTimeSpent" value="36408000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="67" y="24" width="1845" height="1056" extended-state="4" />
@@ -807,13 +798,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test/plot_test/launch/plot_test.launch">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="96">
+          <caret line="4" column="29" selection-start-line="4" selection-start-column="29" selection-end-line="4" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/plot_test/src/plot_test.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="35" column="24" selection-start-line="35" selection-start-column="24" selection-end-line="35" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="505" column="49" lean-forward="true" selection-start-line="505" selection-start-column="2" selection-end-line="505" selection-end-column="49" />
+        <state relative-caret-position="1607">
+          <caret line="368" column="13" selection-start-line="368" selection-start-column="9" selection-end-line="368" selection-end-column="13" />
           <folding>
             <element signature="e#1769#2957#1" />
-            <element signature="e#3100#4471#1" />
             <element signature="e#5196#5219#0" expanded="true" />
             <element signature="e#5458#5481#0" expanded="true" />
             <element signature="e#9465#9488#0" expanded="true" />
@@ -827,16 +834,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/plot_lib/include/plot_lib/qt_plot.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="794">
-          <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
+        <state relative-caret-position="384">
+          <caret line="109" column="44" selection-start-line="109" selection-start-column="44" selection-end-line="109" selection-end-column="44" />
           <folding>
             <element signature="e#407#1819#0" />
             <element signature="e#1821#1887#0" />
             <element signature="e#1889#1988#0" />
             <element signature="e#1990#2094#0" />
-            <element signature="e#2407#3575#0" />
+            <element signature="e#2096#2602#0" />
             <element signature="e#3577#3658#0" />
             <element signature="e#3660#3751#0" />
+            <element signature="e#3897#5052#0" />
             <element signature="e#5054#5201#0" />
             <element signature="e#5203#5265#0" />
             <element signature="e#5267#5317#0" />
@@ -859,7 +867,6 @@
             <element signature="e#6042#6132#0" />
             <element signature="e#6134#6385#0" />
             <element signature="e#6387#6430#0" />
-            <element signature="e#6432#7590#0" />
             <element signature="e#7592#7642#0" />
             <element signature="e#7644#7757#0" />
             <element signature="e#7759#8016#0" />
@@ -880,7 +887,6 @@
             <element signature="e#13464#13535#0" />
             <element signature="e#13537#13615#0" />
             <element signature="e#13617#13688#0" />
-            <element signature="e#13690#13848#0" />
             <element signature="e#13850#14146#0" />
             <element signature="e#14148#14274#0" />
             <element signature="e#14276#14482#0" />
@@ -943,23 +949,6 @@
             <element signature="e#17010#17058#0" />
             <element signature="e#17058#17121#0" />
             <element signature="e#17133#17193#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/plot_test/launch/plot_test.launch">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="4" column="29" selection-start-line="4" selection-start-column="29" selection-end-line="4" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/plot_test/src/plot_test.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="115" column="51" selection-start-line="115" selection-start-column="51" selection-end-line="115" selection-end-column="51" />
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -425,8 +425,10 @@ void Axes::plotSlot(const void *x_data, const void *y_data)
 
   graphs.push_back( new Graph(graph, this) );
   last_graph = graphs.back();
-  last_graph->setColorSlot(static_cast<Color>(color_ind));
+
+  last_graph->setColorSlot(QtPlot::getQColor(static_cast<Color>(color_ind)));
   color_ind = (color_ind+1)%QtPlot::N_COLORS;
+
   last_graph->setLineStyleSlot(SolidLine);
   last_graph->setLineWidthSlot(2.0);
   last_graph->setMarkerStyleSlot(ssDot);
