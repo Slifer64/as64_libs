@@ -36,6 +36,7 @@ enum PROPERTY
 {
   Color_,
   LineWidth_,
+  BarWidth_,
   LineStyle_,
   MarkerSize_,
   MarkerStyle_,
@@ -342,8 +343,61 @@ private:
   void setPropertyHelper(pl_::PROPERTY p, pl_::LineStyle p_value);
   void setPropertyHelper(pl_::PROPERTY p, pl_::MarkerStyle p_value);
 
-  Axes *parent;
+  Axes *axes;
   QCPGraph *qcp_graph;
+};
+
+
+// =============================================
+// =============   BarGraph   ==================
+// =============================================
+
+class BarGraph : public QWidget {
+
+Q_OBJECT
+
+  friend Axes;
+
+public:
+  BarGraph(QCPBars *qcp_bars, Axes *parent = 0);
+
+  ~BarGraph();
+
+  template<typename T, typename... Arguments>
+  void setProperty(pl_::PROPERTY p, T p_value, Arguments... parameters)
+  {
+    setPropertyHelper(p, p_value);
+    setProperty(parameters...);
+  }
+
+  void setColor(Color color);
+
+  void setColor(const QColor &color);
+
+  void setWidth(double width);
+
+signals:
+
+  void setColorSignal(const QColor &color);
+
+  void setLineStyleSignal(int style);
+
+  void setWidthSignal(double width);
+
+private slots:
+
+  void setColorSlot(const QColor &color);
+
+  void setWidthSlot(double width);
+
+private:
+  void setProperty();
+  void setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value);
+  void setPropertyHelper(pl_::PROPERTY p, const QColor &p_value);
+  void setPropertyHelper(pl_::PROPERTY p, double p_value);
+
+  Axes *axes;
+  QCPBars *qcp_bars;
 };
 
 
@@ -366,6 +420,25 @@ public:
 
   void grid(bool set);
 
+  BarGraph *bar(const arma::vec &x_data, const arma::vec &y_data);
+  BarGraph *bar(const arma::rowvec &x_data, const arma::rowvec &y_data);
+
+  template<typename... Arguments>
+  BarGraph *bar(const arma::rowvec  &x, const arma::rowvec  &y, Arguments... properties)
+  {
+    BarGraph *bar_graph = bar(x, y);
+    bar_graph->setProperty(properties...);
+    return bar_graph;
+  }
+
+  template<typename... Arguments>
+  BarGraph *bar(const arma::vec  &x, const arma::vec  &y, Arguments... properties)
+  {
+    BarGraph *bar_graph = bar(x, y);
+    bar_graph->setProperty(properties...);
+    return bar_graph;
+  }
+
   Graph *plot(const arma::vec &data);
   Graph *plot(const arma::rowvec &data);
 
@@ -387,6 +460,7 @@ public:
     graph->setProperty(properties...);
     return graph;
   }
+
 
   template<typename... Arguments>
   TextLabel *title(const std::string &title_text, Arguments... properties)
@@ -438,6 +512,8 @@ signals:
 
   void plotSignal(const void *x_data, const void *y_data);
 
+  void barSignal(const void *x_data, const void *y_data);
+
   void setTitleSignal(const QString &title);
 
   void setXLabelSignal(const QString &label);
@@ -456,6 +532,8 @@ private slots:
 
   void plotSlot(const void *x_data, const void *y_data);
 
+  void barSlot(const void *x_data, const void *y_data);
+
   void setTitleSlot(const QString &title);
 
   void setXLabelSlot(const QString &label);
@@ -470,14 +548,14 @@ private slots:
 private:
   bool hold_on;
   Figure *parent;
-  std::vector<Graph *> graphs;
+  std::vector<Graph *> graphs; // maybe use shared pointers here...?
+  std::vector<BarGraph *> bars;
 
   QCPAxisRect *axes;
   QCPLayoutGrid *axes_grid;
 
   int color_ind;
 
-  Graph *last_graph;
   TextLabel *title_;
   Legend *legend_;
   AxisLabel *x_ax_label;
@@ -488,7 +566,9 @@ private:
 // =============   Figure   ==================
 // ===========================================
 
-class Figure : public QMainWindow {
+class Figure : public QMainWindow
+{
+
 Q_OBJECT
 
 public:
@@ -497,7 +577,7 @@ public:
 
   ~Figure();
 
-  Axes *getAxes(int k);
+  Axes *getAxes(int k=0);
   Axes *getAxes(int row, int col);
   void setAxes(int n1, int n2);
   void clearAxes(int k = -1);

@@ -134,6 +134,29 @@ int main(int argc, char** argv)
     ax->drawnow();
   }
 
+  // ================  Bar plot  ====================
+
+  // create some data
+  int n_bars = 10;
+  arma::rowvec x_data(n_bars);
+  arma::rowvec y_data(n_bars);
+  arma::rowvec y_data2(n_bars);
+  for (int i=0; i<n_bars; i++)
+  {
+    x_data[i] = i+1;
+    y_data[i] = 0.5*(rand()%20)+0.5;
+    y_data2[i] = 0.5*(rand()%20)+0.5;
+  }
+
+  fig = pl_::QtPlot::figure("Bar plot figure", {1000, 500, 700, 500});
+  ax = fig->getAxes();
+  ax->hold(true);
+  pl_::BarGraph *bars = ax->bar(x_data, y_data, pl_::BarWidth_,0.8, pl_::Color_,QColor(100,20,250));
+  ax->bar(x_data, y_data2, pl_::BarWidth_,0.6, pl_::Color_,QColor(100,220,50));
+  ax->xlabel("bars centers", pl_::FontSize_,14);
+  ax->legend({"bars-1", "bars-2"}, pl_::FontSize_,15);
+  ax->drawnow();
+
   // ======================================================
 
   std::string temp;
