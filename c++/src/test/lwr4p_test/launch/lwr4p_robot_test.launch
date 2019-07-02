@@ -43,7 +43,7 @@
           q1: [-0.46, 0.58, 0.28, -1.4, 0, -0.25, 1.27]
           q2: [2.1, 0.92, -0.24, -1.38, 0.03, -1.51, -1.42]
           time_duration: 5.5 <!-- duration to move from q1 to q2 and vice versa -->
-          use_sim: false
+          use_sim: true
         </rosparam>
 
   </node>

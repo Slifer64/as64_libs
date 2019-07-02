@@ -157,8 +157,14 @@ classdef EKF < handle
             
             if (nargin < 2), cookie=[]; end
                     
-            this.F_k = this.stateTransFunJacob_ptr(this.theta, cookie);             
-            this.theta = this.stateTransFun_ptr(this.theta, cookie);
+            if (~isempty(cookie))
+                this.F_k = this.stateTransFunJacob_ptr(this.theta, cookie);             
+                this.theta = this.stateTransFun_ptr(this.theta, cookie);
+            else
+                this.F_k = this.stateTransFunJacob_ptr(this.theta);             
+                this.theta = this.stateTransFun_ptr(this.theta);
+            end
+            
             this.P = this.a_p^2*this.F_k*this.P*this.F_k' + this.Q;
     
         end
@@ -173,9 +179,9 @@ classdef EKF < handle
             
             % =====  Retrive the measurement function Jacobian  ===== 
             this.H_k = this.msrFunJacob_ptr(this.theta, cookie);
-            
-            % =====  Correction estimates ===== 
             z_hat = this.msrFun_ptr(this.theta, cookie);
+
+            % =====  Correction estimates ===== 
             Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.R);
             this.theta = this.theta + Kg * (z - z_hat);
             
@@ -234,6 +240,7 @@ classdef EKF < handle
             F_k = zeros(N_params,N_params);
             % compute Jacobian numerically
             dtheta_j = zeros(N_params,1);
+            
             for j=1:N_params
                 dtheta_j(j) = this.dtheta(j);
                 Ftheta2 = this.stateTransFun_ptr(theta + dtheta_j, cookie);
@@ -251,7 +258,7 @@ classdef EKF < handle
         %  @return H_k: The measurement function's Jacobian.
         function H_k = calcMsrFunJacob(this, theta, cookie)
             
-            if (nargin < 2), cookie=[]; end
+            if (nargin < 3), cookie=[]; end
             
             N_params = length(theta);
             N_out = size(this.R,1);
@@ -260,6 +267,7 @@ classdef EKF < handle
             
             % compute Jacobian numerically
             dtheta_j = zeros(N_params,1);
+            
             for j=1:N_params
                 dtheta_j(j) = this.dtheta(j);
                 Htheta2 = this.msrFun_ptr(theta + dtheta_j, cookie);

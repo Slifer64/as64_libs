@@ -16,17 +16,12 @@ R_hat = 10*R;
 P0 = 10*diag([1 1]);
 
 %% Construct the filter
-n_params = length(x0_hat);
-n_msr = length(vdp.msrFun(x0_hat));
-ekf = EKF(n_params, n_msr, @vdp.stateTransFun, @vdp.msrFun);
-ekf.theta = x0_hat;
-ekf.P = P0;
-ekf.setProcessNoiseCov(Q);
-ekf.setMeasureNoiseCov(R_hat);
-ekf.setFadingMemoryCoeff(1.0);
-ekf.setPartDerivStep(0.001);
-% ekf.setStateTransFunJacob(@vdp.stateTransFunJacob);
-% ekf.setMsrFunJacob(@vdp.msrFunJacob);
+ekf = extendedKalmanFilter(@vdp.stateTransFun, @vdp.msrFun, x0_hat);
+ekf.MeasurementNoise = R_hat;
+ekf.ProcessNoise = Q;
+ekf.StateCovariance = P0;
+% ekf.StateTransitionJacobianFcn = @vdp.stateTransFunJacob;
+% ekf.MeasurementJacobianFcn = @vdp.msrFunJacob;
 
 Time = 0:dt:5;
 x_data = [];
@@ -42,8 +37,8 @@ for i=1:length(Time)
 end
 
 rng(1); % Fix the random number generator for reproducible results
-n_msr = length(vdp.msrFun(x_data(:,1)));
-y_nn_data = zeros(n_msr, length(Time));
+n_out = length(vdp.msrFun(x_data(:,1)));
+y_nn_data = zeros(n_out, length(Time));
 for j=1:length(y_nn_data), y_nn_data(:,j) = vdp.msrFun(x_data(:,j)); end
 y_data = y_nn_data + sqrt(R)*randn(size(y_nn_data)); % sqrt(R): Standard deviation of noise
 
@@ -57,8 +52,8 @@ e = zeros(n_steps,1); % Residuals (or innovations)
 
 P_data = [];
 x_hat_data = [];
-P = ekf.P;
-x_hat = ekf.theta;
+P = ekf.StateCovariance;
+x_hat = ekf.State;
 
 for k=1:n_steps
     
@@ -66,7 +61,7 @@ for k=1:n_steps
     P_data = [P_data P(:)];
     
     % Residuals (or innovations): Measured output - Predicted output
-    e(k) = y_data(k) - vdp.msrFun(ekf.theta); % ukf.State is x[k|k-1] at this point
+    e(k) = y_data(k) - vdp.msrFun(ekf.State); % ukf.State is x[k|k-1] at this point
     
     % Incorporate the measurements at time k into the state estimates by
     % using the "correct" command. This updates the State and StateCovariance
@@ -74,8 +69,8 @@ for k=1:n_steps
     % are also produced as the output of the "correct" command.
     ekf.correct(y_data(k));
     
-    P = ekf.P;
-    x_hat = ekf.theta;
+    P = ekf.StateCovariance;
+    x_hat = ekf.State;
 
     % Predict the states at next time step, k+1. This updates the State and
     % StateCovariance properties of the filter to contain x[k+1|k] and
@@ -94,7 +89,7 @@ plot(Time,x_data(1,:), 'LineWidth',2.0, 'Color','blue');
 plot(Time,x_hat_data(1,:), 'LineWidth',2.0, 'Color','magenta');
 legend({'$x_1$','$\hat{x}_1$'}, 'interpreter','latex', 'fontsize',15);
 ylabel('$x_1$', 'interpreter','latex', 'fontsize',17);
-title('EKF estimation results', 'interpreter','latex', 'fontsize',17);
+title('EKF matlab estimation results', 'interpreter','latex', 'fontsize',17);
 hold off;
 subplot(2,2,3);
 hold on;

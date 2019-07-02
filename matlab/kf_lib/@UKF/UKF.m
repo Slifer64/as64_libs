@@ -230,14 +230,16 @@ classdef UKF < handle
         %  @param[in] x: current state.
         %  @param[in] P: state covariance.
         %  @param[in] Q: process noise covariance.
-        function predict(this, cookie)
+        function [theta, Sigma_points] = predict(this, cookie)
             
             if (nargin < 2), cookie=[]; end
             
             X = this.genSigmaPoints(this.theta, this.P);
-            [this.theta, this.P] = this.unscentedTransform(@(x)this.stateTransFun_ptr(x,cookie), X, this.Q);
+            [this.theta, this.P, Sigma_points] = this.unscentedTransform(@(x)this.stateTransFun_ptr(x,cookie), X, this.Q);
             
             this.P = this.a_p^2*(this.P - this.Q) + this.Q;
+            
+            theta = this.theta;
             
         end
         
@@ -248,12 +250,15 @@ classdef UKF < handle
         %  @param[in] P: state covariance.
         %  @param[in] y_out: Groundtruth measurements.
         %  @param[in] R: measurement noise covariance.
-        function correct(this, y, cookie)
+        function [theta_p, theta_m, Sigma_points] = correct(this, y, cookie)
 
             if (nargin < 3), cookie=[]; end
             
             X = this.genSigmaPoints(this.theta, this.P);
             N_sigma = size(X,2);
+            
+            Sigma_points = X;
+            theta_m = this.theta;
             
             [y_hat, Py, ~, Ydiff] = this.unscentedTransform(@(x)this.msrFun_ptr(x,cookie), X, this.R);
 
@@ -293,6 +298,8 @@ classdef UKF < handle
             
             this.K = Kg;
             
+            theta_p = this.theta;
+            
         end
         
         
@@ -314,7 +321,7 @@ classdef UKF < handle
                 Y(:,j)  = fmap(X(:,j));
             end
 
-            % calculate average
+            % calculate average  
             y = Y*this.W_s;
             
             % calculate covariance
