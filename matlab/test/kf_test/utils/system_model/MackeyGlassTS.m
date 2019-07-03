@@ -14,7 +14,7 @@ classdef MackeyGlassTS < SysModel
 
             if (nargin < 2), a = 0.2; end
             if (nargin < 3), b = 0.1; end
-            if (nargin < 4), tau = 17; end
+            if (nargin < 4), tau = 30; end
             if (nargin < 5), x0 = 1.2; end
             
             deltat = 0.01;
@@ -26,27 +26,44 @@ classdef MackeyGlassTS < SysModel
             sample_n = 3*tau/deltat; % 120000;
             [T, X] = MackeyGlassTS.mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
             
-            n_in = this.tau;
-            n_out = 1;
-            this.net = network(n_in, n_out);
+            n_in = 15;
+            net = feedforwardnet([10]);
+            net.numinputs = n_in;
+            net.inputConnect = [ones(1, n_in); zeros(1, n_in)];
             
+            n_data = length(T);
+            X_data = zeros(n_in,n_data);
+            x_in = zeros(n_in,1);
+            for j=1:n_data
+                x_in(2:end) = x_in(1:end-1);
+                x_in(1) = X(j);
+                X_data(:,j) = x_in;
+            end
+            Xin = cell(n_in,1);
+            for i=1:n_in, Xin{i} = X_data(i,:); end            
+            Xout = T;
             
+            net = train(net,Xin,Xout);
             
-            this.net.train(T,X);
-            
-            X_hat = zeros(length(T));
-            x_hat = [x0; ]
-            for i=1:length(T)
-                
+            X_hat = zeros(1,n_data);
+            x_in = [X(1) zeros(n_in-1,1)];
+            for j=1:length(T)
+                x_out = net({x_in});
+                X_hat(j) = x_out{1};
+                x_in(2:end) = x_in(1:end-1);
+                x_in(1) = X_hat(j);
             end
             
             figure;
             hold on;
-            plot(T, X);
+            plot(T,X, 'LineWidth',2, 'Color','blue');
+            plot(T,X_hat, 'LineWidth',2, 'Color','magenta');
+            legend({'$x$','$\hat{x}$'}, 'interpreter','latex', 'fontsize',16);
             hold off;
             
             stop
             
+            this.net  = net;
         end
 
         

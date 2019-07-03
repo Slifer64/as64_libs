@@ -31,7 +31,7 @@ x2 = t;
 X = {x1; x2};
 y = x1.*x2;
 
-net = fitnet([10]);
+net = feedforwardnet([10]);
 net.numinputs = 2;
 net.inputConnect = [1 1; 0 0];
 % view(net)
