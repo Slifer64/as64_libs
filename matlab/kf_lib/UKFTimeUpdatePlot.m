@@ -33,7 +33,7 @@ classdef UKFTimeUpdatePlot < handle
             end
             this.sc_handle{N_sigma+1} = scatter([],[], 'Parent', ax, 'SizeData',100, 'LineWidth',3, 'Marker','o');
             this.sc_handle{N_sigma+2} = scatter([],[], 'Parent', ax, 'SizeData',100, 'LineWidth',3, 'Marker','d');
-            title(ax, 'Time update', 'interpreter','latex', 'fontsize',17, 'Color',[0 1 0], 'BackgroundColor',[1 1 1], 'EdgeColor',[0 1 0]);
+            title(ax, 'Time update', 'interpreter','latex', 'fontsize',17, 'Color',[0 0 1], 'BackgroundColor',[1 1 1], 'EdgeColor',[0 1 0]);
             xlabel('$x_1$', 'interpreter','latex', 'fontsize',16, 'Parent',ax);
             ylabel('$x_2$', 'interpreter','latex', 'fontsize',16, 'Parent',ax);
             ax.XLim = [-0.1 0.1];

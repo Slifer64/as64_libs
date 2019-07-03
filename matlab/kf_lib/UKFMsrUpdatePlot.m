@@ -1,7 +1,7 @@
-%% UKF measurement upodate plot class
+%% Plot estimate and actual signal online
 %
 
-classdef UKFMsrUpdatePlot < handle
+classdef ActualVsEstimatePlot < handle
 
 
     %% ====  Methods  =====
@@ -11,7 +11,7 @@ classdef UKFMsrUpdatePlot < handle
         % @param[in] ax: axes handle.
         % @param[in] N_sigma: number of sigma points.
         %
-        function this = UKFMsrUpdatePlot(ax, N_sigma)
+        function this = UKFMsrUpdatePlot(ax)
         
             this.ax = ax;
             this.N_sigma = N_sigma;

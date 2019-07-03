@@ -90,35 +90,7 @@
 
 
 classdef UKF < handle
-    properties
-        alpha % alpha parameter of UKF
-        beta % beta parameter of UKF
-        k % k parameter of UKF
-        L % number of states to estimate
-        
-        lambda %
-        
-        W_s % weights for state update
-        W_c % weights for state covariance update
-        
-        K % Kalman gain
-        Q % process noise covariance
-        R % measurement noise covariance
-        
-        a_p % fading memory coefficient
-        theta % parameters estimate
-        P % parameters estimation error covariance
-        
-        % Apply projection so that:
-        % A_c * theta <= b_c
-        enable_constraints
-        A_c % constraint matrix
-        b_c % constraints bounds
-        
-        stateTransFun_ptr % state transition function pointer
-        msrFun_ptr % measurement function pointer
-    end
-
+    
     methods
         %% Unscented Kalman Filter constructor
         %  @param[in] alpha: alpha parameter of UKF.
@@ -291,6 +263,15 @@ classdef UKF < handle
                 Kg = ( I - D'/(D*D')*D ) * Kg;
                 this.theta = this.theta - D'/(D*D')*(D*this.theta-d); 
             end
+            
+%             disp('================================================');
+%             y_err = y - y_hat
+%             Px = this.P
+%             Pxy
+%             Py
+%             Kg
+%             disp('================================================');
+            
 
             % =====  Calculate new covariance  =====
             this.P = this.P - Kg*Py*Kg'; % ???
@@ -349,4 +330,35 @@ classdef UKF < handle
 
 
     end
+    
+    
+    properties
+        alpha % alpha parameter of UKF
+        beta % beta parameter of UKF
+        k % k parameter of UKF
+        L % number of states to estimate
+        
+        lambda %
+        
+        W_s % weights for state update
+        W_c % weights for state covariance update
+        
+        K % Kalman gain
+        Q % process noise covariance
+        R % measurement noise covariance
+        
+        a_p % fading memory coefficient
+        theta % parameters estimate
+        P % parameters estimation error covariance
+        
+        % Apply projection so that:
+        % A_c * theta <= b_c
+        enable_constraints
+        A_c % constraint matrix
+        b_c % constraints bounds
+        
+        stateTransFun_ptr % state transition function pointer
+        msrFun_ptr % measurement function pointer
+    end
+    
 end
