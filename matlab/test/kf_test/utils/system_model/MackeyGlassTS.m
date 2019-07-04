@@ -69,7 +69,7 @@ classdef MackeyGlassTS < SysModel
         
         %% State transition function.
         function x_next = stateTransFun(this, x, cookie) 
-            
+
             x_next = this.net(x);
 
         end

@@ -2,58 +2,68 @@ clc;
 close all;
 clear;
 
-a = 0.2;
-b = 0.1;
-tau = 17;
+a = 0.15;
+b = 0.05;
+tau = 10;
 x0 = 1.2;
 
-deltat = 0.01;
+deltat = 0.05;
 
-sample_n = 3*tau/deltat; % 120000;
-[T, X] = mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
+sample_n = 30*tau/deltat; % 120000;
+[Time, X] = mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
 
-n_in = 20;
-net = feedforwardnet([1]);
-net.numinputs = n_in;
-net.inputConnect = [ones(1, n_in); zeros(1, n_in)];
+% plot(Time,X)
+% return
 
-n_data = length(T);
-X_data = zeros(n_in,n_data);
-x_in = zeros(n_in,1);
-for j=1:n_data
-    x_in(2:end) = x_in(1:end-1);
-    x_in(1) = X(j);
-    X_data(:,j) = x_in;
-end
-Xin = cell(n_in,1);
-for i=1:n_in, Xin{i} = X_data(i,:); end            
-Xout = T';
+n_data = length(Time);
 
-net = train(net,Xin,Xout);
-
-X_hat = zeros(1,n_data);
-x_in = zeros(n_in,1);
-% for j=1:n_data
-%     if (mod(j,100)==0), fprintf('%i/%i\n', j,n_data); end
-%     
-%     x_out = net({x_in'});
-%     X_hat(j) = x_out{1};
-%     
-% %     x_in(2:end) = x_in(1:end-1);
-% %     x_in(1) = X_hat(j);
-%     
-%     x_in(2:end) = x_in(1:end-1);
-%     x_in(1) = X(j);
-% end
-
-X_hat = net(Xin);
-X_hat = [X_hat{:}];
+n_lag = 15;
+net = narnet(1:n_lag, 20);
+T = num2cell(X');
+[Xs,Xi,Ai,Ts] = preparets(net,{},{},T);
 
 figure;
 hold on;
-plot(T,X, 'LineWidth',2, 'Color','blue');
-plot(T,X_hat, 'LineWidth',2, 'Color','magenta');
-legend({'$x$','$\hat{x}$'}, 'interpreter','latex', 'fontsize',16);
+plot(Time, X, 'LineWidth',2, 'Color','blue', 'LineStyle','-');
+plot(Time(1:n_lag), cell2mat(Xi), 'LineWidth',2, 'Color','green', 'LineStyle','--');
+plot(Time(n_lag+1:end), cell2mat(Xs), 'LineWidth',2, 'Color','magenta', 'LineStyle','--');
+legend({'$X$','$X_i$','$X_s$'}, 'interpreter','latex', 'fontsize',18);
+hold off;
+
+% return 
+
+net = train(net,Xs,Ts,Xi,Ai);
+
+[Y,Xf,Af] = net(Xs,Xi,Ai);
+% perf = perform(net,Ts,Y)
+X_hat = [X(1:n_lag); cell2mat(Y)'];
+
+% X2_hat = zeros(1, n_data);
+% xin = Xi;
+% X2_hat(1:n_lag) = cell2mat(xin);
+% for j=n_lag+1:n_data
+%     xout = net(cell(0,1),xin,Ai);
+%     X2_hat(j) = xout{1};
+%     xin(2:end) = xin(1:end-1);
+%     xin{1} = xout{1};
+%     
+%     err = abs(X_hat(j)-X(j))
+%     err2 = abs(xout{1}-X(j))
+%     pause
+% end
+
+[netc,Xic,Aic] = closeloop(net,Xf,Af);
+% view(netc)
+Y2 = netc(cell(0,n_data-n_lag),Xic,Aic);
+X2_hat = [X(1:n_lag); cell2mat(Y2)'];
+
+
+figure;
+hold on;
+plot(Time,X, 'LineWidth',2, 'Color','blue');
+plot(Time,X_hat, 'LineWidth',2, 'Color','magenta');
+plot(Time,X2_hat, 'LineWidth',2, 'Color','green');
+legend({'$x$','$\hat{x}$','$\hat{x}_2$'}, 'interpreter','latex', 'fontsize',16);
 hold off;
             
 
