@@ -2,12 +2,14 @@ clc;
 close all;
 clear;
 
+setdemorandstream(491218381)
+
 a = 0.15;
 b = 0.05;
-tau = 10;
+tau = 30;
 x0 = 1.2;
 
-deltat = 0.05;
+deltat = 1;
 
 sample_n = 30*tau/deltat; % 120000;
 [Time, X] = mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
@@ -17,8 +19,8 @@ sample_n = 30*tau/deltat; % 120000;
 
 n_data = length(Time);
 
-n_lag = 15;
-net = narnet(1:n_lag, 20);
+n_lag = 31;
+net = narnet(1:n_lag, [10]);
 T = num2cell(X');
 [Xs,Xi,Ai,Ts] = preparets(net,{},{},T);
 
@@ -46,10 +48,6 @@ X_hat = [X(1:n_lag); cell2mat(Y)'];
 %     X2_hat(j) = xout{1};
 %     xin(2:end) = xin(1:end-1);
 %     xin{1} = xout{1};
-%     
-%     err = abs(X_hat(j)-X(j))
-%     err2 = abs(xout{1}-X(j))
-%     pause
 % end
 
 [netc,Xic,Aic] = closeloop(net,Xf,Af);
