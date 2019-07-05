@@ -9,7 +9,7 @@ b = 0.05;
 tau = 30;
 x0 = 1.2;
 
-deltat = 1;
+deltat = 5;
 
 sample_n = 30*tau/deltat; % 120000;
 [Time, X] = mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
@@ -19,7 +19,7 @@ sample_n = 30*tau/deltat; % 120000;
 
 n_data = length(Time);
 
-n_lag = 31;
+n_lag = 7;
 net = narnet(1:n_lag, [10]);
 T = num2cell(X');
 [Xs,Xi,Ai,Ts] = preparets(net,{},{},T);
@@ -40,20 +40,27 @@ net = train(net,Xs,Ts,Xi,Ai);
 % perf = perform(net,Ts,Y)
 X_hat = [X(1:n_lag); cell2mat(Y)'];
 
-% X2_hat = zeros(1, n_data);
-% xin = Xi;
-% X2_hat(1:n_lag) = cell2mat(xin);
-% for j=n_lag+1:n_data
-%     xout = net(cell(0,1),xin,Ai);
-%     X2_hat(j) = xout{1};
-%     xin(2:end) = xin(1:end-1);
-%     xin{1} = xout{1};
-% end
+X2_hat = zeros(1, n_data);
+xin = Xi;
+X2_hat(1:n_lag) = cell2mat(xin);
+for j=n_lag+1:n_data
+    xout = net(cell(0,1),xin,Ai);
+%     xout = neural_function(xin,xin);
+    X2_hat(j) = xout{1};
+    xin(1:end-1) = xin(2:end);
+    xin{end} = xout{1};
+end
 
-[netc,Xic,Aic] = closeloop(net,Xf,Af);
-% view(netc)
-Y2 = netc(cell(0,n_data-n_lag),Xic,Aic);
-X2_hat = [X(1:n_lag); cell2mat(Y2)'];
+% [netc,Xic,Aic] = closeloop(net,Xf,Af);
+% % view(netc)
+% % Y2 = netc(cell(0,n_data-n_lag),Xic,Aic);
+% Y2 = cell(1, n_data-n_lag);
+% for j=1:length(Y2)
+%     xout = netc(cell(0,j),Xic,Aic);
+%     Y2{j} = xout{j};
+%     % Xic = xout;
+% end
+% X2_hat = [X(1:n_lag); cell2mat(Y2)'];
 
 
 figure;

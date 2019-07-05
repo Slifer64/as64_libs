@@ -8,69 +8,96 @@ classdef MackeyGlassTS < SysModel
     methods
             
         %% Constructor.
-        function this = MackeyGlassTS(dt, a, b, tau, x0)
+        function this = MackeyGlassTS(dt)
         
             this@SysModel(dt);
 
-            if (nargin < 2), a = 0.2; end
-            if (nargin < 3), b = 0.1; end
-            if (nargin < 4), tau = 30; end
-            if (nargin < 5), x0 = 1.2; end
-            
-            deltat = 0.01;
-            
-            this.a = a;
-            this.b = b;
-            this.tau = tau;
+            deltat = 5;
+            a = 0.2;
+            b = 0.1;
+            tau = 30;
+            x0 = 1.2;
  
-            sample_n = 3*tau/deltat; % 120000;
-            [T, X] = MackeyGlassTS.mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
+            this.trainNN(a, b, tau, x0, deltat);
             
-            n_in = 15;
-            net = feedforwardnet([10]);
-            net.numinputs = n_in;
-            net.inputConnect = [ones(1, n_in); zeros(1, n_in)];
+            return
             
-            n_data = length(T);
-            X_data = zeros(n_in,n_data);
-            x_in = zeros(n_in,1);
-            for j=1:n_data
-                x_in(2:end) = x_in(1:end-1);
-                x_in(1) = X(j);
-                X_data(:,j) = x_in;
+        end
+        
+        function trainNN(this, a, b, tau, x0, deltat)
+           
+            setdemorandstream(491218381);
+            
+            sample_n = round(30*tau/deltat);
+            [Time, X] = MackeyGlassTS.mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
+
+            n_data = length(Time);
+
+            n_lag = tau/deltat + 1;
+            
+            n_lag
+            
+            net = narnet(1:n_lag, [10]);
+            T = num2cell(X');
+            [Xs,Xi,Ai,Ts] = preparets(net,{},{},T);
+
+            % figure;
+            % hold on;
+            % plot(Time, X, 'LineWidth',2, 'Color','blue', 'LineStyle','-');
+            % plot(Time(1:n_lag), cell2mat(Xi), 'LineWidth',2, 'Color','green', 'LineStyle','--');
+            % plot(Time(n_lag+1:end), cell2mat(Xs), 'LineWidth',2, 'Color','magenta', 'LineStyle','--');
+            % legend({'$X$','$X_i$','$X_s$'}, 'interpreter','latex', 'fontsize',18);
+            % hold off;
+
+            net = train(net,Xs,Ts,Xi,Ai);
+
+            [Y,Xf,Af] = net(Xs,Xi,Ai);
+            % perf = perform(net,Ts,Y)
+            X_hat = [X(1:n_lag); cell2mat(Y)'];
+
+            X2_hat = zeros(1, n_data);
+            xin = Xi;
+            X2_hat(1:n_lag) = cell2mat(xin);
+            for j=n_lag+1:n_data
+                xout = net(cell(0,1),xin,Ai);
+                % xout = neural_function(xin,xin);
+                X2_hat(j) = xout{1};
+                xin(1:end-1) = xin(2:end);
+                xin{end} = xout{1};
             end
-            Xin = cell(n_in,1);
-            for i=1:n_in, Xin{i} = X_data(i,:); end            
-            Xout = T;
-            
-            net = train(net,Xin,Xout);
-            
-            X_hat = zeros(1,n_data);
-            x_in = [X(1) zeros(n_in-1,1)];
-            for j=1:length(T)
-                x_out = net({x_in});
-                X_hat(j) = x_out{1};
-                x_in(2:end) = x_in(1:end-1);
-                x_in(1) = X_hat(j);
-            end
-            
+
+            % [netc,Xic,Aic] = closeloop(net,Xf,Af);
+            % % view(netc)
+            % % Y2 = netc(cell(0,n_data-n_lag),Xic,Aic);
+            % Y2 = cell(1, n_data-n_lag);
+            % for j=1:length(Y2)
+            %     xout = netc(cell(0,j),Xic,Aic);
+            %     Y2{j} = xout{j};
+            %     % Xic = xout;
+            % end
+            % X2_hat = [X(1:n_lag); cell2mat(Y2)'];
+
+
             figure;
             hold on;
-            plot(T,X, 'LineWidth',2, 'Color','blue');
-            plot(T,X_hat, 'LineWidth',2, 'Color','magenta');
-            legend({'$x$','$\hat{x}$'}, 'interpreter','latex', 'fontsize',16);
+            plot(Time,X, 'LineWidth',2, 'Color','blue');
+            plot(Time,X_hat, 'LineWidth',2, 'Color','magenta');
+            plot(Time,X2_hat, 'LineWidth',2, 'Color','green');
+            legend({'$x$','$\hat{x} (open loop)$','$\hat{x} (closed loop)$'}, 'interpreter','latex', 'fontsize',16);
             hold off;
             
-            stop
-            
-            this.net  = net;
+            genFunction(net, 'mackeyGlassNN');
+
         end
 
         
         %% State transition function.
         function x_next = stateTransFun(this, x, cookie) 
 
-            x_next = this.net(x);
+            xin = num2cell(x);
+            % xout = this.net(xin);
+            xout  = this.mackeyGlassNN(xin, xin);
+            x_next = [x(2:end); xout{1}];
 
         end
         
@@ -78,7 +105,7 @@ classdef MackeyGlassTS < SysModel
         %% Measurement function.
         function y = msrFun(this, x, cookie)
         
-            y = x(1);
+            y = x(end);
 
         end
 
@@ -180,12 +207,6 @@ classdef MackeyGlassTS < SysModel
     end
     
     properties (Access = private)
-        
-        a
-        b
-        tau
-        
-        net
         
     end
     
