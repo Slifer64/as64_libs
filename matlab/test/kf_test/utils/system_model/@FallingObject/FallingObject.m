@@ -43,6 +43,8 @@ classdef FallingObject < SysModel
         %% Measurement function.
         function y = msrFun(this, x, cookie)
 
+            x = x .* this.x_n;
+            
             y = sqrt(this.M^2 + (x(1)-this.a)^2 );
 
         end
@@ -51,8 +53,10 @@ classdef FallingObject < SysModel
         %% Measurement function Jacobian.
         function H = msrFunJacob(this, x, cookie)
         
+            x = x .* this.x_n;
+            
             H = zeros(1,3);
-            H(1) = (x(1) - this.a) / sqrt(this.M^2 + (x(1)-this.a)^2 );
+            H(1) = (x(1) - this.a) / sqrt(this.M^2 + (x(1)-this.a)^2 ) * this.x_n(1);
 
         end
 
@@ -68,22 +72,7 @@ classdef FallingObject < SysModel
             F(2,1) = -0.5*this.po*exp(-x(1)/this.k)*x(2)^2*x(3)/this.k * this.x_n(1);
             F(2,2) = this.po*exp(-x(1)/this.k)*x(2)*x(3) * this.x_n(2);
             F(2,3) = 0.5*this.po*exp(-x(1)/this.k)*x(2)^2 * this.x_n(3);
-            
-            
 
-        end
-
-        
-        %% Get reference trajectory.
-        function Qd = getTrajectory(this, t)
-    
-            tn = t/this.T;   
-            eo_d = this.eo_0 + (this.eo_g - this.eo_0)*( 10*tn^3 - 15*tn^4 + 6*tn^5 );    
-            Qd = quatExp(eo_d);
-            
-            if ( dot(Qd,this.Qd_prev) < 0), Qd = -Qd; end
-            this.Qd_prev = Qd;
-            
         end
         
     end
