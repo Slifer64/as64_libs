@@ -133,6 +133,8 @@ end
 
 n_dim = size(x_data,1);
 
+% n_dim = 1;
+
 figure('Position',[282 128 1436 846]);
 for i=1:n_dim
     subplot(n_dim,2,(i-1)*2+1);

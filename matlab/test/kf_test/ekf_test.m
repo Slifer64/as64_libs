@@ -15,8 +15,10 @@ ekf.setProcessNoiseCov(Q);
 ekf.setMeasureNoiseCov(R_hat);
 ekf.setFadingMemoryCoeff(1.0);
 ekf.setPartDerivStep(0.001);
-% ekf.setStateTransFunJacob(@model.stateTransFunJacob);
-% ekf.setMsrFunJacob(@model.msrFunJacob);
+if (use_analytic_jacob)
+    ekf.setStateTransFunJacob(@model.stateTransFunJacob);
+    ekf.setMsrFunJacob(@model.msrFunJacob);
+end
 
 Time = 0:dt:tf;
 x_data = [];
@@ -78,6 +80,8 @@ end
 %% ========================================================================
 
 n_dim = size(x_data,1);
+
+% n_dim = 1;
 
 figure('Position',[282 128 1436 846]);
 for i=1:n_dim

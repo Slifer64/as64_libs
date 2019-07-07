@@ -8,9 +8,9 @@ setParams();
 
 % Construct the filter
 ukf = unscentedKalmanFilter(@model.stateTransFun, @model.msrFun, x0_hat, 'HasAdditiveMeasurementNoise',true);
-ukf.Alpha = 1e-1;
+ukf.Alpha = 1e-3;
 ukf.Beta = 2;
-ukf.Kappa = 1;
+ukf.Kappa = 0;
 ukf.StateCovariance = P0;
 ukf.MeasurementNoise = R_hat;
 ukf.ProcessNoise = Q;

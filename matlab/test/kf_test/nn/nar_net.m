@@ -4,12 +4,12 @@ clear;
 
 setdemorandstream(491218381)
 
-a = 0.15;
-b = 0.05;
-tau = 30;
-x0 = 1.2;
+a = 0.2;
+b = 0.1;
+tau = 17;
+x0 = 0.1;
 
-deltat = 5;
+deltat = 0.5;
 
 sample_n = 30*tau/deltat; % 120000;
 [Time, X] = mackeyglassDataSet(a, b, tau, x0, deltat, sample_n);
@@ -19,7 +19,7 @@ sample_n = 30*tau/deltat; % 120000;
 
 n_data = length(Time);
 
-n_lag = 7;
+n_lag = ceil(tau/deltat) + 1;
 net = narnet(1:n_lag, [10]);
 T = num2cell(X');
 [Xs,Xi,Ai,Ts] = preparets(net,{},{},T);
@@ -42,13 +42,15 @@ X_hat = [X(1:n_lag); cell2mat(Y)'];
 
 X2_hat = zeros(1, n_data);
 xin = Xi;
+% xin = num2cell(rand(1,7));
 X2_hat(1:n_lag) = cell2mat(xin);
 for j=n_lag+1:n_data
+    
     xout = net(cell(0,1),xin,Ai);
 %     xout = neural_function(xin,xin);
-    X2_hat(j) = xout{1};
+    X2_hat(j) = xout{end};
     xin(1:end-1) = xin(2:end);
-    xin{end} = xout{1};
+    xin{end} = xout{end};
 end
 
 % [netc,Xic,Aic] = closeloop(net,Xf,Af);
