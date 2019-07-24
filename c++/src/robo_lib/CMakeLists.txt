@@ -22,6 +22,8 @@ SET(SRC_LIST
   src/kinematic_chain.cpp
   src/ppc_joint_limit_avoid.cpp
   src/singular_value_filter.cpp
+  src/tool_estimator.cpp
+  src/xml_parser.cpp
 )
 
 include_directories(
