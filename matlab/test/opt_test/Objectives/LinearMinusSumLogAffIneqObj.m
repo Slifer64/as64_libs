@@ -33,11 +33,16 @@ classdef LinearMinusSumLogAffIneqObj < Objective
         %  @param[out] dJ: Gradient of the objective function value at the point 'x'.
         function dJ = gradFun(this, x)
             
-            m = length(this.b);
-            dJ = this.c;
-            for i=1:m
-                dJ = dJ + this.A(i,:)' / (this.b(i)-this.A(i,:)*x);
-            end
+            dJ = this.c + this.A' * ( ones(size(this.b)) ./ (this.b - this.A*x) );
+            
+        end
+        
+        %% Calculates the hessian of the objective function.
+        %  @param[in] x: Point at which to evaluate the gradient.
+        %  @param[out] H: Hessian of the objective function value at the point 'x'.
+        function H = hessianFun(this, x)
+
+            H = this.A' * diag( ( ones(size(this.b)) ./ (this.b - this.A*x) ).^2 ) * this.A;
             
         end
         

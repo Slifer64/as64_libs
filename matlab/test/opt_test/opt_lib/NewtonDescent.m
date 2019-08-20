@@ -1,19 +1,20 @@
 %% Gradient Descent class
 %
 
-classdef GradientDescent
+classdef NewtonDescent
        
     methods (Access = public)
         %% Gradient Descent class constructor.
         %  @param[in] objFun_ptr: Pointer to objective function.
         %  @param[in] gradObjFun_ptr: Pointer to gradient objective function.
         %  @param[in] lineSearch: Pointer to line search object. (optinal, default = BackTrackLineSearch)
-        function this = GradientDescent(objFun_ptr, gradObjFun_ptr, lineSearch)
+        function this = NewtonDescent(objFun_ptr, gradObjFun_ptr, hessianObjFun_ptr, lineSearch)
 
-            if (nargin < 3), lineSearch = BackTrackLineSearch(objFun_ptr, 0.01, 0.5); end
+            if (nargin < 4), lineSearch = BackTrackLineSearch(objFun_ptr, 0.01, 0.5); end
   
             this.objFun_ptr = objFun_ptr;
             this.gradObjFun_ptr = gradObjFun_ptr;
+            this.hessianObjFun_ptr = hessianObjFun_ptr;
             this.lineSearch = lineSearch;
 
         end
@@ -29,27 +30,32 @@ classdef GradientDescent
 
             x = x0;
             df = this.gradObjFun_ptr(x);
+            ddf = this.hessianObjFun_ptr(x);
             
             iter = 1;
             
             x_data = [];
 
-            while (norm(df)>eps)
+            while (true)
                 
                 if (iter > max_iter)
                     warning('Exiting due to maximum iterations reached...');
                     break;
                 end
+                iter = iter + 1;
                 
                 if (nargout > 1), x_data = [x_data x]; end
                 
-                dx = - df;
+                dx = - ddf\df;
                 t = this.lineSearch.run(x, dx, df);
                 x = x + t*dx;
 
                 df = this.gradObjFun_ptr(x);
-                
-                iter = iter + 1;
+                ddf = this.hessianObjFun_ptr(x);
+
+                lambda2 = -0.5*df'*dx;
+                if (lambda2 < eps), break; end
+                    
             end
             
             if (nargout > 1), x_data = [x_data x]; end
@@ -60,9 +66,10 @@ classdef GradientDescent
     
     properties (Access = protected)
         
-        objFun_ptr     % objective function pointer
-        gradObjFun_ptr % gradient of objective function pointer
-        lineSearch     % object to lineSearch object
+        objFun_ptr         % objective function pointer
+        gradObjFun_ptr     % gradient of objective function pointer
+        hessianObjFun_ptr  % hessian of objective function pointer
+        lineSearch         % object to lineSearch object
 
     end
     

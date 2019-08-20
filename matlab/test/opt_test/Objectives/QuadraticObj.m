@@ -39,6 +39,15 @@ classdef QuadraticObj < Objective
             
         end
         
+        %% Calculates the hessian of the objective function.
+        %  @param[in] x: Point at which to evaluate the gradient.
+        %  @param[out] H: Hessian of the objective function value at the point 'x'.
+        function H = hessianFun(this, x)
+            
+            H = 2*this.P;
+            
+        end
+        
     end
     
     methods (Static, Access = public)

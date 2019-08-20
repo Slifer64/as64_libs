@@ -20,7 +20,12 @@ classdef Objective
         %% Calculates the gradient of the objective function.
         %  @param[in] x: Point at which to evaluate the gradient.
         %  @param[out] dJ: Gradient of the objective function value at the point 'x'.
-        dJ = gradFun(this, x)   
+        dJ = gradFun(this, x)
+        
+        %% Calculates the hessian of the objective function.
+        %  @param[in] x: Point at which to evaluate the gradient.
+        %  @param[out] H: Hessian of the objective function value at the point 'x'.
+        H = hessianFun(this, x)
         
     end
     

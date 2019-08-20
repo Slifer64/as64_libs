@@ -38,6 +38,15 @@ classdef SumExpAffObj < Objective
             
         end
         
+        %% Calculates the hessian of the objective function.
+        %  @param[in] x: Point at which to evaluate the gradient.
+        %  @param[out] H: Hessian of the objective function value at the point 'x'.
+        function H = hessianFun(this, x)
+            
+            H = exp(this.a1'*x + this.b1)*this.a1*this.a1' + exp(this.a2'*x + this.b2)*this.a2*this.a2' + exp(this.a3'*x + this.b3)*this.a3*this.a3';
+            
+        end
+        
     end
     
     properties (Access = private)
