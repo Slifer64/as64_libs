@@ -25,11 +25,15 @@ classdef BackTrackLineSearch
         %  @param[in] df: Gradient of the objective at the current point.
         %  @param[out] t: The step length.
         function t = run(this, x, dx, df)
-
+            
             t = 1;
             f = this.objFun_ptr(x);
             adfdx = this.a*dot(df,dx);
 
+            if (~(isfinite(f) & isreal(f)))
+                error('[BackTrackLineSearch::run]: The given point in not in the domain of the objective function...');
+            end
+            
             while (true)
                 f_next = this.objFun_ptr(x + t*dx);
                 if (isfinite(f_next) & isreal(f_next))
@@ -42,7 +46,7 @@ classdef BackTrackLineSearch
         
     end
     
-    properties (Access = protected)
+    properties (Access = public)
         
         objFun_ptr   % objective function pointer
         a            % fraction of the decrease of the objective function predicted by linear extrapolation

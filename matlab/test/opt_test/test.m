@@ -6,6 +6,23 @@ set_matlab_utils_path();
 
 rng(0);
 
+% n = 100;
+% m = 50;
+% k = 10;
+% A = rand(m,n);
+% H = eye(n,n) + A'*A;
+% B = rand(n,k);
+% 
+% lowTriangSolve = dsp.LowerTriangularSolver;
+% upperTriangSolve = dsp.UpperTriangularSolver;
+% 
+% L = chol(H,'lower');
+% X = upperTriangSolve(L', lowTriangSolve(L,B));
+% X2 = H \ B;
+% 
+% norm(X(:)-X2(:))
+% 
+% return
 
 % %% ===========  Linear minus sum of log of affine inequalities  =================
 % n = 50;
@@ -83,4 +100,19 @@ if (length(x) == 2)
     hold off;
 end
 
+
+function 
+
+
+function P = genRandSPDmatrix(n)
+            
+    L = zeros(n,n);
+    for i=1:n, L(i,1:i) = rand(1,i); end
+    for i=1:n
+       L(i,i) = abs(L(i,i));
+       if (L(i,i) < 0.01), L(i,i) = 0.01; end
+    end
+    P = L*L';
+
+end
 
