@@ -25,7 +25,7 @@ classdef NewtonDescent < handle
 
         end
         
-        %% Calculates the minimum based on gradient descent
+        %% Calculates the minimum of unconstrained convex problem.
         %  @param[in] x0: Initial point.
         function [x, x_data] = solve(this, x0)
             
@@ -63,7 +63,7 @@ classdef NewtonDescent < handle
 
         end
         
-        %% Calculates the minimum based on gradient descent
+        %% Calculates the minimum of convex problem with equality constraints.
         %  @param[in] x0: Initial point.
         %  @param[in] A: Equality constrained matrix.
         %  @param[in] b: Equality constrained vector.
@@ -133,7 +133,8 @@ classdef NewtonDescent < handle
 
         end
         
-        function [x, w, x_data] = solveEqInfeasStart(this, x0, A, b, kkt_solve_method)
+        %% Calculates the minimum of convex problem with equality constraints. The starting point needs not be feasible.
+        function [x, v, x_data] = solveEqInfeasStart(this, x0, A, b, kkt_solve_method)
 
             m = size(A,1);
             
@@ -149,14 +150,12 @@ classdef NewtonDescent < handle
             
             x = x0;
             v = zeros(m,1);
-            g = this.gradObjFun_ptr(x); 
-            H = this.hessianObjFun_ptr(x);
             
             iter = 1;
             
             x_data = [];
             
-            r_fun = @(x,v) norm([A*x-b; this.gradObjFun_ptr(x) + A'*v]);
+            r_fun = @(x,v) norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
             a = this.lineSearch.a;
             b = this.lineSearch.b;
 
@@ -175,13 +174,13 @@ classdef NewtonDescent < handle
                 g = this.gradObjFun_ptr(x);
                 H = this.hessianObjFun_ptr(x);
                 
-                h = Ax - b;
-                [dx, dv] = solveKKT_ptr(this, H, A, g, h);
+                h = A*x - b;
+                [dx, dv] = solveKKT_ptr(H, A, g, h);
               
                 % back-tracking line search
                 t = 1;
                 while (true)
-                    r_next = r_fun(x+dx, v+dv);
+                    r_next = r_fun(x+t*dx, v+t*dv);
                     if (r_next <= (1-a*t)*r), break; end
                     t = b*t;         
                 end
@@ -190,6 +189,9 @@ classdef NewtonDescent < handle
                 v = v + t*dv;
                 
                 r = r_fun(x,v);
+                
+%                 v
+%                 pause
 
                 if (norm(A*x-b)<1e-10 & r<this.eps), break; end
                     
@@ -225,7 +227,7 @@ classdef NewtonDescent < handle
             
             [m, n] = size(A);
             
-            z = [H A'; A zeros(m,m)] \ [-g; h];
+            z = [H A'; A zeros(m,m)] \ -[g; h];
             dx = z(1:n);
             w = z(n+1:end);
             

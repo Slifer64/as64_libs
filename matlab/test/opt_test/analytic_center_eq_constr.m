@@ -14,8 +14,8 @@ set_matlab_utils_path();
 
 rng(0);
 
-n = 1000;
-m = 50;
+n = 5;
+m = 2;
 
 P = genRandSPDmatrix(n);
 A = P(1:m,:);
@@ -40,23 +40,36 @@ solver.setMaxIters(100);
 tic
 [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.FULL_INV);
 toc
-p_start = fun(x)
+fprintf('Solve eq - FULL_INV: p_star = %f\n',fun(x));
 
 tic
 [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
 toc
-p_start = fun(x)
+fprintf('Solve eq - BLOCK_ELIM: p_star = %f\n',fun(x));
 
 % tic
 % [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.EQ_ELIM);
 % toc
 % p_start = fun(x)
 
+x0 = rand(n,1);
+tic
+[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
+toc
+fprintf('Solve eq - Infeas start - FULL_INV: p_star = %f\n',fun(x));
+
+x0 = rand(n,1);
+tic
+[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
+toc
+fprintf('Solve eq - Infeas start - BLOCK_ELIM: p_star = %f\n',fun(x));
+
+
 tic
 options = optimoptions(@fmincon, 'Algorithm','interior-point', 'MaxIterations',100, 'SpecifyObjectiveGradient',true);
 x2 = fmincon(@fun,x0,[],[],A,b, [],[], [], options);
 toc
-p_start2 = fun(x2)
+fprintf('fmincon: p_star = %f\n',fun(x2));
 
 %% ============================================
 %% =============  Plot results ================
