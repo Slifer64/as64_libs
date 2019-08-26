@@ -6,6 +6,8 @@ set_matlab_utils_path();
 
 rng(0);
 
+global P x_c;
+
 n = 5;
 m = 2;
 
@@ -13,6 +15,10 @@ P = genRandSPDmatrix(n);
 A = P(1:m,:);
 x = 2*(rand(n,1) + 1.1);
 b = A*x;
+
+
+P = genRandSPDmatrix(n);
+x_c = rand(n,1);
 
 %% ============================================
 %% ============================================
@@ -36,12 +42,12 @@ fprintf('=====================================\n');
 fprintf('Solve eq - FULL_INV: p_star = %f\n',fun(x));
 fprintf('=====================================\n');
 
-tic
-[x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
-toc
-fprintf('=====================================\n');
-fprintf('Solve eq - BLOCK_ELIM: p_star = %f\n',fun(x));
-fprintf('=====================================\n');
+% tic
+% [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
+% toc
+% fprintf('=====================================\n');
+% fprintf('Solve eq - BLOCK_ELIM: p_star = %f\n',fun(x));
+% fprintf('=====================================\n');
 
 tic
 [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.EQ_ELIM);
@@ -50,21 +56,21 @@ fprintf('=====================================\n');
 fprintf('Solve eq - EQ_ELIM: p_star = %f\n',fun(x));
 fprintf('=====================================\n');
 
-x0 = rand(n,1);
-tic
-[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
-toc
-fprintf('=====================================\n');
-fprintf('Solve eq - Infeas start - FULL_INV: p_star = %f\n',fun(x));
-fprintf('=====================================\n');
-
-x0 = rand(n,1);
-tic
-[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
-toc
-fprintf('=====================================\n');
-fprintf('Solve eq - Infeas start - BLOCK_ELIM: p_star = %f\n',fun(x));
-fprintf('=====================================\n');
+% x0 = rand(n,1);
+% tic
+% [x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
+% toc
+% fprintf('=====================================\n');
+% fprintf('Solve eq - Infeas start - FULL_INV: p_star = %f\n',fun(x));
+% fprintf('=====================================\n');
+% 
+% x0 = rand(n,1);
+% tic
+% [x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
+% toc
+% fprintf('=====================================\n');
+% fprintf('Solve eq - Infeas start - BLOCK_ELIM: p_star = %f\n',fun(x));
+% fprintf('=====================================\n');
 
 tic
 options = optimoptions(@fmincon, 'Algorithm','interior-point', 'MaxIterations',100, 'SpecifyObjectiveGradient',true);
@@ -117,20 +123,26 @@ end
 
 function [f, df] = fun(x)
 
-    f = -sum(log(x+100));
+    global P x_c;
+    
+    f = (x-x_c)'*P*(x-x_c);
 
     if (nargout > 1), df = gradFun(x); end
 end
 
 function g = gradFun(x)
 
-    g = -1./(x+100);
+    global P x_c;
+    
+    g = P*(x-x_c);
 
 end
 
 function H = hessianFun(x)
 
-    H = diag(1./(x+100).^2);
+    global P;
+    
+    H = P;
 
 end
 
