@@ -49,21 +49,22 @@ fprintf('=====================================\n');
 % fprintf('Solve eq - BLOCK_ELIM: p_star = %f\n',fun(x));
 % fprintf('=====================================\n');
 
-tic
-[x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.EQ_ELIM);
-toc
-fprintf('=====================================\n');
-fprintf('Solve eq - EQ_ELIM: p_star = %f\n',fun(x));
-fprintf('=====================================\n');
-
-% x0 = rand(n,1);
 % tic
-% [x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
+% [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.EQ_ELIM);
 % toc
 % fprintf('=====================================\n');
-% fprintf('Solve eq - Infeas start - FULL_INV: p_star = %f\n',fun(x));
+% fprintf('Solve eq - EQ_ELIM: p_star = %f\n',fun(x));
 % fprintf('=====================================\n');
-% 
+
+x0 = rand(n,1);
+solver.setStopThreshold(1e-7);
+tic
+[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
+toc
+fprintf('=====================================\n');
+fprintf('Solve eq - Infeas start - FULL_INV: p_star = %f\n',fun(x));
+fprintf('=====================================\n');
+
 % x0 = rand(n,1);
 % tic
 % [x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.BLOCK_ELIM);

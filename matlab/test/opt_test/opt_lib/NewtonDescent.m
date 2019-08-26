@@ -163,14 +163,13 @@ classdef NewtonDescent < handle
             
             x_data = [];
             
-            r_fun = @(x,v) norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
+%             r1_fun = @(x,v) [this.gradObjFun_ptr(x) + A'*v; A*x-b];
+%             r_fun = @(x,v) norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
             a = this.lineSearch.a;
             b = this.lineSearch.b;
-
-            r = r_fun(x,v);
             
             while (true)
-                
+
                 if (iter > this.max_iter)
                     warning('[NewtonDescent::solveEq]: Exiting due to maximum iterations reached...');
                     break;
@@ -179,16 +178,26 @@ classdef NewtonDescent < handle
                 
                 if (nargout > 1), x_data = [x_data x]; end
                 
-                g = this.gradObjFun_ptr(x);
+                g = this.gradObjFun_ptr(x) + A'*v;
                 H = this.hessianObjFun_ptr(x);
                 
                 h = A*x - b;
                 [dx, dv] = solveKKT_ptr(H, A, g, h);
+                
+%                 x = x + dx;
+%                 v = v + dv;
+%                 r1_fun = @(x,v) [this.gradObjFun_ptr(x) + A'*v; A*x-b];
+%                 r1_fun(x+dx, v+dv)
+%                 [this.gradObjFun_ptr(x+dx) + A'*(v+dv); A*(x+dx)-b]
+%                 pause
               
                 % back-tracking line search
                 t = 1;
+                r = norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
                 while (true)
-                    r_next = r_fun(x+t*dx, v+t*dv);
+                    Dx = t*dx;
+                    Dv = t*dv;
+                    r_next = norm([this.gradObjFun_ptr(x+Dx) + A'*(v+Dv); A*(x+Dx)-b]); % r_fun(x+t*dx, v+t*dv);
                     if (r_next <= (1-a*t)*r), break; end
                     t = b*t;         
                 end
@@ -196,10 +205,7 @@ classdef NewtonDescent < handle
                 x = x + t*dx;
                 v = v + t*dv;
                 
-                r = r_fun(x,v);
-                
-%                 v
-%                 pause
+                r = norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
 
                 if (norm(A*x-b)<1e-10 & r<this.eps), break; end
                     
@@ -231,13 +237,13 @@ classdef NewtonDescent < handle
     methods (Access = private)
         
         %% Solves iteratively the KKT system using full inversion of the KKT matrix.
-        function [dx, w] = solveKKTFullInv(this, H, A, g, h)
+        function [dx, v] = solveKKTFullInv(this, H, A, g, h)
             
             [m, n] = size(A);
             
             z = [H A'; A zeros(m,m)] \ -[g; h];
             dx = z(1:n);
-            w = z(n+1:end);
+            v = z(n+1:end);
             
         end
         
