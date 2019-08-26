@@ -142,7 +142,7 @@ classdef NewtonDescent < handle
         end
         
         %% Calculates the minimum of convex problem with equality constraints. The starting point needs not be feasible.
-        function [x, v, x_data] = solveEqInfeasStart(this, x0, A, b, kkt_solve_method)
+        function [x, v, x_data, exit_code] = solveEqInfeasStart(this, x0, A, b, kkt_solve_method)
 
             m = size(A,1);
             
@@ -163,15 +163,16 @@ classdef NewtonDescent < handle
             
             x_data = [];
             
-%             r1_fun = @(x,v) [this.gradObjFun_ptr(x) + A'*v; A*x-b];
-%             r_fun = @(x,v) norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
-            a = this.lineSearch.a;
-            b = this.lineSearch.b;
+            r_fun = @(x,v) norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
+            
+            alpha = this.lineSearch.a;
+            beta = this.lineSearch.b;
             
             while (true)
 
                 if (iter > this.max_iter)
                     warning('[NewtonDescent::solveEq]: Exiting due to maximum iterations reached...');
+                    exit_code = NewtonDescent.MAX_ITERS_REACHED;
                     break;
                 end
                 iter = iter + 1;
@@ -183,39 +184,34 @@ classdef NewtonDescent < handle
                 
                 h = A*x - b;
                 [dx, dv] = solveKKT_ptr(H, A, g, h);
-                
-%                 x = x + dx;
-%                 v = v + dv;
-%                 r1_fun = @(x,v) [this.gradObjFun_ptr(x) + A'*v; A*x-b];
-%                 r1_fun(x+dx, v+dv)
-%                 [this.gradObjFun_ptr(x+dx) + A'*(v+dv); A*(x+dx)-b]
-%                 pause
-              
+
                 % back-tracking line search
                 t = 1;
-                r = norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
+                r = r_fun(x,v);
                 while (true)
                     Dx = t*dx;
                     Dv = t*dv;
-                    r_next = norm([this.gradObjFun_ptr(x+Dx) + A'*(v+Dv); A*(x+Dx)-b]); % r_fun(x+t*dx, v+t*dv);
-                    if (r_next <= (1-a*t)*r), break; end
-                    t = b*t;         
+                    r_next = r_fun(x+Dx,v+Dv);
+                    if (r_next <= (1-alpha*t)*r), break; end
+                    t = beta*t;         
                 end
 
                 x = x + t*dx;
                 v = v + t*dv;
                 
-                r = norm([this.gradObjFun_ptr(x) + A'*v; A*x-b]);
+                r = r_fun(x,v);
 
-                if (norm(A*x-b)<1e-10 & r<this.eps), break; end
+                if (norm(A*x-b)<1e-8 & r<this.eps)
+                    exit_code = NewtonDescent.TOLERANCE_REACHED;
+                    break;
+                end
                     
             end
             
             if (nargout > 1), x_data = [x_data x]; end
 
         end
-        
-        
+            
         %% Sets the stopping threshold for the solve method.
         %  @param[in] eps: Stopping threshold.
         function setStopThreshold(this, eps)

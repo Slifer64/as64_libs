@@ -8,17 +8,18 @@ rng(0);
 
 global P x_c;
 
-n = 5;
-m = 2;
+n = 100;
+m = 25;
 
 P = genRandSPDmatrix(n);
 A = P(1:m,:);
 x = 2*(rand(n,1) + 1.1);
 b = A*x;
 
-
 P = genRandSPDmatrix(n);
 x_c = rand(n,1);
+
+checkKKTcond = @(x,v) [gradFun(x) + A'*v; A*x-b];
 
 %% ============================================
 %% ============================================
@@ -36,50 +37,61 @@ solver.setMaxIters(100);
 % [x, x_data] = solver.solve(x0);
 
 tic
-[x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.FULL_INV);
+[x1, v, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.FULL_INV);
+fprintf('=====================================\n');
 toc
+fprintf('Solve eq - FULL_INV: p_star = %f\n',fun(x1));
 fprintf('=====================================\n');
-fprintf('Solve eq - FULL_INV: p_star = %f\n',fun(x));
-fprintf('=====================================\n');
+% checkKKTcond(x1,v)
 
 % tic
 % [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
-% toc
 % fprintf('=====================================\n');
+% toc
 % fprintf('Solve eq - BLOCK_ELIM: p_star = %f\n',fun(x));
 % fprintf('=====================================\n');
 
 % tic
 % [x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.EQ_ELIM);
-% toc
 % fprintf('=====================================\n');
+% toc
 % fprintf('Solve eq - EQ_ELIM: p_star = %f\n',fun(x));
 % fprintf('=====================================\n');
 
 x0 = rand(n,1);
-solver.setStopThreshold(1e-7);
 tic
-[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
-toc
+[x, v, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
 fprintf('=====================================\n');
+toc
 fprintf('Solve eq - Infeas start - FULL_INV: p_star = %f\n',fun(x));
 fprintf('=====================================\n');
+% checkKKTcond(x,v)
+
+x0 = rand(n,1);
+tic
+[x, v, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
+fprintf('=====================================\n');
+toc
+fprintf('Solve eq - Infeas start - BLOCK_ELIM: p_star = %f\n',fun(x));
+fprintf('=====================================\n');
+% checkKKTcond(x,v)
 
 % x0 = rand(n,1);
 % tic
 % [x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
-% toc
 % fprintf('=====================================\n');
+% toc
 % fprintf('Solve eq - Infeas start - BLOCK_ELIM: p_star = %f\n',fun(x));
 % fprintf('=====================================\n');
 
 tic
 options = optimoptions(@fmincon, 'Algorithm','interior-point', 'MaxIterations',100, 'SpecifyObjectiveGradient',true);
 x2 = fmincon(@fun,x0,[],[],A,b, [],[], [], options);
-toc
 fprintf('=====================================\n');
+toc
 fprintf('fmincon: p_star = %f\n',fun(x2));
 fprintf('=====================================\n');
+
 
 %% ============================================
 %% =============  Plot results ================
