@@ -27,24 +27,27 @@ x0 = A \ b;
 solver = NewtonDescent(@fun, @gradFun, @hessianFun);
 solver.setStopThreshold(1e-7);
 solver.setMaxIters(100);
-% [x, x_data] = solver.solve(x0);
+solver.setEqConstr(A,b);
 
 tic
-[x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.FULL_INV);
+solver.setKKTsolveMethod(KKTSolveMethod.FULL_INV);
+[x, w, x_data] = solver.solve(x0);
 fprintf('=====================================\n');
 toc
 fprintf('Solve eq - FULL_INV: p_star = %f\n',fun(x));
 fprintf('=====================================\n');
 
 tic
-[x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
+solver.setKKTsolveMethod(KKTSolveMethod.BLOCK_ELIM);
+[x, w, x_data] = solver.solveEq(x0);
 fprintf('=====================================\n');
 toc
 fprintf('Solve eq - BLOCK_ELIM: p_star = %f\n',fun(x));
 fprintf('=====================================\n');
 
 tic
-[x, w, x_data] = solver.solveEq(x0, A, b, KKTSolveMethod.EQ_ELIM);
+solver.setKKTsolveMethod(KKTSolveMethod.EQ_ELIM);
+[x, w, x_data] = solver.solve(x0);
 fprintf('=====================================\n');
 toc
 fprintf('Solve eq - EQ_ELIM: p_star = %f\n',fun(x));
@@ -52,7 +55,8 @@ fprintf('=====================================\n');
 
 x0 = x0 + 100*rand(n,1);
 tic
-[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.FULL_INV);
+solver.setKKTsolveMethod(KKTSolveMethod.FULL_INV);
+[x, w, x_data] = solver.solveEqInfeasStart(x0);
 fprintf('=====================================\n');
 toc
 fprintf('Solve eq - Infeas start - FULL_INV: p_star = %f\n',fun(x));
@@ -60,7 +64,8 @@ fprintf('=====================================\n');
 
 x0 = x0 + 100*rand(n,1);
 tic
-[x, w, x_data] = solver.solveEqInfeasStart(x0, A, b, KKTSolveMethod.BLOCK_ELIM);
+solver.setKKTsolveMethod(KKTSolveMethod.BLOCK_ELIM);
+[x, w, x_data] = solver.solveEqInfeasStart(x0);
 fprintf('=====================================\n');
 toc
 fprintf('Solve eq - Infeas start - BLOCK_ELIM: p_star = %f\n',fun(x));

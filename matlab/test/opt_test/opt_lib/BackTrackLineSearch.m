@@ -40,6 +40,9 @@ classdef BackTrackLineSearch
                     if ( f_next <= f + t*adfdx ), break; end
                 end   
                 t = this.b*t;
+                if (t < 1e-20)
+                   warning('[BackTrackLineSearch::run]: The step has grown too small. Line search may not converge...'); 
+                end
             end
 
         end
