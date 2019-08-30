@@ -24,7 +24,9 @@ b = A*x;
 
 x0 = A \ b;
 
-solver = NewtonDescent(@fun, @gradFun, @hessianFun);
+N_var = length(x0);
+
+solver = NewtonDescent(N_var, @fun, @gradFun, @hessianFun);
 solver.setStopThreshold(1e-7);
 solver.setMaxIters(100);
 solver.setEqConstr(A,b);

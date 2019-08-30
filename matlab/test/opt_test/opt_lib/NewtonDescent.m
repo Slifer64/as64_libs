@@ -247,7 +247,7 @@ classdef NewtonDescent < handle
             end
             
             % calc initial t
-            [~, grad_phi, ~] = logBarFun(x0);
+            [~, grad_phi, ~] = this.barrierFun(x0);
             A0 = [this.gradObjFun_ptr(x0) this.A'];
             b0 = grad_phi;
             z = -(A0\b0);
@@ -266,7 +266,7 @@ classdef NewtonDescent < handle
                 
                 t = mu*t;
             
-                [~, grad_phi, hess_phi] = logBarFun(x);
+                [~, grad_phi, hess_phi] = this.barrierFun(x);
                 g = t*this.gradObjFun_ptr(x) + grad_phi;
                 H = t*this.hessianObjFun_ptr(x) + hess_phi;
 
@@ -288,7 +288,7 @@ classdef NewtonDescent < handle
                     
                     if (nargout > 1), x_data = [x_data x]; end
 
-                    [~, grad_phi, hess_phi] = logBarFun(x);
+                    [~, grad_phi, hess_phi] = this.barrierFun(x);
                     g = t*this.gradObjFun_ptr(x) + grad_phi;
                     H = t*this.hessianObjFun_ptr(x) + hess_phi;
 
@@ -328,7 +328,7 @@ classdef NewtonDescent < handle
                 
                 phase1_solver = NewtonDescent(@this.ph1, @this.gradPh1, @this.hessPh1);
                 phase1_solver.setEqConstr(this.A,this.b);
-                phase1_solver.setInEqConstr(this, this.ph1Fi, this.ph1LogBarFun);
+                phase1_solver.setInEqConstr(this, this.ph1Fi, this.ph1barrierFun);
                 
                 phase1_solver.setKKTsolveMethod(KKTSolveMethod.BLOCK_ELIM);
                 
@@ -338,7 +338,7 @@ classdef NewtonDescent < handle
             end
             
             % calc initial t
-            [~, grad_phi, ~] = this.logBarFun(x0);
+            [~, grad_phi, ~] = this.barrierFun(x0);
             A0 = [this.gradObjFun_ptr(x0) this.A'];
             b0 = grad_phi;
             z = -(A0\b0);
@@ -357,7 +357,7 @@ classdef NewtonDescent < handle
                 
                 t = mu*t;
             
-                [~, grad_phi, hess_phi] = this.logBarFun(x);
+                [~, grad_phi, hess_phi] = this.barrierFun(x);
                 g = t*this.gradObjFun_ptr(x) + grad_phi;
                 H = t*this.hessianObjFun_ptr(x) + hess_phi;
 
@@ -379,7 +379,7 @@ classdef NewtonDescent < handle
                     
                     if (nargout > 1), x_data = [x_data x]; end
 
-                    [~, grad_phi, hess_phi] = this.logBarFun(x);
+                    [~, grad_phi, hess_phi] = this.barrierFun(x);
                     g = t*this.gradObjFun_ptr(x) + grad_phi;
                     H = t*this.hessianObjFun_ptr(x) + hess_phi;
 
@@ -457,13 +457,13 @@ classdef NewtonDescent < handle
         
         %% Sets the inequality constraints.
         %  @param[in] Fi: Pointer to function that returns a vector with the value of each inequality constraint.
-        %  @param[in] logBarFun: Pointer to function that calculates the value, the gradient and hessian of the log barrier function.
-        function setInEqConstr(this, Fi, logBarFun, ph1LogBarFun)
+        %  @param[in] barrierFun: Pointer to function that calculates the value, the gradient and hessian of the log barrier function.
+        function setInEqConstr(this, Fi, barrierFun, ph1barrierFun)
             
             this.ineq_constr_flag = true;
             this.Fi = Fi;
-            this.logBarFun = logBarFun;
-            this.ph1LogBarFun = ph1LogBarFun;
+            this.barrierFun = barrierFun;
+            this.ph1barrierFun = ph1barrierFun;
             
         end
         
@@ -472,7 +472,7 @@ classdef NewtonDescent < handle
             Fi = @(x) Ai*x - hi;
             
             
-            this.setInEqConstr(this, Fi, logBarFun, ph1LogBarFun);
+            this.setInEqConstr(this, Fi, @this.linLogBarFun, @this.linLogBarPh1Fun);
             
         end
         
@@ -632,11 +632,6 @@ classdef NewtonDescent < handle
         hessianObjFun_ptr  % hessian of objective function pointer
         line_search         % object to line_search object
         
-        % used under the hood for the optimization of the original problem.
-        objFun2_ptr         % modified objective function pointer
-        gradObjFun2_ptr     % gradient of modified objective function pointer
-        hessianObjFun2_ptr  % hessian of modified objective function pointer
-
         eps      % stopping threshold
         max_iter % maximum iterations
         eq_check_tol % tollerance for checking if an equality holds
@@ -655,8 +650,8 @@ classdef NewtonDescent < handle
         Ai % linear inequality constraint matrix
         bi % linear inequality constraint vector
         Fi % pointer to function that returns a vector with the value of each inequality constraint
-        logBarFun % pointer to function that calculates the value, the gradient and hessian of the log barrier function
-        ph1LogBarFun % pointer to function that calculates the value, the gradient and hessian of the log barrier function for the phaseI method
+        barrierFun % pointer to function that calculates the value, the gradient and hessian of the log barrier function
+        ph1barrierFun % pointer to function that calculates the value, the gradient and hessian of the log barrier function for the phaseI method
         ineq_constr_flag % flag that is true if inequality constraints are set
         
         kkt_solve_method % method for solving the KKT system
