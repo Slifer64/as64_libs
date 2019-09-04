@@ -16,19 +16,19 @@ rng(0);
 dt = 0.005;
 
 Y0_offset = [0 0 0]';
-pg_offset = [0.2, -0.1, 0.1]';
-time_offset = 1; 
+pg_offset = [0.8, -0.9, 0.7]';
+time_offset = 5; 
 
 % Qn = diag( [ 0.02*[1 1 1], 0.02*[1 1 1], 0.05*[1 1 1], 0.05*[1] ] );
 % Rn = diag( [ 0.05^2*[1 1 1], 0.1^2*[1 1 1] ] );
 % Rn_hat = diag( [ 500^2*[1 1 1], 1000*[1 1 1] ] );
 
 Qn = 0.001*eye(10,10);
-Rn = 1*eye(6,6);
-Rn_hat = 1*eye(6,6);
+Rn = 0.1^2*eye(6,6);
+Rn_hat = 100*eye(6,6);
 
-P0 = diag( [ 1*[1 1 1], 1*[1 1 1], 1*[1 1 1], 1*[1] ] );
-a_p = 1.000;
+P0 = diag( [ 1*[1 1 1], 1*[1 1 1], 100*[1 1 1], 1000*[1] ] );
+a_p = 1.002;
 
 plot_1sigma = false;
 
@@ -133,7 +133,7 @@ while (true)
     F_ext = Mr*(p_ddot - p_ddot_hat) + Dr*(p_dot - p_dot_hat) + Kr*(p - p_hat);
 
     
-    Y_out = [p_dot; p]; % + Sigma_vn*randn(N_out,1);
+    Y_out = [p_dot; p] + Sigma_vn*randn(N_out,1);
     % Y_out_hat = [p_dot_hat; p_hat];
 
     %% Update phase variable
@@ -151,21 +151,12 @@ while (true)
         break;
     end
 
-%     ekf.theta'
-%     [p_dot; p; pg; tau]'
-    
-%     Y_out
-    
-%     pause
     
     %% ========  KF measurement update  ========
-    ekf.correct(Y_out, pMsrCookie(t));
-  
-%     ekf.theta'
-%     [p_dot; p; pg; tau]'
-%     
-%     pause
-    
+    ekf.correct(Y_out);
+
+    t = t + dt;
+
     %% ========  KF time update  ========
     ekf.predict(pStateTransCookie(t,p0));
     
@@ -173,7 +164,6 @@ while (true)
     P_theta = ekf.P;
 
     %% Numerical integration
-    t = t + dt;
     x = x + dx*dt;
     p = p + p_dot*dt;
     p_dot = p_dot + p_ddot*dt;
@@ -184,11 +174,6 @@ while (true)
     tau_hat = theta(10);
     
     x_hat = t/tau_hat;
-    
-%     F_ext
-%     [p_dot_hat; p_hat; pg_hat; tau_hat]'
-%     [p_dot; p; pg; tau]'
-%     pause
 
 end
 toc
@@ -219,11 +204,6 @@ plot_pos_estimation_results(Time, pg, pg_data, tau, tau_data, Sigma_theta_data, 
 
 end
 
-function cookie = pMsrCookie(t)
-    
-    cookie = struct('t',t);
-    
-end
 
 function cookie = pStateTransCookie(t,p0)
     

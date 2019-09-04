@@ -2,6 +2,9 @@ clc;
 close all;
 clear;
 
+format compact;
+set_matlab_utils_path();
+
 T = 5;
 dt = 0.005;
 p0 = [0 0 0];

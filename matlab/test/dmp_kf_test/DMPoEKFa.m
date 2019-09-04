@@ -7,7 +7,7 @@
 %
 
 
-classdef DMPpEKFa < matlab.mixin.Copyable
+classdef DMPoEKFa < matlab.mixin.Copyable
     
     methods
         %% Extended Kalman Filter constructor
@@ -17,7 +17,7 @@ classdef DMPpEKFa < matlab.mixin.Copyable
         %                                  a void pointer (cookie) to pass optinally extra arguments to the state transition function.
         %  @param[in] msrFun_ptr: Pointer to measurement function. It should accept a vector (the parameters) and 
         %                                  a void pointer (cookie) to pass optinally extra arguments to the measurement function.
-        function this = DMPpEKFa(dmp, Ts)
+        function this = DMPoEKFa(dmp, Ts)
             
             this.Ts = Ts;
             this.dmp = dmp;
@@ -86,9 +86,9 @@ classdef DMPpEKFa < matlab.mixin.Copyable
         %  Note that if the continuous time process noise is R_c the discrete
         %  one is 'R = Q_c/Ts' where Ts is the sampling period.
         %  @param[in] Q: Process noise covariance matrix.
-        function setProcessNoiseCov(this, Q)
+        function setProcessNoiseCov(this, Qn)
             
-            this.Q = Q;
+            this.Qn = Qn;
             
         end
         
@@ -97,9 +97,9 @@ classdef DMPpEKFa < matlab.mixin.Copyable
         %% Note that if the continuous time process noise is Q_c the discrete
         %% one is 'Q = Q_c*Ts' where Ts is the sampling period.
         %  @param[in] R: Measurement noise covariance matrix.
-        function setMeasureNoiseCov(this, R)
+        function setMeasureNoiseCov(this, Rn)
             
-            this.R = R;
+            this.Rn = Rn;
             
         end
             
@@ -153,11 +153,11 @@ classdef DMPpEKFa < matlab.mixin.Copyable
                 this.theta = this.stateTransFun_ptr(this.theta);
             end
  
-            FP = this.P;
-            FP(1:3,:) = this.F_k(1:3,:)*this.P;
-            FP(4:6,:) = FP(4:6,:)+ this.P(1:3,:)*this.Ts;
-            this.P = this.a_p^2*FP*this.F_k' + this.Q;
-            % this.P = this.a_p^2*this.F_k*this.P*this.F_k' + this.Q;
+            % FP = this.P;
+            % FP(1:3,:) = this.F_k(1:3,:)*this.P;
+            % FP(4:6,:) = FP(4:6,:)+ this.P(1:3,:)*this.Ts;
+            % this.P = this.a_p^2*FP*this.F_k' + this.Q;
+            this.P = this.a_p^2*this.F_k*this.P*this.F_k' + this.Qn;
 
         end
         
@@ -175,8 +175,8 @@ classdef DMPpEKFa < matlab.mixin.Copyable
             z_hat = this.msrFun_ptr(this.theta, cookie);
 
             % =====  Correction estimates ===== 
-            % Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.R);
-            Kg = this.P*this.H_k'/(this.P(1:6,1:6) + this.R);
+            Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.Rn);
+            % Kg = this.P*this.H_k'/(this.P(1:6,1:6) + this.Rn);
             this.theta = this.theta + Kg * (z - z_hat);
             
             % =====  Apply projection if enabled  ===== 
@@ -204,7 +204,7 @@ classdef DMPpEKFa < matlab.mixin.Copyable
 
             % =====  Calculate new covariance  =====
 %             KC = Kg()
-            this.P = (I - Kg*this.H_k) * this.P * (I - Kg*this.H_k)' + Kg*this.R*Kg';
+            this.P = (I - Kg*this.H_k) * this.P * (I - Kg*this.H_k)' + Kg*this.Rn*Kg';
             this.K = Kg;
 
         end
@@ -213,20 +213,24 @@ classdef DMPpEKFa < matlab.mixin.Copyable
         %% Performs the EKF correction (measurement update).
         function theta_next = stateTransFun(this, theta, cookie)
             
-            p_dot = theta(1:3);
-            p = theta(4:6);
-            pg = theta(7:9);
+            vRot = theta(1:3);
+            eQ = theta(4:6);
+            eg = theta(7:9);
             tau = theta(10);
+            
+            Q = quatExp(eQ);
+            Qg = quatExp(eg);
             
             x = cookie.t/tau;
             tau0 = this.dmp.getTau();
             this.dmp.setTau(tau);
-            p_ddot = this.dmp.calcYddot(x, p, p_dot, pg);
+            dvRot = this.dmp.calcRotAccel(x, Q, vRot, Qg);
+            deQ = this.rotVel2deo(vRot, Q);
             this.dmp.setTau(tau0);
             
             theta_next = zeros(10,1);
-            theta_next(1:3) = theta(1:3) + p_ddot*this.Ts;
-            theta_next(4:6) = theta(4:6) + p_dot*this.Ts;
+            theta_next(1:3) = vRot + dvRot*this.Ts;
+            theta_next(4:6) = eQ + deQ*this.Ts;
             theta_next(7:10) = theta(7:10);
             
         end
@@ -248,18 +252,113 @@ classdef DMPpEKFa < matlab.mixin.Copyable
         %                      state transition function's Jacobian (default = []).
         %  @return F_k: The state transition function's Jacobian.
         function F_k = stateTransFunJacob(this, theta, cookie)
+ 
+            t = cookie.t;
             
-            p_dot = theta(1:3);
-            p = theta(4:6);
-            pg = theta(7:9);
+            F_k = zeros(10,10);
+            F_k(1:3,:) = this.calcF1Jacob(theta, t);
+            F_k(4:6,:) = this.calcF2Jacob(theta);
+            
+            F_k = eye(10,10) + F_k*this.Ts;
+            
+%             F_k
+%             
+%             pause
+            
+        end
+        
+        function F1 = calcF1Jacob(this, theta, t)
+           
+            vRot = theta(1:3);
+            eQ = theta(4:6);
+            eg = theta(7:9);
             tau = theta(10);
-            x = cookie.t/tau;
             
-            F_k = eye(10,10); 
-            F_k(1:3,1:3) = eye(3,3) - this.Az*this.Ts/tau;
-            F_k(1:3,4:6) = -this.Az*this.Bz*this.Ts/tau^2;
-            F_k(1:3,7:10) = this.dmp.getAcellPartDev_g_tau(cookie.t, p, p_dot, cookie.p0, x, pg, tau)*this.Ts;
-            F_k(4:6,1:3) = eye(3,3)*this.Ts;
+            Q = quatExp(eQ);
+            Qg = quatExp(eg);
+            
+            x = t/tau;
+            
+            tau0 = this.dmp.getTau();
+            
+            this.dmp.setTau(tau);
+            
+            F1 = zeros(3,10);
+            
+            dvRot_step = 1e-3;
+            for i=1:3
+                dvRot = zeros(3,1);
+                dvRot(i) = dvRot_step;
+                dvRot2 = this.dmp.calcRotAccel(x, Q, vRot + dvRot, Qg);
+                dvRot1 = this.dmp.calcRotAccel(x, Q, vRot - dvRot, Qg);
+                F1(:,i) = (dvRot2 - dvRot1) / (2*dvRot_step);
+            end
+            
+            deQ_step = 1e-3;
+            for i=1:3
+                deQ = zeros(3,1);
+                deQ(i) = deQ_step;
+                dvRot2 = this.dmp.calcRotAccel(x, quatExp(eQ+deQ), vRot, Qg);
+                dvRot1 = this.dmp.calcRotAccel(x, quatExp(eQ-deQ), vRot, Qg);
+                F1(:,3+i) = (dvRot2 - dvRot1) / (2*deQ_step);
+            end
+            
+            deg_step = 1e-3;
+            for i=1:3
+                deQ = zeros(3,1);
+                deQ(i) = deg_step;
+                dvRot2 = this.dmp.calcRotAccel(x, Q, vRot, quatExp(eg+deQ));
+                dvRot1 = this.dmp.calcRotAccel(x, Q, vRot, quatExp(eg-deQ));
+                F1(:,6+i) = (dvRot2 - dvRot1) / (2*deg_step);
+            end
+            
+            dtau = 1e-2;
+            this.dmp.setTau(tau+dtau);
+            dvRot2 = this.dmp.calcRotAccel((t+dtau)/tau, Q, vRot, Qg);
+            this.dmp.setTau(tau);
+            dvRot1 = this.dmp.calcRotAccel((t)/tau, Q, vRot, Qg);
+            F1(:,10) = (dvRot2 - dvRot1) / (dtau);
+            
+            this.dmp.setTau(tau0);
+            
+        end
+        
+        function F2 = calcF2Jacob(this, theta)
+           
+            vRot = theta(1:3);
+            eQ = theta(4:6);
+            Q = quatExp(eQ);
+            
+            F2 = zeros(3,10);
+            
+            dvRot_step = 1e-3;
+            for i=1:3
+                dvRot = zeros(3,1);
+                dvRot(i) = dvRot_step;
+                deo2 = this.rotVel2deo(vRot + dvRot, Q);
+                deo1 = this.rotVel2deo(vRot - dvRot, Q);
+                F2(:,i) = (deo2 - deo1) / (2*dvRot_step);
+            end
+            
+            % J_eQ_Q = DMP_eo.jacobDeoDquat(Q);
+            % J_Q_eQ = DMP_eo.jacobDquatDeo(Q);
+            % F2(:,1:3) = 0.5*J_eQ_Q*this.quat2mat(vRot)*J_Q_eQ;
+            
+            deQ_step = 1e-3;
+            for i=1:3
+                deQ = zeros(3,1);
+                deQ(i) = deQ_step;
+                deo2 = this.rotVel2deo(vRot, quatExp(eQ+deQ));
+                deo1 = this.rotVel2deo(vRot, quatExp(eQ-deQ));
+                F2(:,3+i) = (deo2 - deo1) / (2*deQ_step);
+            end
+            
+        end
+        
+        function deo = rotVel2deo(this, rotVel, Q)
+            
+            J_deo_dQ = DMP_eo.jacobDeoDquat(Q);
+            deo = 0.5*J_deo_dQ * quatProd([0; rotVel], Q);
             
         end
         
@@ -279,6 +378,37 @@ classdef DMPpEKFa < matlab.mixin.Copyable
 
         
     end
+    
+    methods (Static, Access = private)
+       
+        function ssMat = vec2ssMat(p)
+
+            ssMat(1,1) = 0;
+            ssMat(2,2) = 0;
+            ssMat(3,3) = 0;
+            ssMat(1,2) = -p(3);
+            ssMat(2,1) = p(3);
+            ssMat(1,3) = p(2);
+            ssMat(3,1) = -p(2);
+            ssMat(3,2) = p(1);
+            ssMat(2,3) = -p(1);
+
+        end
+        
+        function qmat = quat2mat(Q)
+
+            qmat = zeros(4,4);
+
+            w = Q(1);
+            v = Q(2:4);
+
+            qmat(:,1) = Q;
+            qmat(1,2:4) = -v;
+            qmat(2:4,2:4) = w*eye(3,3) + this.vec2ssMat(v);
+
+        end
+        
+    end
 
     properties
         
@@ -290,8 +420,8 @@ classdef DMPpEKFa < matlab.mixin.Copyable
         F_k % state transition function Jacobian
         H_k % measurement function Jacobian
         K % Kalman gain
-        Q % process noise covariance
-        R % measurement noise covariance
+        Qn % process noise covariance
+        Rn % measurement noise covariance
         
         a_p % fading memory coefficient
         theta % parameters estimate
