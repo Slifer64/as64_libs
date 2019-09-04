@@ -20,7 +20,7 @@ path = strrep(mfilename('fullpath'), 'sim_DMP_Pos_UKF_disc','');
 load([path 'data/dmp_data.mat'],'dmp_p', 'Yg0', 'Y0', 'tau0');
 
 Dim = length(Y0);
-can_clock_ptr = dmp_p.getCanClockPtr();
+can_clock_ptr = dmp_p.can_clock_ptr;
 can_clock_ptr.setTau(tau0);
 
 %% DMP simulation

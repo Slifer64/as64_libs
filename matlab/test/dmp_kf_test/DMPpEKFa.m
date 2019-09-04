@@ -21,10 +21,11 @@ classdef DMPpEKFa < handle
             
             this.Ts = Ts;
             this.dmp = dmp;
-            this.Az = diag([dmp{1}.a_z, dmp{2}.a_z, dmp{3}.a_z]);
-            this.Bz = diag([dmp{1}.b_z, dmp{2}.b_z, dmp{3}.b_z]);
+            this.Az = diag([dmp.dmp{1}.a_z, dmp.dmp{2}.a_z, dmp.dmp{3}.a_z]);
+            this.Bz = diag([dmp.dmp{1}.b_z, dmp.dmp{2}.b_z, dmp.dmp{3}.b_z]);
             
             N_params = 10;
+            N_out = 6;
             
             this.theta = zeros(N_params);
             this.P = zeros(N_params, N_params);
@@ -152,13 +153,12 @@ classdef DMPpEKFa < handle
                 this.theta = this.stateTransFun_ptr(this.theta);
             end
  
-            this.P = this.a_p^2*this.F_k*this.P*this.F_k' + this.Q;
-            
-%             FP = this.P;
-%             FP(1:3,:) = this.F_k(1:3,:)*this.P;
-%             FP(4:6,:) = FP(4:6,:)+ this.P(1:3,:)*this.Ts;
-%             this.P = this.a_p^2*FP*this.F_k' + this.Q;
-    
+            FP = this.P;
+            FP(1:3,:) = this.F_k(1:3,:)*this.P;
+            FP(4:6,:) = FP(4:6,:)+ this.P(1:3,:)*this.Ts;
+            this.P = this.a_p^2*FP*this.F_k' + this.Q;
+            % this.P = this.a_p^2*this.F_k*this.P*this.F_k' + this.Q;
+
         end
         
         
@@ -175,9 +175,8 @@ classdef DMPpEKFa < handle
             z_hat = this.msrFun_ptr(this.theta, cookie);
 
             % =====  Correction estimates ===== 
-%             CPC = this.P(1:6,1:6);
-%             CPC == this.H_k*this.P*this.H_k'
-            Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.R);
+            % Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.R);
+            Kg = this.P*this.H_k'/(this.P(1:6,1:6) + this.R);
             this.theta = this.theta + Kg * (z - z_hat);
             
             % =====  Apply projection if enabled  ===== 
@@ -220,8 +219,10 @@ classdef DMPpEKFa < handle
             tau = theta(10);
             
             x = cookie.t/tau;
+            tau0 = this.dmp.getTau();
+            this.dmp.setTau(tau);
             p_ddot = this.dmp.calcYddot(x, p, p_dot, pg);
- 
+            this.dmp.setTau(tau0);
             
             theta_next = zeros(10,1);
             theta_next(1:3) = p_ddot;
@@ -254,11 +255,11 @@ classdef DMPpEKFa < handle
             tau = theta(10);
             x = cookie.t/tau;
             
-            F_k = eye(10,10);
-            F_k(4:6,1:3) = eye(3,3)*this.Ts;
+            F_k = eye(10,10); 
             F_k(1:3,1:3) = eye(3,3) - this.Az*this.Ts/tau;
+            F_k(4:6,1:3) = eye(3,3)*this.Ts;
             F_k(1:3,4:6) = -this.Az*this.Bz*this.Ts/tau^2;
-            F_k(1:3,7:10) = this.dmp.getAcellPartDev_g_tau(this, cookie.t, p, p_dot, cookie.p0, x, pg, tau)*this.Ts;
+            F_k(1:3,7:10) = this.dmp.getAcellPartDev_g_tau(cookie.t, p, p_dot, cookie.p0, x, pg, tau)*this.Ts;
             
         end
         

@@ -34,7 +34,7 @@ tau_low_lim = 1.0;
 tau_up_lim = 30.0; %Inf;
 
 process_noise = diag([0.02 0.02 0.02 0.05]); % Q
-msr_noise = 0.2^2;
+msr_noise = 0.1^2;
 msr_noise_hat = 1000; %1000.0/dt; % R
 
 % process_noise = process_noise*dt;

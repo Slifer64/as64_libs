@@ -6,7 +6,7 @@ set_matlab_utils_path();
 
 path = strrep(mfilename('fullpath'), 'trainDMP','');
 
-load([path 'data/train_data2.mat'], 'Data');
+load([path 'data/train_5traj_data.mat'], 'Data');
 
 Timed = Data.Time;
 Pd_data = Data.Pos;

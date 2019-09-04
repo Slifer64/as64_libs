@@ -289,7 +289,7 @@ classdef DMP_eo < matlab.mixin.Copyable
     
     properties (Constant)  
         
-          zero_tol = 1e-8;
+          zero_tol = 1e-15;
           
     end
     
