@@ -1,4 +1,4 @@
-function sim_DMP_Pos_UKF_matlab()
+function sim_DMPp_UKFc_disc()
 
 %% ==============================================================
 %% DMP with state reset (y=y_r, y_dot=y_r_dot) and force feedback, i.e. 
@@ -15,7 +15,7 @@ set_matlab_utils_path();
 
 setPosParams();
 
-path = strrep(mfilename('fullpath'), 'sim_DMP_Pos_UKF_matlab','');
+path = strrep(mfilename('fullpath'), 'sim_DMPp_UKFc_disc','');
 
 load([path 'data/dmp_data.mat'],'dmp_p', 'Yg0', 'Y0', 'tau0');
 
@@ -67,16 +67,16 @@ Rn = eye(N_out,N_out) .* msr_noise;
 Qn = eye(N_params,N_params) .* process_noise;
 
 %% Set up UKF object
-ukf = unscentedKalmanFilter(@pStateTransFun, @pMsrFun, theta, 'HasAdditiveMeasurementNoise',true);
-ukf.State = theta;
-ukf.StateCovariance = P_theta;
-ukf.ProcessNoise = Qn;
-ukf.MeasurementNoise = Rn;
-ukf.Alpha = 0.001;
-ukf.Beta = 2;
-ukf.Kappa = 0.1;
-% a_p = exp(a_pc*dt);
-a_p = 1.000;
+ukf = UKF(N_params, N_out, @pStateTransFun, @pMsrFun);
+ukf.setProcessNoiseCov(Qn);
+ukf.setMeasureNoiseCov(Rn);
+a_p = exp(a_pc*dt);
+% ukf.setFadingMemoryCoeff(a_p);
+ukf.theta = theta;
+ukf.P = P_theta;
+
+ukf.enableParamsContraints(enable_constraints);
+ukf.setParamsConstraints(A_c, b_c);
 
 dmp_p.setY0(Y0);
 
@@ -129,11 +129,10 @@ while (true)
     ukf.correct(Y_out, pMsrCookie(dmp_p, t, Y, dY, Yg, tau, est_goal, est_tau));
     
     %% ========  KF time update  ========
-    ukf.predict([]);
-    ukf.StateCovariance = a_p^2*(ukf.StateCovariance - Qn) + Qn;
+    ukf.predict();
 
-    theta = ukf.State;
-    P_theta = ukf.StateCovariance;
+    theta = ukf.theta;
+    P_theta = ukf.P;
 
     %% Numerical integration
     t = t + dt;

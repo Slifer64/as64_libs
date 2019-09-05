@@ -1,15 +1,15 @@
 function plot_pos_estimation_results(Time, Yg, Yg_data, tau, tau_data, Sigma_theta_data, F_data, plot_1sigma, Y_data, dY_data)
 
-figure
-hold on;
-plot(Time, Sigma_theta_data(1,:), 'LineWidth',2.0, 'Color','red');
-plot(Time, Sigma_theta_data(2,:), 'LineWidth',2.0, 'Color','green');
-plot(Time, Sigma_theta_data(3,:), 'LineWidth',2.0, 'Color','blue');
-plot(Time, Sigma_theta_data(4,:), 'LineWidth',2.0, 'Color',[0.93 0.69 0.13]);
-legend({'$x$','$y$','$z$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
-title('$\sigma_{\theta}$', 'interpreter','latex', 'fontsize',15);
-xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
-hold off;
+% figure
+% hold on;
+% plot(Time, Sigma_theta_data(1,:), 'LineWidth',2.0, 'Color','red');
+% plot(Time, Sigma_theta_data(2,:), 'LineWidth',2.0, 'Color','green');
+% plot(Time, Sigma_theta_data(3,:), 'LineWidth',2.0, 'Color','blue');
+% plot(Time, Sigma_theta_data(4,:), 'LineWidth',2.0, 'Color',[0.93 0.69 0.13]);
+% legend({'$x$','$y$','$z$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
+% title('$\sigma_{\theta}$', 'interpreter','latex', 'fontsize',15);
+% xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
+% hold off;
 
 %% ==============================================================
 %% ==========   Target and time scaling est plot ================

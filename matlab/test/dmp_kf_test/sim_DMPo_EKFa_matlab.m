@@ -1,4 +1,4 @@
-function sim_DMPoEKFa_disc()
+function sim_DMPo_EKFa_matlab()
 
 %% ==============================================================
 
@@ -40,7 +40,7 @@ Kr = 10*eye(3,3);
 %% ###################################################################
 
 
-path = strrep(mfilename('fullpath'), 'sim_DMPoEKFa_disc','');
+path = strrep(mfilename('fullpath'), 'sim_DMPo_EKFa_matlab','');
 
 load([path 'data/dmp_data.mat'],'dmp_o', 'Qg0', 'Q0', 'tau0');
 
@@ -87,16 +87,15 @@ Sigma_vn = sqrt(Rn);
 N_out = 6;
 
 %% Set up EKF object
-ekf = DMPoEKFa(dmp_o, dt);
-ekf.setProcessNoiseCov(Qn);
-ekf.setMeasureNoiseCov(Rn_hat);
-ekf.setFadingMemoryCoeff(a_p);
-ekf.theta = theta;
-ekf.P = P_theta;
+ekf = extendedKalmanFilter(@oStateTransFun, @oMsrFun, theta);
+ekf.State = theta;
+ekf.StateCovariance = P_theta;
+ekf.ProcessNoise = Qn;
+ekf.MeasurementNoise = Rn_hat;
 
 dmp_o.setQ0(Q0);
 
-disp('DMPoEKFa simulation...');
+disp('DMPoEKFa matlab simulation...');
 tic
 while (true)
 
@@ -130,7 +129,7 @@ while (true)
 
     F_ext = Mr*(dvRot - dvRot_hat) + Dr*(vRot - vRot_hat) + Kr*quatLog(quatDiff(Q,Q_hat));
 
-    Y_out = [vRot; quatLog(Q)]; % + Sigma_vn*randn(N_out,1);
+    Y_out = [vRot; quatLog(Q)] + Sigma_vn*randn(N_out,1);
 
     %% Update phase variable
     dx = dmp_o.phaseDot(x);
@@ -147,16 +146,17 @@ while (true)
         break;
     end
 
-    %% ========   KF measurement update (correction)  ===========
+    %% ========  KF measurement update  ========
     ekf.correct(Y_out);
     
     t = t + dt;
     
     %% ========   KF time update  ===========
-    ekf.predict(oStateTransCookie(t));
+    ekf.predict(oStateTransCookie(dmp_o,t,dt));
+    ekf.StateCovariance = a_p^2*(ekf.StateCovariance - Qn) + Qn;
 
-    theta = ekf.theta;
-    P_theta = ekf.P;
+    theta = ekf.State;
+    P_theta = ekf.StateCovariance;
 
     %% ========   Numerical integration  ===========
     x = x + dx*dt;
@@ -211,11 +211,51 @@ plot_orient_estimation_results(Time, Qg, Qg_data, tau, tau_data, Sigma_theta_dat
 
 end
 
-function cookie = oStateTransCookie(t)
+function cookie = oStateTransCookie(dmp, t, Ts)
     
-    cookie = struct('t',t);
+    cookie = struct('t',t, 'Ts',Ts, 'dmp',dmp);
     
 end
 
+function theta_next = oStateTransFun(theta, cookie)
+
+    t = cookie.t;
+    dmp = cookie.dmp;
+    Ts = cookie.Ts;
+    
+    vRot = theta(1:3);
+    eQ = theta(4:6);
+    eg = theta(7:9);
+    tau = theta(10);
+
+    Q = quatExp(eQ);
+    Qg = quatExp(eg);
+
+    x = t/tau;
+    tau0 = dmp.getTau();
+    dmp.setTau(tau);
+    dvRot = dmp.calcRotAccel(x, Q, vRot, Qg);
+    deQ = rotVel2deo(vRot, Q);
+    dmp.setTau(tau0);
+
+    theta_next = zeros(10,1);
+    theta_next(1:3) = vRot + dvRot*Ts;
+    theta_next(4:6) = eQ + deQ*Ts;
+    theta_next(7:10) = theta(7:10);
+            
+end
+
+function deo = rotVel2deo(rotVel, Q)
+            
+    J_deo_dQ = DMP_eo.jacobDeoDquat(Q);
+    deo = 0.5*J_deo_dQ * quatProd([0; rotVel], Q);
+
+end
+
+function z = oMsrFun(theta)
+
+    z = theta(1:6);
+
+end
 
 

@@ -1,4 +1,4 @@
-function sim_DMPoEKFa_disc()
+function sim_DMPo_UKFa_disc()
 
 %% ==============================================================
 
@@ -17,18 +17,18 @@ rng(0);
 dt = 0.005;
 
 Q0_offset = quatExp([0 0 0]');
-Qg_offset = quatExp([0.8 -0.7 0.55]');
-time_offset = 5;
+Qg_offset = quatExp([0.4 0.5 0.35]');
+time_offset = 4; 
 
 % Qn = diag( [ 0.02*[1 1 1], 0.02*[1 1 1], 0.05*[1 1 1], 0.05*[1] ] );
 % Rn = diag( [ 0.05^2*[1 1 1], 0.1^2*[1 1 1] ] );
 % Rn_hat = diag( [ 500^2*[1 1 1], 1000*[1 1 1] ] );
 
 Qn = 0.0001*eye(10,10);
-Rn = 0.01^2*eye(6,6);
-Rn_hat = diag([0.1*[1 1 1] 0.01*[1 1 1]]);
+Rn = 0.001^2*eye(6,6);
+Rn_hat = 1*eye(6,6);
 
-P0 = diag( [ 0.1*[1 1 1], 0.1*[1 1 1], 1*[1 1 1], 10*[1] ] );
+P0 = diag( [ 1*[1 1 1], 1*[1 1 1], 1*[1 1 1], 1*[1] ] );
 a_p = 1.002;
 
 plot_1sigma = false;
@@ -40,7 +40,7 @@ Kr = 10*eye(3,3);
 %% ###################################################################
 
 
-path = strrep(mfilename('fullpath'), 'sim_DMPoEKFa_disc','');
+path = strrep(mfilename('fullpath'), 'sim_DMPo_UKFa_disc','');
 
 load([path 'data/dmp_data.mat'],'dmp_o', 'Qg0', 'Q0', 'tau0');
 
@@ -85,14 +85,16 @@ P_theta = P0;
 
 Sigma_vn = sqrt(Rn);
 N_out = 6;
+N_params = 10;
 
-%% Set up EKF object
-ekf = DMPoEKFa(dmp_o, dt);
-ekf.setProcessNoiseCov(Qn);
-ekf.setMeasureNoiseCov(Rn_hat);
-ekf.setFadingMemoryCoeff(a_p);
-ekf.theta = theta;
-ekf.P = P_theta;
+%% Set up UKF object
+ukf = UKF(N_params, N_out, @oStateTransFun, @oMsrFun);
+ukf.setProcessNoiseCov(Qn);
+ukf.setMeasureNoiseCov(Rn);
+% ukf.setFadingMemoryCoeff(a_p);
+ukf.theta = theta;
+ukf.P = P_theta;
+
 
 dmp_o.setQ0(Q0);
 
@@ -130,7 +132,7 @@ while (true)
 
     F_ext = Mr*(dvRot - dvRot_hat) + Dr*(vRot - vRot_hat) + Kr*quatLog(quatDiff(Q,Q_hat));
 
-    Y_out = [vRot; quatLog(Q)]; % + Sigma_vn*randn(N_out,1);
+    Y_out = [vRot; quatLog(Q)] + Sigma_vn*randn(N_out,1);
 
     %% Update phase variable
     dx = dmp_o.phaseDot(x);
@@ -147,16 +149,17 @@ while (true)
         break;
     end
 
-    %% ========   KF measurement update (correction)  ===========
-    ekf.correct(Y_out);
+    %% ========  KF measurement update  ========
+    ukf.correct(Y_out);
     
     t = t + dt;
     
     %% ========   KF time update  ===========
-    ekf.predict(oStateTransCookie(t));
+    ukf.predict(oStateTransCookie(dmp_o,t,dt));
+    % ukf.StateCovariance = a_p^2*(ukf.StateCovariance - Qn) + Qn;
 
-    theta = ekf.theta;
-    P_theta = ekf.P;
+    theta = ukf.theta;
+    P_theta = ukf.P;
 
     %% ========   Numerical integration  ===========
     x = x + dx*dt;
@@ -211,11 +214,51 @@ plot_orient_estimation_results(Time, Qg, Qg_data, tau, tau_data, Sigma_theta_dat
 
 end
 
-function cookie = oStateTransCookie(t)
+function cookie = oStateTransCookie(dmp, t, Ts)
     
-    cookie = struct('t',t);
+    cookie = struct('t',t, 'Ts',Ts, 'dmp',dmp);
     
 end
 
+function theta_next = oStateTransFun(theta, cookie)
+
+    t = cookie.t;
+    dmp = cookie.dmp;
+    Ts = cookie.Ts;
+    
+    vRot = theta(1:3);
+    eQ = theta(4:6);
+    eg = theta(7:9);
+    tau = theta(10);
+
+    Q = quatExp(eQ);
+    Qg = quatExp(eg);
+
+    x = t/tau;
+    tau0 = dmp.getTau();
+    dmp.setTau(tau);
+    dvRot = dmp.calcRotAccel(x, Q, vRot, Qg);
+    deQ = rotVel2deo(vRot, Q);
+    dmp.setTau(tau0);
+
+    theta_next = zeros(10,1);
+    theta_next(1:3) = vRot + dvRot*Ts;
+    theta_next(4:6) = eQ + deQ*Ts;
+    theta_next(7:10) = theta(7:10);
+            
+end
+
+function deo = rotVel2deo(rotVel, Q)
+            
+    J_deo_dQ = DMP_eo.jacobDeoDquat(Q);
+    deo = 0.5*J_deo_dQ * quatProd([0; rotVel], Q);
+
+end
+
+function z = oMsrFun(theta, cookie)
+
+    z = theta(1:6);
+
+end
 
 

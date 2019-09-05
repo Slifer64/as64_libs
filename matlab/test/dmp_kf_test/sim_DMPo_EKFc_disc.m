@@ -1,4 +1,4 @@
-function sim_DMP_Orient_EKF_disc()
+function sim_DMPo_EKFc_disc()
 
 %% ==============================================================
 %% DMP with state reset (y=y_r, y_dot=y_r_dot) and force feedback, i.e. 
@@ -16,7 +16,7 @@ set_matlab_utils_path();
 
 setOrientParams();
 
-path = strrep(mfilename('fullpath'), 'sim_DMP_Orient_EKF_disc','');
+path = strrep(mfilename('fullpath'), 'sim_DMPo_EKFc_disc','');
 
 load([path 'data/dmp_data.mat'],'dmp_o', 'Qg0', 'Q0', 'tau0');
 

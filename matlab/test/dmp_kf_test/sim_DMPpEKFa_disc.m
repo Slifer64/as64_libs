@@ -200,6 +200,16 @@ for i=1:3
    hold off;
 end
 
+figure
+hold on;
+for i=1:10
+    plot(Time, Sigma_theta_data(i,:), 'LineWidth',2.0);
+end
+legend({'$\dot{p}_x$','$\dot{p}_y$','$\dot{p}_z$','$p_x$','$p_y$','$p_z$','$g_x$','$g_y$','$g_z$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
+title('$\sigma_{\theta}$', 'interpreter','latex', 'fontsize',15);
+xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
+hold off;
+
 plot_pos_estimation_results(Time, pg, pg_data, tau, tau_data, Sigma_theta_data, F_data, plot_1sigma, p_data, p_dot_data);
 
 end

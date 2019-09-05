@@ -1,4 +1,4 @@
-function sim_DMPoEKFa_disc()
+function sim_DMPoEKFa_2()
 
 %% ==============================================================
 
@@ -40,7 +40,7 @@ Kr = 10*eye(3,3);
 %% ###################################################################
 
 
-path = strrep(mfilename('fullpath'), 'sim_DMPoEKFa_disc','');
+path = strrep(mfilename('fullpath'), 'sim_DMPoEKFa_2','');
 
 load([path 'data/dmp_data.mat'],'dmp_o', 'Qg0', 'Q0', 'tau0');
 
@@ -85,18 +85,21 @@ P_theta = P0;
 
 Sigma_vn = sqrt(Rn);
 N_out = 6;
+N_params = 10;
 
 %% Set up EKF object
-ekf = DMPoEKFa(dmp_o, dt);
+ekf = EKF(N_params, N_out, @oStateTransFun, @oMsrFun);
 ekf.setProcessNoiseCov(Qn);
 ekf.setMeasureNoiseCov(Rn_hat);
 ekf.setFadingMemoryCoeff(a_p);
 ekf.theta = theta;
 ekf.P = P_theta;
 
+% ekf.setPartDerivStep(num_diff_step);
+
 dmp_o.setQ0(Q0);
 
-disp('DMPoEKFa simulation...');
+disp('DMPoEKFa2 simulation...');
 tic
 while (true)
 
@@ -147,13 +150,13 @@ while (true)
         break;
     end
 
-    %% ========   KF measurement update (correction)  ===========
+    %% ========  KF measurement update  ========
     ekf.correct(Y_out);
     
     t = t + dt;
     
     %% ========   KF time update  ===========
-    ekf.predict(oStateTransCookie(t));
+    ekf.predict(oStateTransCookie(dmp_o,t,dt));
 
     theta = ekf.theta;
     P_theta = ekf.P;
@@ -211,11 +214,51 @@ plot_orient_estimation_results(Time, Qg, Qg_data, tau, tau_data, Sigma_theta_dat
 
 end
 
-function cookie = oStateTransCookie(t)
+function cookie = oStateTransCookie(dmp, t, Ts)
     
-    cookie = struct('t',t);
+    cookie = struct('t',t, 'Ts',Ts, 'dmp',dmp);
     
 end
 
+function theta_next = oStateTransFun(theta, cookie)
+
+    t = cookie.t;
+    dmp = cookie.dmp;
+    Ts = cookie.Ts;
+    
+    vRot = theta(1:3);
+    eQ = theta(4:6);
+    eg = theta(7:9);
+    tau = theta(10);
+
+    Q = quatExp(eQ);
+    Qg = quatExp(eg);
+
+    x = t/tau;
+    tau0 = dmp.getTau();
+    dmp.setTau(tau);
+    dvRot = dmp.calcRotAccel(x, Q, vRot, Qg);
+    deQ = rotVel2deo(vRot, Q);
+    dmp.setTau(tau0);
+
+    theta_next = zeros(10,1);
+    theta_next(1:3) = vRot + dvRot*Ts;
+    theta_next(4:6) = eQ + deQ*Ts;
+    theta_next(7:10) = theta(7:10);
+            
+end
+
+function deo = rotVel2deo(rotVel, Q)
+            
+    J_deo_dQ = DMP_eo.jacobDeoDquat(Q);
+    deo = 0.5*J_deo_dQ * quatProd([0; rotVel], Q);
+
+end
+
+function z = oMsrFun(theta, cookie)
+
+    z = theta(1:6);
+
+end
 
 

@@ -1,4 +1,4 @@
-function sim_DMP_Pos_UKF_disc()
+function sim_DMPp_EKFc_disc()
 
 %% ==============================================================
 %% DMP with state reset (y=y_r, y_dot=y_r_dot) and force feedback, i.e. 
@@ -15,7 +15,7 @@ set_matlab_utils_path();
 
 setPosParams();
 
-path = strrep(mfilename('fullpath'), 'sim_DMP_Pos_UKF_disc','');
+path = strrep(mfilename('fullpath'), 'sim_DMPp_EKFc_disc','');
 
 load([path 'data/dmp_data.mat'],'dmp_p', 'Yg0', 'Y0', 'tau0');
 
@@ -27,7 +27,6 @@ can_clock_ptr.setTau(tau0);
 % set initial values
 t = 0.0;
 iters = 0;
-Yg = Yg0;
 x = 0.0; dx = 0.0;
 Y0 = Y0 + Y0_offset;
 Y = Y0; dY = zeros(Dim,1); ddY = zeros(Dim,1);
@@ -63,24 +62,33 @@ if (est_tau), theta = [theta; tau_hat]; end
 
 N_params = length(theta);
 P_theta = eye(N_params, N_params) .* init_params_variance;
-Rn = eye(N_out,N_out) .* msr_noise;
+Rn_hat = eye(N_out,N_out) .* msr_noise_hat;
 Qn = eye(N_params,N_params) .* process_noise;
 
-%% Set up UKF object
-ukf = UKF(N_params, N_out, @pStateTransFun, @pMsrFun);
-ukf.setProcessNoiseCov(Qn);
-ukf.setMeasureNoiseCov(Rn);
-a_p = exp(a_pc*dt);
-% ukf.setFadingMemoryCoeff(a_p);
-ukf.theta = theta;
-ukf.P = P_theta;
+rng(0);
+Rn = eye(N_out,N_out) .* msr_noise;
+Sigma_vn = sqrt(Rn);
 
-ukf.enableParamsContraints(enable_constraints);
-ukf.setParamsConstraints(A_c, b_c);
+
+%% Set up EKF object
+ekf = EKF(N_params, N_out, @pStateTransFun, @pMsrFun);
+ekf.setProcessNoiseCov(Qn);
+ekf.setMeasureNoiseCov(Rn_hat);
+% a_p = exp(a_pc*dt);
+ekf.setFadingMemoryCoeff(a_p);
+ekf.theta = theta;
+ekf.P = P_theta;
+
+ekf.enableParamsContraints(enable_constraints);
+ekf.setParamsConstraints(A_c, b_c);
+ekf.setPartDerivStep(num_diff_step);
+
+ekf.setStateTransFunJacob(@pStateTransFunJacob);
+ekf.setMsrFunJacob(@pMsrFunJacob);
 
 dmp_p.setY0(Y0);
 
-disp('DMP-UKF (discrete) Pos simulation...');
+disp('DMP-EKF (discrete) Pos simulation...');
 tic
 while (true)
 
@@ -101,9 +109,12 @@ while (true)
 
     Sigma_theta_data = [Sigma_theta_data sqrt(diag(P_theta))];
 
-    %% DMP simulation
-    ddY = dmp_p.calcYddot(x, Y, dY, Yg);
+    %% DMP simulation  
+    dmp_p.setTau(tau_hat);
     ddY_hat = dmp_p.calcYddot(x_hat, Y, dY, Yg_hat);
+    
+    dmp_p.setTau(tau);
+    ddY = dmp_p.calcYddot(x, Y, dY, Yg) + Sigma_vn*randn(N_out,1);
 
     F_ext = M_r * (ddY - ddY_hat);
     
@@ -126,13 +137,13 @@ while (true)
     end
 
     %% ========  KF measurement update  ========
-    ukf.correct(Y_out, pMsrCookie(dmp_p, t, Y, dY, Yg, tau, est_goal, est_tau));
+    ekf.correct(Y_out, pMsrCookie(dmp_p, t, Y, dY, Y0, Yg, tau, est_goal, est_tau));
     
     %% ========  KF time update  ========
-    ukf.predict();
+    ekf.predict();
 
-    theta = ukf.theta;
-    P_theta = ukf.P;
+    theta = ekf.theta;
+    P_theta = ekf.P;
 
     %% Numerical integration
     t = t + dt;
@@ -157,6 +168,13 @@ function theta_next = pStateTransFun(theta, cookie)
     
 end
 
+function J = pStateTransFunJacob(theta, cookie)
+    
+    n_params = length(theta);
+    J = eye(n_params, n_params);
+    
+end
+
 function Y_out = pMsrFun(theta, cookie)
 
     if (cookie.est_goal), Yg_hat = theta(1:end-cookie.est_tau);
@@ -169,13 +187,31 @@ function Y_out = pMsrFun(theta, cookie)
 
     x_hat = cookie.t/tau_hat;
     
+    cookie.dmp_p.setTau(tau_hat);
     Y_out = cookie.dmp_p.calcYddot(x_hat, cookie.Y, cookie.dY, Yg_hat);
+    cookie.dmp_p.setTau(cookie.tau);
 
 end
 
-function cookie = pMsrCookie(dmp_p, t, Y, dY, Yg, tau, est_goal, est_tau)
+function J = pMsrFunJacob(theta, cookie)
     
-    cookie = struct('dmp_p',dmp_p, 't',t, 'Y',Y, 'dY',dY, 'Yg',Yg, 'tau',tau, 'est_goal',est_goal, 'est_tau',est_tau);
+    if (cookie.est_goal), Yg_hat = theta(1:end-cookie.est_tau);
+    else, Yg_hat = cookie.Yg;
+    end
+    
+    if (cookie.est_tau), tau_hat = theta(end);
+    else, tau_hat = cookie.tau;
+    end
+    
+    x_hat = cookie.t / tau_hat;
+
+    J = cookie.dmp_p.getAcellPartDev_g_tau(cookie.t, cookie.Y, cookie.dY, cookie.Y0, x_hat, Yg_hat, tau_hat);
+
+end
+
+function cookie = pMsrCookie(dmp_p, t, Y, dY, Y0, Yg, tau, est_goal, est_tau)
+    
+    cookie = struct('dmp_p',dmp_p, 't',t, 'Y',Y, 'dY',dY, 'Y0',Y0, 'Yg',Yg, 'tau',tau, 'est_goal',est_goal, 'est_tau',est_tau);
     
 end
 

@@ -261,9 +261,10 @@ classdef DMPoEKFa < matlab.mixin.Copyable
             
             F_k = eye(10,10) + F_k*this.Ts;
             
+%             theta'
 %             F_k
 %             
-%             pause
+%             stop
             
         end
         
@@ -312,12 +313,12 @@ classdef DMPoEKFa < matlab.mixin.Copyable
                 F1(:,6+i) = (dvRot2 - dvRot1) / (2*deg_step);
             end
             
-            dtau = 1e-2;
+            dtau = 1e-3;
             this.dmp.setTau(tau+dtau);
-            dvRot2 = this.dmp.calcRotAccel((t+dtau)/tau, Q, vRot, Qg);
-            this.dmp.setTau(tau);
-            dvRot1 = this.dmp.calcRotAccel((t)/tau, Q, vRot, Qg);
-            F1(:,10) = (dvRot2 - dvRot1) / (dtau);
+            dvRot2 = this.dmp.calcRotAccel(t/(tau+dtau), Q, vRot, Qg);
+            this.dmp.setTau(tau-dtau);
+            dvRot1 = this.dmp.calcRotAccel(t/(tau-dtau), Q, vRot, Qg);
+            F1(:,10) = (dvRot2 - dvRot1) / (2*dtau);
             
             this.dmp.setTau(tau0);
             

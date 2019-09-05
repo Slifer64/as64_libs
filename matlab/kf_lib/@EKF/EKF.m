@@ -249,6 +249,11 @@ classdef EKF < handle
                 dtheta_j(j) = 0.0;
             end
             
+%             theta'
+%             F_k
+%             
+%             stop
+            
         end
         
         %% Computes numerically the measurement function's Jacobian.
