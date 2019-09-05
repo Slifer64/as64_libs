@@ -9,9 +9,6 @@
 
 #include <io_lib/io_utils.h>
 #include <dmp_lib/DMP/DMP_eo.h>
-#include <dmp_lib/GatingFunction/LinGatingFunction.h>
-#include <dmp_lib/GatingFunction/ExpGatingFunction.h>
-#include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
 #include <kf_lib/EKF.h>
 #include <math_lib/quaternions.h>
 

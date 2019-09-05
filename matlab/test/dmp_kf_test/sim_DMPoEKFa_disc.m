@@ -136,7 +136,7 @@ while (true)
     dx = dmp_o.phaseDot(x);
 
     %% Stopping criteria
-    err_p = quatLog(quatDiff(Qg,Q));
+    err_p = norm(quatLog(quatDiff(Qg,Q)));
     if (err_p <= 0.5e-2 & t>=t_end)
         break; 
     end

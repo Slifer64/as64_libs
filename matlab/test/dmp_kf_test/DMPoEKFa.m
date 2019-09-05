@@ -261,11 +261,6 @@ classdef DMPoEKFa < matlab.mixin.Copyable
             
             F_k = eye(10,10) + F_k*this.Ts;
             
-%             theta'
-%             F_k
-%             
-%             stop
-            
         end
         
         function F1 = calcF1Jacob(this, theta, t)
