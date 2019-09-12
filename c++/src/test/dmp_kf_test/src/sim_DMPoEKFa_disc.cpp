@@ -18,6 +18,8 @@
 #include <dmp_kf_test/utils.h>
 #include <dmp_kf_test/DMPoEKFa.h>
 
+#include <plot_lib/qt_plot.h>
+
 using namespace as64_;
 
 
@@ -43,8 +45,6 @@ int main(int argc, char** argv)
 
   arma::mat P0 = arma::diagmat(arma::vec( {0.1,0.1,0.1,  0.1,0.1,0.1,  1,1,1,  10} ));
   double a_p = 1.002;
-
-  bool plot_1sigma = false;
 
   arma::mat Mr = 1*arma::mat().eye(3,3);
   arma::mat Dr = 5*arma::mat().eye(3,3);
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
 
     x_data = arma::join_horiz(x_data, arma::vec({x}));
     F_data = arma::join_horiz(F_data, F_ext);
-    Sigma_theta_data = arma::join_horiz(Sigma_theta_data, arma::sqrt(arma::vectorise(P_theta)));
+    Sigma_theta_data = arma::join_horiz(Sigma_theta_data, arma::sqrt(arma:: diagvec(P_theta)));
 
     // DMP simulation
     dmp_o->setTau(tau_hat);
@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 
     F_ext = Mr*(dvRot - dvRot_hat) + Dr*(vRot - vRot_hat) + Kr*math_::quatLog(math_::quatDiff(Q,Q_hat));
 
-    arma::vec Y_out = arma::join_vert(dvRot, math_::quatLog(Q)) + Sigma_vn*arma::vec().randn(N_out);
+    arma::vec Y_out = arma::join_vert(dvRot, math_::quatLog(Q)); // + Sigma_vn*arma::vec().randn(N_out);
     // Y_out_hat = dvRot_hat;
 
     // Update phase variable
@@ -170,11 +170,15 @@ int main(int argc, char** argv)
       break;
     }
 
+    std::cerr << "theta init = " << ekf.theta.t() << "\n";
+
     ekf_timer.tic();
     // ========  KF measurement update  ========
     ekf.correct(Y_out);
 
     t = t + dt;
+
+    std::cerr << "theta correct = " << ekf.theta.t() << "\n";
 
     // ========  KF time update  ========
     kf_::DMPoEKFa::StateTransCookie state_cookie(t);
@@ -184,6 +188,10 @@ int main(int argc, char** argv)
 
     theta = ekf.theta;
     P_theta = ekf.P;
+
+    std::cerr << "theta predict = " << ekf.theta.t() << "\n";
+
+    exit(-1);
 
     // Numerical integration
     x = x + dx*dt;
@@ -210,7 +218,7 @@ int main(int argc, char** argv)
   std::cerr << "ekf_max_time = " << ekf_max_time << " ms\n";
 
   // ===========  write results  ===============
-  std::string sim_data_file = path + "/matlab/data/orient_est_results.bin";
+  std::string sim_data_file = path + "/matlab/data/sim_DMPoEKFa_results.bin";
   std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
   if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
   io_::write_mat(Time, out);
@@ -222,6 +230,8 @@ int main(int argc, char** argv)
   io_::write_mat(F_data, out);
   io_::write_mat(Q_data, out);
   io_::write_mat(vRot_data, out);
+  io_::write_mat(Q_hat_data, out);
+  io_::write_mat(vRot_hat_data, out);
   out.close();
 
   // ===========  Shutdown ROS node  ==================

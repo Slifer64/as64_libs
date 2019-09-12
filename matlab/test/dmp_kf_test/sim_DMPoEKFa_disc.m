@@ -146,17 +146,25 @@ while (true)
         warning('Time limit reached. Stopping simulation...\n');
         break;
     end
+    
+    theta_init = ekf.theta'
 
     %% ========   KF measurement update (correction)  ===========
     ekf.correct(Y_out);
     
     t = t + dt;
     
+    theta_correct = ekf.theta'
+    
     %% ========   KF time update  ===========
     ekf.predict(oStateTransCookie(t));
 
     theta = ekf.theta;
     P_theta = ekf.P;
+    
+    theta_predict = ekf.theta'
+    
+    stop
 
     %% ========   Numerical integration  ===========
     x = x + dx*dt;
@@ -202,7 +210,7 @@ hold on;
 for i=1:10
     plot(Time, Sigma_theta_data(i,:), 'LineWidth',2.0);
 end
-legend({'$\dot{p}_x$','$\dot{p}_y$','$\dot{p}_z$','$p_x$','$p_y$','$p_z$','$g_x$','$g_y$','$g_z$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
+legend({'$\omega_x$','$\omega_y$','$\omega_z$','$eQ_x$','$eQ_y$','$eQ_z$','$eQ_{g,x}$','$eQ_{g,y}$','$eQ_{g,z}$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
 title('$\sigma_{\theta}$', 'interpreter','latex', 'fontsize',15);
 xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
 hold off;

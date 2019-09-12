@@ -95,7 +95,7 @@ int main(int argc, char** argv)
   std::string dmp_data_file = path + "/matlab/data/dmp_data.bin";
   saveDMPdata(dmp_data_file, dmp_p, dmp_o, Ygd, Y0d, Qgd, Q0d, taud);
 
-  dmp_p->printParams();
+  // dmp_p->printParams();
 
   // ===========  Shutdown ROS node  ==================
   ros::shutdown();

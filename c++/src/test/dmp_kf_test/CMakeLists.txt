@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   kf_lib
   io_lib
   math_lib
+  plot_lib
 )
 
 ###################################
@@ -31,6 +32,7 @@ set(LINK_LIBS
   kf_lib
   io_lib
   math_lib
+  plot_lib
 )
 
 file(GLOB INCLUDE_LIST "")

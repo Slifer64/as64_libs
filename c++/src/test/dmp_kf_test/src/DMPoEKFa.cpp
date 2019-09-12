@@ -32,10 +32,10 @@ DMPoEKFa::DMPoEKFa(std::shared_ptr<dmp_::DMP_eo> dmp, double Ts)
 
   this->setPartDerivStep(0.001);
 
-  this->stateTransFun_ptr = std::bind(&DMPoEKFa::stateTransFun, *this, std::placeholders::_1, std::placeholders::_2);
-  this->msrFun_ptr = std::bind(&DMPoEKFa::msrFun, *this, std::placeholders::_1, std::placeholders::_2);
-  this->stateTransFunJacob_ptr = std::bind(&DMPoEKFa::stateTransFunJacob, *this, std::placeholders::_1, std::placeholders::_2);
-  this->msrFunJacob_ptr = std::bind(&DMPoEKFa::msrFunJacob, *this, std::placeholders::_1, std::placeholders::_2);
+  // this->stateTransFun_ptr = std::bind(&DMPoEKFa::stateTransFun, *this, std::placeholders::_1, std::placeholders::_2);
+  // this->msrFun_ptr = std::bind(&DMPoEKFa::msrFun, *this, std::placeholders::_1, std::placeholders::_2);
+  // this->stateTransFunJacob_ptr = std::bind(&DMPoEKFa::stateTransFunJacob, *this, std::placeholders::_1, std::placeholders::_2);
+  // this->msrFunJacob_ptr = std::bind(&DMPoEKFa::msrFunJacob, *this, std::placeholders::_1, std::placeholders::_2);
 }
 
 void DMPoEKFa::setFadingMemoryCoeff(double a_p)
@@ -76,18 +76,18 @@ void DMPoEKFa::setPartDerivStep(const arma::vec &dtheta)
 
 void DMPoEKFa::predict(void *cookie)
 {
-  F_k = stateTransFunJacob_ptr(theta, cookie);
-  theta = stateTransFun_ptr(theta, cookie);
+  F_k = stateTransFunJacob(theta, cookie);
+  theta = stateTransFun(theta, cookie);
   P = std::pow(a_p,2)*F_k*P*F_k.t() + Qn;
 }
 
 void DMPoEKFa::correct(const arma::vec &z, void *cookie)
 {
   // =====  Retrive the measurement function Jacobian  =====
-  this->H_k = msrFunJacob_ptr(theta, cookie);
+  this->H_k = msrFunJacob(theta, cookie);
 
   // =====  Correction estimates =====
-  arma::vec z_hat = this->msrFun_ptr(this->theta, cookie);
+  arma::vec z_hat = msrFun(this->theta, cookie);
   arma::mat K_kf = arma::solve((H_k*P*H_k.t() + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
 
   this->theta = this->theta + K_kf * (z - z_hat);
@@ -132,8 +132,8 @@ arma::mat DMPoEKFa::calcStateTransFunJacob(const arma::vec &theta, void *cookie)
   for (int j=0; j<N_params; j++)
   {
       dtheta_j(j) = this->dtheta(j);
-      arma::vec Ftheta2 = this->stateTransFun_ptr(theta + dtheta_j, cookie);
-      arma::vec Ftheta1 = this->stateTransFun_ptr(theta - dtheta_j, cookie);
+      arma::vec Ftheta2 = this->stateTransFun(theta + dtheta_j, cookie);
+      arma::vec Ftheta1 = this->stateTransFun(theta - dtheta_j, cookie);
       F_k.col(j) = (Ftheta2 - Ftheta1) / (2*this->dtheta(j));
       dtheta_j(j) = 0.0;
   }
@@ -151,8 +151,8 @@ arma::mat DMPoEKFa::calcMsrFunJacob(const arma::vec &theta, void *cookie)
   for (int j=0; j<N_params; j++)
   {
       dtheta_j(j) = this->dtheta(j);
-      arma::vec Htheta2 = this->msrFun_ptr(theta + dtheta_j, cookie);
-      arma::vec Htheta1 = this->msrFun_ptr(theta - dtheta_j, cookie);
+      arma::vec Htheta2 = this->msrFun(theta + dtheta_j, cookie);
+      arma::vec Htheta1 = this->msrFun(theta - dtheta_j, cookie);
       H_k.col(j) = (Htheta2 - Htheta1) / (2*this->dtheta(j));
       dtheta_j(j) = 0.0;
   }
@@ -185,7 +185,7 @@ arma::vec DMPoEKFa::stateTransFun(const arma::vec &theta, void *cookie)
   arma::vec theta_next(10);
   theta_next.subvec(0,2) = vRot + dvRot*Ts;
   theta_next.subvec(3,5) = eQ + deQ*Ts;
-  theta_next.subvec(6,8) = theta.subvec(6,8);
+  theta_next.subvec(6,9) = theta.subvec(6,9);
 
   return theta_next;
 }
@@ -206,11 +206,11 @@ arma::mat DMPoEKFa::stateTransFunJacob(const arma::vec &theta, void *cookie)
 {
   double t = static_cast<StateTransCookie *>(cookie)->t;
 
-  arma::mat F_k = arma::mat().zeros(10,10);
-  F_k.rows(0,2) = calcF1Jacob(theta, t);
-  F_k.rows(3,5) = calcF2Jacob(theta);
+  arma::mat A_k = arma::mat().zeros(10,10);
+  A_k.rows(0,2) = calcF1Jacob(theta, t);
+  A_k.rows(3,5) = calcF2Jacob(theta);
 
-  return arma::mat().eye(10,10) + F_k*Ts;
+  return arma::mat().eye(10,10) + A_k*Ts;
 }
 
 arma::mat DMPoEKFa::calcF1Jacob(const arma::vec &theta, double t)

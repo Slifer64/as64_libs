@@ -40,11 +40,11 @@ classdef DMPoEKFa < matlab.mixin.Copyable
             
             this.setPartDerivStep(0.001);
             
-            this.stateTransFun_ptr = @this.stateTransFun;
-            this.msrFun_ptr = @this.msrFun;
+            % this.stateTransFun_ptr = @this.stateTransFun;
+            % this.msrFun_ptr = @this.msrFun;
             
-            this.msrFunJacob_ptr = @this.msrFunJacob;
-            this.stateTransFunJacob_ptr = @this.stateTransFunJacob;
+            % this.msrFunJacob_ptr = @this.msrFunJacob;
+            % this.stateTransFunJacob_ptr = @this.stateTransFunJacob;
 
         end
         
@@ -104,26 +104,6 @@ classdef DMPoEKFa < matlab.mixin.Copyable
         end
             
         
-        %% Sets the state transition function Jacobian.
-        %  @param[in] stateTransFunJacob_ptr: Pointer to the state transition function Jacobian. It should accept a vector (the parameters)
-        %                                        and a void pointer (cookie) to pass extra arguments to the function.
-        function setStateTransFunJacob(this, stateTransFunJacob_ptr)
-            
-            this.stateTransFunJacob_ptr = stateTransFunJacob_ptr;
-            
-        end
-        
-        
-        %% Sets the measurement function Jacobian.
-        %  @param[in] msrFunJacob_ptr: Pointer to the measurement function Jacobian. It should accept a vector (the parameters)
-        %                                        and a void pointer (cookie) to pass extra arguments to the function.
-        function setMsrFunJacob(this, msrFunJacob_ptr)
-            
-            this.msrFunJacob_ptr = msrFunJacob_ptr;
-            
-        end
-        
-        
         %% Sets the step for computing the partial derivatives of the state
         %% transition and/or measurement function w.r.t. the estimation parameters.
         %  @param[in] dtheta: Scalar or vector of parameters step size.
@@ -146,11 +126,11 @@ classdef DMPoEKFa < matlab.mixin.Copyable
             if (nargin < 2), cookie=[]; end
                     
             if (~isempty(cookie))
-                this.F_k = this.stateTransFunJacob_ptr(this.theta, cookie);             
-                this.theta = this.stateTransFun_ptr(this.theta, cookie);
+                this.F_k = this.stateTransFunJacob(this.theta, cookie);             
+                this.theta = this.stateTransFun(this.theta, cookie);
             else
-                this.F_k = this.stateTransFunJacob_ptr(this.theta);             
-                this.theta = this.stateTransFun_ptr(this.theta);
+                this.F_k = this.stateTransFunJacob(this.theta);             
+                this.theta = this.stateTransFun(this.theta);
             end
  
             % FP = this.P;
@@ -171,8 +151,8 @@ classdef DMPoEKFa < matlab.mixin.Copyable
             if (nargin < 3), cookie=[]; end
             
             % =====  Retrive the measurement function Jacobian  ===== 
-            this.H_k = this.msrFunJacob_ptr(this.theta, cookie);
-            z_hat = this.msrFun_ptr(this.theta, cookie);
+            this.H_k = this.msrFunJacob(this.theta, cookie);
+            z_hat = this.msrFun(this.theta, cookie);
 
             % =====  Correction estimates ===== 
             Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.Rn);
