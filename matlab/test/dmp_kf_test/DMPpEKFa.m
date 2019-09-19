@@ -225,8 +225,8 @@ classdef DMPpEKFa < matlab.mixin.Copyable
             this.dmp.setTau(tau0);
             
             theta_next = zeros(10,1);
-            theta_next(1:3) = theta(1:3) + p_ddot*this.Ts;
-            theta_next(4:6) = theta(4:6) + p_dot*this.Ts;
+            theta_next(1:3) = p_dot + p_ddot*this.Ts;
+            theta_next(4:6) = p + p_dot*this.Ts;
             theta_next(7:10) = theta(7:10);
             
         end

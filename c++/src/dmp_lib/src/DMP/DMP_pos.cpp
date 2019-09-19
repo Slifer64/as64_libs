@@ -159,6 +159,22 @@ std::shared_ptr<DMP_pos> DMP_pos::importFromFile(std::istream &in)
   return dmp_p;
 }
 
+arma::mat DMP_pos::getAcellPartDev_g_tau(double t, const arma::vec &Y, const arma::vec &dY, const arma::vec &Y0, double x, const arma::vec &Yg, double tau) const
+{
+
+  int n_dim = dmp.size();
+  arma::mat J(n_dim, n_dim+1);
+
+  int j_end = n_dim;
+  for (int i=0; i<n_dim; i++)
+  {
+    arma::vec C = dmp[i]->getAcellPartDev_g_tau(t, Y(i), dY(i), Y0(i), x, Yg(i), tau);
+    J(i,i) = C(0);
+    J(i,j_end) = C(1);
+  }
+
+  return J;
+}
 
 } // namespace dmp_
 

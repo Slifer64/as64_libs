@@ -1,25 +1,25 @@
 
-path = strrep(mfilename('fullpath'), 'plot_DMPoEKFa_results','');
+path = strrep(mfilename('fullpath'), 'plot_DMPpEKFa_results','');
 addpath([path 'utils/']);
 
 addpath([path '/utils/']);
 
-filename = [path '/data/sim_DMPoEKFa_results.bin'];
+filename = [path '/data/sim_DMPpEKFa_results.bin'];
 %% Load sim data
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end
   
 Time = read_mat(in, true);
-Qg = read_mat(in, true);
-Qg_data = read_mat(in, true);
+pg = read_mat(in, true);
+pg_data = read_mat(in, true);
 tau = read_scalar(in, true, 'double');
 tau_data = read_mat(in, true);
 Sigma_theta_data = read_mat(in, true);
 F_data = read_mat(in, true);
-Q_data = read_mat(in, true);
-vRot_data = read_mat(in, true);
-Q_hat_data = read_mat(in, true);
-vRot_hat_data = read_mat(in, true);
+p_data = read_mat(in, true);
+p_dot_data = read_mat(in, true);
+p_hat_data = read_mat(in, true);
+p_dot_hat_data = read_mat(in, true);
 
 plot_1sigma = false;
 
@@ -36,13 +36,13 @@ end
 %% ==========   Unit Quaternion ================
 
 figure
-for i=1:4
-   subplot(4,1,i);
+for i=1:3
+   subplot(3,1,i);
    hold on;
-   plot(Time, Q_data(i,:), 'LineWidth',2, 'Color','blue');
-   plot(Time, Q_hat_data(i,:), 'LineWidth',2, 'Color','magenta');
+   plot(Time, p_data(i,:), 'LineWidth',2, 'Color','blue');
+   plot(Time, p_hat_data(i,:), 'LineWidth',2, 'Color','magenta');
    if (i==1), legend('actual','estimate'); end
-   if (i==1), title('Orientation (Quaternion)'); end
+   if (i==1), title('Position'); end
    hold off;
 end
 
@@ -54,10 +54,10 @@ figure
 for i=1:3
    subplot(3,1,i);
    hold on;
-   plot(Time, vRot_data(i,:), 'LineWidth',2, 'Color','blue');
-   plot(Time, vRot_hat_data(i,:), 'LineWidth',2, 'Color','magenta');
+   plot(Time, p_dot_data(i,:), 'LineWidth',2, 'Color','blue');
+   plot(Time, p_dot_hat_data(i,:), 'LineWidth',2, 'Color','magenta');
    if (i==1), legend('actual','estimate'); end
-   if (i==1), title('Rotational Velocity'); end
+   if (i==1), title('Velocity'); end
    hold off;
 end
 
@@ -69,7 +69,7 @@ hold on;
 for i=1:10
     plot(Time, Sigma_theta_data(i,:), 'LineWidth',2.0);
 end
-legend({'$\omega_x$','$\omega_y$','$\omega_z$','$eQ_x$','$eQ_y$','$eQ_z$','$eQ_{g,x}$','$eQ_{g,y}$','$eQ_{g,z}$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
+legend({'$\dot{x}$','$\dot{y}$','$\dot{z}$','$x$','$y$','$z$','$g_x$','$g_y$','$g_z$','$\tau$'}, 'interpreter','latex', 'fontsize',15);
 title('$\sigma_{\theta}$', 'interpreter','latex', 'fontsize',15);
 xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
 hold off;
@@ -81,7 +81,7 @@ hold off;
 fontsize = 16;
 linewidth = 1.5;
 
-D = length(Qg);
+D = length(pg);
 
 axis_name = {'x', 'y', 'z'};
 
@@ -91,26 +91,19 @@ pos_color = {[0.85 0.7 1], [0.75 0.75 0], [0 0.45 0.75], [1.0 0.84 0.0]};
 tau_color = [0 0 1];
 tau_hat_color = [0.85 0.33 0.1];
 
-n = size(Qg_data,2);
-eQg_data = zeros(3,n);
-eQ_data = zeros(3,n);
-
-for j=1:n
-    eQg_data(:,j) = quatLog(quatDiff(Qg,Qg_data(:,j)));
-    eQ_data(:,j) = quatLog(quatDiff(Qg,Q_data(:,j)));
-end
+n = size(pg_data,2);
 
 figure;
 for i=1:3
     subplot(5,1,i);
     hold on;
-    plot([Time(1) Time(end)],[0 0], 'LineStyle','--', 'Color','red' ,'LineWidth',2);
-    plot(Time,eQg_data(i,:), 'LineStyle','-', 'Color','blue', 'LineWidth',linewidth);
-    plot(Time,eQ_data(i,:), 'LineStyle','-.', 'Color',[0 0.7 0], 'LineWidth',linewidth);
-    legend_labels = {['$\mathbf{eQ}_{g,' axis_name{i} '}$'], ['$\hat{\mathbf{eQ}}_{g,' axis_name{i} '}$'], ['$\mathbf{Q}_{' axis_name{i} '}$']};
+    plot([Time(1) Time(end)],[pg(i) pg(i)], 'LineStyle','--', 'Color','red' ,'LineWidth',2);
+    plot(Time,pg_data(i,:), 'LineStyle','-', 'Color','blue', 'LineWidth',linewidth);
+    plot(Time,p_data(i,:), 'LineStyle','-.', 'Color',[0 0.7 0], 'LineWidth',linewidth);
+    legend_labels = {['$\mathbf{p}_{g,' axis_name{i} '}$'], ['$\hat{\mathbf{p}}_{g,' axis_name{i} '}$'], ['$\mathbf{p}_{' axis_name{i} '}$']};
     if (plot_1sigma)
-        plot(Time,eQg_data(i,:)+Sigma_theta_data(i,:),'c-.', 'LineWidth',linewidth);
-        plot(Time,eQg_data(i,:)-Sigma_theta_data(i,:),'c-.', 'LineWidth',linewidth);
+        plot(Time,pg_data(i,:)+Sigma_theta_data(i,:),'c-.', 'LineWidth',linewidth);
+        plot(Time,pg_data(i,:)-Sigma_theta_data(i,:),'c-.', 'LineWidth',linewidth);
         legend_labels = [legend_labels, ['$\pm1\sigma$']];
     end
     % ylabel('[$m$]','interpreter','latex','fontsize',fontsize);
@@ -153,12 +146,12 @@ sum_f2 = 0.0;
 P = zeros(length(Time),1);
 F_square = zeros(length(Time),1);
 for i=1:size(F_data,2)
-    P(i) = abs(F_data(:,i)'*vRot_data(:,i));
+    P(i) = abs(F_data(:,i)'*p_dot_data(:,i));
     effort = effort + abs(P(i))*dt;
     F_square(i) = F_data(:,i)'*F_data(:,i);
     sum_f2 = sum_f2 + F_square(i)*dt;
 end
-goal_err = norm(Qg-Qg_data(:,end));
+goal_err = norm(pg-pg_data(:,end));
     
 %% ================================================
 %% ================  Plot effort  =================

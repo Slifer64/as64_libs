@@ -146,26 +146,17 @@ while (true)
         warning('Time limit reached. Stopping simulation...\n');
         break;
     end
-    
-    theta_init = ekf.theta'
 
     %% ========   KF measurement update (correction)  ===========
     ekf.correct(Y_out);
     
     t = t + dt;
-    
-    theta_correct = ekf.theta'
-    
     %% ========   KF time update  ===========
     ekf.predict(oStateTransCookie(t));
 
     theta = ekf.theta;
     P_theta = ekf.P;
     
-    theta_predict = ekf.theta'
-    
-    stop
-
     %% ========   Numerical integration  ===========
     x = x + dx*dt;
     Q = quatProd( quatExp(vRot*dt), Q);

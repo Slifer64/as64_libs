@@ -1,0 +1,7 @@
+<launch>
+
+  <node pkg="dmp_kf_test" type="sim_DMPpEKFa_disc" name="sim_DMPpEKFa_disc" output="screen">
+
+  </node>
+
+</launch>

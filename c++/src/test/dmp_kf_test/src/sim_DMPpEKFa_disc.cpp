@@ -8,7 +8,7 @@
 #include <exception>
 
 #include <io_lib/io_utils.h>
-#include <dmp_lib/DMP/DMP_eo.h>
+#include <dmp_lib/DMP/DMP_pos.h>
 #include <dmp_lib/GatingFunction/LinGatingFunction.h>
 #include <dmp_lib/GatingFunction/ExpGatingFunction.h>
 #include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
@@ -16,7 +16,7 @@
 #include <math_lib/quaternions.h>
 
 #include <dmp_kf_test/utils.h>
-#include <dmp_kf_test/DMPoEKFa.h>
+#include <dmp_kf_test/DMPpEKFa.h>
 
 #include <plot_lib/qt_plot.h>
 
@@ -26,7 +26,7 @@ using namespace as64_;
 int main(int argc, char** argv)
 {
   // ===========  Initialize the ROS node  ===============
-  ros::init(argc, argv, "DMPoEKFa_test_node");
+  ros::init(argc, argv, "DMPpEKFa_test_node");
   ros::NodeHandle nh_("~");
 
   std::string path = ros::package::getPath("dmp_kf_test");
@@ -35,20 +35,20 @@ int main(int argc, char** argv)
 
   double dt = 0.005;
 
-  arma::vec Q0_offset = math_::quatExp(arma::vec({0,0,0}));
-  arma::vec Qg_offset = math_::quatExp(arma::vec({0.8, -0.7, 0.55}));
+  arma::vec Y0_offset = arma::vec({0,0,0});
+  arma::vec pg_offset = arma::vec({0.8, -0.9, 0.7});
   double time_offset = 5;
 
-  arma::mat Qn = 0.0001*arma::mat().eye(10,10);
-  arma::mat Rn = std::pow(0.01,2)*arma::mat().eye(6,6);
-  arma::mat Rn_hat = arma::diagmat(arma::vec( {0.1, 0.1, 0.1, 0.01, 0.01, 0.01} ));
+  arma::mat Qn = 0.001*arma::mat().eye(10,10);
+  arma::mat Rn = std::pow(0.1,2)*arma::mat().eye(6,6);
+  arma::mat Rn_hat = arma::diagmat(arma::vec( {100, 100, 100, 100, 100, 100} ));
 
-  arma::mat P0 = arma::diagmat(arma::vec( {0.1,0.1,0.1,  0.1,0.1,0.1,  1,1,1,  10} ));
+  arma::mat P0 = arma::diagmat(arma::vec( {1,1,1,  1,1,1,  100,100,100,  1000} ));
   double a_p = 1.002;
 
-  arma::mat Mr = 1*arma::mat().eye(3,3);
-  arma::mat Dr = 5*arma::mat().eye(3,3);
-  arma::mat Kr = 10*arma::mat().eye(3,3);
+  arma::mat Mr = 5*arma::mat().eye(3,3);
+  arma::mat Dr = 80*arma::mat().eye(3,3);
+  arma::mat Kr = 400*arma::mat().eye(3,3);
 
   // ===========  load DMP data  ===============
   std::string dmp_data_file = path + "/matlab/data/dmp_data.bin";
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
   double tau0;
   loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, &Yg0, &P0d, &Qg0, &Q0d, &tau0);
 
-  std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_o->can_clock_ptr;
+  std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_p->can_clock_ptr;
   can_clock_ptr->setTau(tau0);
 
   // DMP simulation
@@ -70,41 +70,38 @@ int main(int argc, char** argv)
   double t = 0.0;
   double x = 0.0;
   double dx = 0.0;
-  arma::vec Q0 = math_::quatProd(Q0_offset, Q0d);
-  arma::vec Q = Q0;
-  arma::vec vRot = arma::vec().zeros(Dim);
-  arma::vec dvRot = arma::vec().zeros(Dim);
+  arma::vec p0 = P0d + Y0_offset;
+  arma::vec p = p0;
+  arma::vec p_dot = arma::vec().zeros(Dim);
+  arma::vec p_ddot = arma::vec().zeros(Dim);
   arma::vec F_ext = arma::vec().zeros(Dim);
 
   arma::rowvec Time;
-  arma::mat Q_data, vRot_data, dvRot_data;
-  arma::mat Q_hat_data, vRot_hat_data, dvRot_hat_data;
+  arma::mat p_data, p_dot_data, p_ddot_data;
+  arma::mat p_hat_data, p_dot_hat_data, p_ddot_hat_data;
   arma::rowvec x_data;
-  arma::mat Qg_data;
+  arma::mat pg_data;
   arma::rowvec tau_data;
   arma::mat F_data;
   arma::mat Sigma_theta_data;
 
-  arma::vec Qg = math_::quatProd(Qg_offset, Qg0);
+  arma::vec pg = Yg0 + pg_offset;
 
   double t_end = tau0 + time_offset;
   double tau = t_end;
   can_clock_ptr->setTau(tau);
 
-
   double tau_hat = tau0;
-  arma::vec Qg_hat = Qg0;
-  arma::vec eQg_hat = math_::quatLog(Qg_hat);
+  arma::vec pg_hat = Yg0;
   double x_hat = t/tau_hat;
-  arma::vec Q_hat = Q;
-  arma::vec eQ_hat = math_::quatLog(Q_hat);
-  arma::vec vRot_hat = vRot;
-  arma::vec dvRot_hat = arma::vec().zeros(3,1);
+  arma::vec p_hat = p;
+  arma::vec p_dot_hat = p_dot;
+  arma::vec p_ddot_hat = arma::vec().zeros(3,1);
 
   arma::vec theta(10);
-  theta.subvec(0,2) = vRot_hat;
-  theta.subvec(3,5) = eQ_hat;
-  theta.subvec(6,8) = eQg_hat;
+  theta.subvec(0,2) = p_dot_hat;
+  theta.subvec(3,5) = p_hat;
+  theta.subvec(6,8) = pg_hat;
   theta(9) = tau_hat;
   arma::mat P_theta = P0;
 
@@ -112,34 +109,34 @@ int main(int argc, char** argv)
   int N_out = 6;
 
   // Set up EKF object
-  kf_::DMPoEKFa ekf(dmp_o, dt);
+  kf_::DMPpEKFa ekf(dmp_p, dt);
   ekf.setProcessNoiseCov(Qn);
   ekf.setMeasureNoiseCov(Rn_hat);
   ekf.setFadingMemoryCoeff(a_p);
   ekf.theta = theta;
   ekf.P = P_theta;
 
-  dmp_o->setQ0(Q0);
+  dmp_p->setY0(p0);
 
   arma::wall_clock ekf_timer;
   arma::rowvec ekf_time;
 
-  std::cout << "DMP-EKF (discrete) Orient simulation...\n";
+  std::cout << "DMP-EKF (discrete) Pos simulation...\n";
   arma::wall_clock timer;
   timer.tic();
   while (true)
   {
     // data logging
     Time = arma::join_horiz(Time, arma::vec({t}));
-    Q_data = arma::join_horiz(Q_data, Q);
-    vRot_data = arma::join_horiz(vRot_data, vRot);
-    dvRot_data = arma::join_horiz(dvRot_data, dvRot);
+    p_data = arma::join_horiz(p_data, p);
+    p_dot_data = arma::join_horiz(p_dot_data, p_dot);
+    p_ddot_data = arma::join_horiz(p_ddot_data, p_ddot);
 
-    Q_hat_data = arma::join_horiz(Q_hat_data, Q_hat);
-    vRot_hat_data = arma::join_horiz(vRot_hat_data, vRot_hat);
-    dvRot_hat_data = arma::join_horiz(dvRot_hat_data, dvRot_hat);
+    p_hat_data = arma::join_horiz(p_hat_data, p_hat);
+    p_dot_hat_data = arma::join_horiz(p_dot_hat_data, p_dot_hat);
+    p_ddot_hat_data = arma::join_horiz(p_ddot_hat_data, p_ddot_hat);
 
-    Qg_data = arma::join_horiz(Qg_data, Qg_hat);
+    pg_data = arma::join_horiz(pg_data, pg_hat);
     tau_data = arma::join_horiz(tau_data, arma::vec({tau_hat}));
 
     x_data = arma::join_horiz(x_data, arma::vec({x}));
@@ -147,22 +144,22 @@ int main(int argc, char** argv)
     Sigma_theta_data = arma::join_horiz(Sigma_theta_data, arma::sqrt(arma:: diagvec(P_theta)));
 
     // DMP simulation
-    dmp_o->setTau(tau_hat);
-    arma::vec dvRot_hat = dmp_o->calcRotAccel(x_hat, Q_hat, vRot_hat, Qg_hat);
-    dmp_o->setTau(tau);
-    dvRot = dmp_o->calcRotAccel(x, Q, vRot, Qg);
+    dmp_p->setTau(tau_hat);
+    arma::vec p_ddot_hat = dmp_p->calcYddot(x_hat, p_hat, p_dot_hat, pg_hat);
+    dmp_p->setTau(tau);
+    p_ddot = dmp_p->calcYddot(x, p, p_dot, pg);
 
-    F_ext = Mr*(dvRot - dvRot_hat) + Dr*(vRot - vRot_hat) + Kr*math_::quatLog(math_::quatDiff(Q,Q_hat));
+    F_ext = Mr*(p_ddot - p_ddot_hat) + Dr*(p_dot - p_dot_hat) + Kr*(p-p_hat);
 
-    arma::vec Y_out = arma::join_vert(vRot, math_::quatLog(Q)); // + Sigma_vn*arma::vec().randn(N_out);
-    // Y_out_hat = dvRot_hat;
+    arma::vec Y_out = arma::join_vert(p_dot, p); // + Sigma_vn*arma::vec().randn(N_out);
+    // Y_out_hat = p_ddot_hat;
 
     // Update phase variable
     dx = can_clock_ptr->getPhaseDot(x);
 
     // Stopping criteria
-    double err_o = arma::norm(math_::quatLog(math_::quatDiff(Qg,Q)));
-    if (err_o <= 0.5e-2 & t>=t_end) break;
+    double err_p = arma::norm(pg-p)/norm(pg);
+    if (err_p <= 0.5e-2 & t>=t_end) break;
 
     if (t>=t_end)
     {
@@ -176,7 +173,7 @@ int main(int argc, char** argv)
 
     t = t + dt;
     // ========  KF time update  ========
-    kf_::DMPoEKFa::StateTransCookie state_cookie(t);
+    kf_::DMPpEKFa::StateTransCookie state_cookie(t,p0);
     ekf.predict(static_cast<void *>(&state_cookie));
 
     ekf_time = arma::join_horiz( ekf_time, arma::vec({ekf_timer.toc()}) );
@@ -186,14 +183,12 @@ int main(int argc, char** argv)
 
     // Numerical integration
     x = x + dx*dt;
-    Q = math_::quatProd( math_::quatExp(vRot*dt), Q);
-    vRot = vRot + dvRot*dt;
+    p = p + p_dot*dt;
+    p_dot = p_dot + p_ddot*dt;
 
-    vRot_hat = theta.subvec(0,2);
-    eQ_hat = theta.subvec(3,5);
-    Q_hat = math_::quatExp(eQ_hat);
-    eQg_hat = theta.subvec(6,8);
-    Qg_hat = math_::quatExp(eQg_hat);
+    p_dot_hat = theta.subvec(0,2);
+    p_hat = theta.subvec(3,5);
+    pg_hat = theta.subvec(6,8);
     tau_hat = theta(9);
 
     x_hat = t/tau_hat;
@@ -209,20 +204,20 @@ int main(int argc, char** argv)
   std::cerr << "ekf_max_time = " << ekf_max_time << " ms\n";
 
   // ===========  write results  ===============
-  std::string sim_data_file = path + "/matlab/data/sim_DMPoEKFa_results.bin";
+  std::string sim_data_file = path + "/matlab/data/sim_DMPpEKFa_results.bin";
   std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
   if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
   io_::write_mat(Time, out);
-  io_::write_mat(Qg, out);
-  io_::write_mat(Qg_data, out);
+  io_::write_mat(pg, out);
+  io_::write_mat(pg_data, out);
   io_::write_scalar(tau, out);
   io_::write_mat(tau_data, out);
   io_::write_mat(Sigma_theta_data, out);
   io_::write_mat(F_data, out);
-  io_::write_mat(Q_data, out);
-  io_::write_mat(vRot_data, out);
-  io_::write_mat(Q_hat_data, out);
-  io_::write_mat(vRot_hat_data, out);
+  io_::write_mat(p_data, out);
+  io_::write_mat(p_dot_data, out);
+  io_::write_mat(p_hat_data, out);
+  io_::write_mat(p_dot_hat_data, out);
   out.close();
 
   // ===========  Shutdown ROS node  ==================

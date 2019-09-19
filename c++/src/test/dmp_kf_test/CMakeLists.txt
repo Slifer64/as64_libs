@@ -113,6 +113,22 @@ target_link_libraries(sim_DMP_Orient_EKF_disc ${LINK_LIBS} )
 # ************   sim_DMPoEKFa_disc  ******************
 # **********************************************************
 
+add_executable(sim_DMPpEKFa_disc
+		src/sim_DMPpEKFa_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		src/DMPpEKFa.cpp
+		)
+
+add_dependencies(sim_DMPpEKFa_disc
+		${${PROJECT_NAME}_EXPORTED_TARGETS}
+		${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(sim_DMPpEKFa_disc ${LINK_LIBS} )
+
+
+# **********************************************************
+# ************   sim_DMPoEKFa_disc  ******************
+# **********************************************************
+
 add_executable(sim_DMPoEKFa_disc
 		src/sim_DMPoEKFa_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
 		src/DMPoEKFa.cpp

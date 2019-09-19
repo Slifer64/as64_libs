@@ -133,7 +133,7 @@ while (true)
     F_ext = Mr*(p_ddot - p_ddot_hat) + Dr*(p_dot - p_dot_hat) + Kr*(p - p_hat);
 
     
-    Y_out = [p_dot; p] + Sigma_vn*randn(N_out,1);
+    Y_out = [p_dot; p]; % + Sigma_vn*randn(N_out,1);
     % Y_out_hat = [p_dot_hat; p_hat];
 
     %% Update phase variable
