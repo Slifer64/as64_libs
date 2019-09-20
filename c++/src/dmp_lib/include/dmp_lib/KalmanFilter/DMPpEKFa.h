@@ -17,7 +17,7 @@
 namespace as64_
 {
 
-namespace kf_
+namespace dmp_
 {
 
 class DMPpEKFa
@@ -192,7 +192,7 @@ private:
 
 };
 
-} // namespace kf_
+} // namespace dmp_
 
 } // namespace as64_
 

@@ -16,7 +16,7 @@
 #include <math_lib/quaternions.h>
 
 #include <dmp_kf_test/utils.h>
-#include <dmp_kf_test/DMPpEKFa.h>
+#include <dmp_lib/KalmanFilter/DMPpEKFa.h>
 
 #include <plot_lib/qt_plot.h>
 
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
   int N_out = 6;
 
   // Set up EKF object
-  kf_::DMPpEKFa ekf(dmp_p, dt);
+  dmp_::DMPpEKFa ekf(dmp_p, dt);
   ekf.setProcessNoiseCov(Qn);
   ekf.setMeasureNoiseCov(Rn_hat);
   ekf.setFadingMemoryCoeff(a_p);
@@ -173,7 +173,7 @@ int main(int argc, char** argv)
 
     t = t + dt;
     // ========  KF time update  ========
-    kf_::DMPpEKFa::StateTransCookie state_cookie(t,p0);
+    dmp_::DMPpEKFa::StateTransCookie state_cookie(t,p0);
     ekf.predict(static_cast<void *>(&state_cookie));
 
     ekf_time = arma::join_horiz( ekf_time, arma::vec({ekf_timer.toc()}) );

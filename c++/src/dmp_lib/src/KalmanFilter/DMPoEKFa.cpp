@@ -1,12 +1,11 @@
-#include <dmp_kf_test/DMPoEKFa.h>
-
+#include <dmp_lib/KalmanFilter/DMPoEKFa.h>
 #include <dmp_lib/math/quaternions.h>
-using namespace as64_::dmp_;
+
 
 namespace as64_
 {
 
-namespace kf_
+namespace dmp_
 {
 
 DMPoEKFa::DMPoEKFa(std::shared_ptr<dmp_::DMP_eo> dmp, double Ts)
@@ -309,6 +308,6 @@ arma::mat DMPoEKFa::calcF2Jacob(const arma::vec &theta)
 }
 
 
-} // namespace kf_
+} // namespace dmp_
 
 } // namespace as64_

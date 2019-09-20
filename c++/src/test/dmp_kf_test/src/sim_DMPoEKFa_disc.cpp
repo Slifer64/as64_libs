@@ -9,14 +9,11 @@
 
 #include <io_lib/io_utils.h>
 #include <dmp_lib/DMP/DMP_eo.h>
-#include <dmp_lib/GatingFunction/LinGatingFunction.h>
-#include <dmp_lib/GatingFunction/ExpGatingFunction.h>
-#include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
 #include <kf_lib/EKF.h>
 #include <math_lib/quaternions.h>
 
 #include <dmp_kf_test/utils.h>
-#include <dmp_kf_test/DMPoEKFa.h>
+#include <dmp_lib/KalmanFilter/DMPoEKFa.h>
 
 #include <plot_lib/qt_plot.h>
 
@@ -112,7 +109,7 @@ int main(int argc, char** argv)
   int N_out = 6;
 
   // Set up EKF object
-  kf_::DMPoEKFa ekf(dmp_o, dt);
+  dmp_::DMPoEKFa ekf(dmp_o, dt);
   ekf.setProcessNoiseCov(Qn);
   ekf.setMeasureNoiseCov(Rn_hat);
   ekf.setFadingMemoryCoeff(a_p);
@@ -176,7 +173,7 @@ int main(int argc, char** argv)
 
     t = t + dt;
     // ========  KF time update  ========
-    kf_::DMPoEKFa::StateTransCookie state_cookie(t);
+    dmp_::DMPoEKFa::StateTransCookie state_cookie(t);
     ekf.predict(static_cast<void *>(&state_cookie));
 
     ekf_time = arma::join_horiz( ekf_time, arma::vec({ekf_timer.toc()}) );

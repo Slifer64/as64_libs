@@ -1,12 +1,10 @@
-#include <dmp_kf_test/DMPpEKFa.h>
-
+#include <dmp_lib/KalmanFilter/DMPpEKFa.h>
 #include <dmp_lib/math/quaternions.h>
-using namespace as64_::dmp_;
 
 namespace as64_
 {
 
-namespace kf_
+namespace dmp_
 {
 
 DMPpEKFa::DMPpEKFa(std::shared_ptr<dmp_::DMP_pos> dmp, double Ts)
@@ -180,6 +178,6 @@ arma::mat DMPpEKFa::stateTransFunJacob(const arma::vec &theta, void *cookie)
 }
 
 
-} // namespace kf_
+} // namespace dmp_
 
 } // namespace as64_

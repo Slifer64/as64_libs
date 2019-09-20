@@ -37,6 +37,9 @@ add_library(${PROJECT_NAME}
   src/DMP/DMP_bio.cpp
   src/DMP/DMP_pos.cpp
   src/DMP/DMP_eo.cpp
+
+  src/KalmanFilter/DMPpEKFa.cpp
+  src/KalmanFilter/DMPoEKFa.cpp
 )
 
 add_dependencies(${PROJECT_NAME}
