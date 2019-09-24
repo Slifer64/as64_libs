@@ -149,8 +149,7 @@ while (true)
 
     %% ========   KF measurement update (correction)  ===========
     ekf.correct(Y_out);
-    
-    t = t + dt;
+
     %% ========   KF time update  ===========
     ekf.predict(oStateTransCookie(t));
 
@@ -158,6 +157,7 @@ while (true)
     P_theta = ekf.P;
     
     %% ========   Numerical integration  ===========
+    t = t + dt;
     x = x + dx*dt;
     Q = quatProd( quatExp(vRot*dt), Q);
     vRot = vRot + dvRot*dt;

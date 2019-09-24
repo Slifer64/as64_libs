@@ -155,8 +155,6 @@ while (true)
     %% ========  KF measurement update  ========
     ekf.correct(Y_out);
 
-    t = t + dt;
-
     %% ========  KF time update  ========
     ekf.predict(pStateTransCookie(t,p0));
     
@@ -164,6 +162,7 @@ while (true)
     P_theta = ekf.P;
 
     %% Numerical integration
+    t = t + dt;
     x = x + dx*dt;
     p = p + p_dot*dt;
     p_dot = p_dot + p_ddot*dt;

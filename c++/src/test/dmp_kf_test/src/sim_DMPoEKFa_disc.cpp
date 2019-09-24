@@ -171,7 +171,6 @@ int main(int argc, char** argv)
     // ========  KF measurement update  ========
     ekf.correct(Y_out);
 
-    t = t + dt;
     // ========  KF time update  ========
     dmp_::DMPoEKFa::StateTransCookie state_cookie(t);
     ekf.predict(static_cast<void *>(&state_cookie));
@@ -182,6 +181,7 @@ int main(int argc, char** argv)
     P_theta = ekf.P;
 
     // Numerical integration
+    t = t + dt;
     x = x + dx*dt;
     Q = math_::quatProd( math_::quatExp(vRot*dt), Q);
     vRot = vRot + dvRot*dt;

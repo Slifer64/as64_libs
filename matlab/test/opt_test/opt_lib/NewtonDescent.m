@@ -246,32 +246,47 @@ classdef NewtonDescent < handle
                 error('[NewtonDescent::solveIneqInterPoint]: No inequalitiy constraints are set...');
             end
             
+            v = [];
+            
             % calc initial t
             [~, grad_phi, ~] = this.barrierFun(x0);
-            A0 = [this.gradObjFun_ptr(x0) this.A'];
+            A0 = this.gradObjFun_ptr(x0);
             b0 = grad_phi;
             z = -(A0\b0);
             t = z(1);
-            v = z(2:end);
-
-            m = size(this.A,1);
             
             x = x0;      
             iter = 1;
             x_data = [x];
             mu = 20;
             
+            Neq = length(this.Fi(x0));
+            
+            out_iters = 0;
+            inner_iters = [];
+            
+            t = 0.05;
+            
+            phi = this.barrierFun(x);
+            J0 = t*this.objFun_ptr(x) + phi;
+
             % outer iteration
             while (Neq/t > this.eps)
                 
                 t = mu*t;
+                
+                out_iters = out_iters + 1;
             
                 [~, grad_phi, hess_phi] = this.barrierFun(x);
                 g = t*this.gradObjFun_ptr(x) + grad_phi;
                 H = t*this.hessianObjFun_ptr(x) + hess_phi;
+                
+                inner_iters(out_iters) = 0;
 
                 % inner iteration
                 while (true)
+                    
+                    inner_iters(out_iters) = inner_iters(out_iters) + 1;
 
                     if (iter > this.max_iter)
                         warning('[NewtonDescent::solveIneqInterPoint]: Exiting due to maximum iterations reached...');
@@ -279,12 +294,21 @@ classdef NewtonDescent < handle
                         break;
                     end
                     iter = iter + 1;
-
-                    h = zeros(m,1); % A*x - b;
-                    [dx, v] = this.solveKKT_ptr(H, this.A, g, h);
-
+ 
+                    dx = - H\g;
                     t1 = this.line_search.run(x, dx, g);
                     x = x + t1*dx;
+                    
+                    phi = this.barrierFun(x0);
+                    J = t*this.objFun_ptr(x0) + phi
+                    
+                    t1
+                    x
+                    H
+                    g
+                    dx
+                    disp('--------------------------')
+                    pause
                     
                     if (nargout > 1), x_data = [x_data x]; end
 
@@ -302,6 +326,9 @@ classdef NewtonDescent < handle
             
             end
 
+            out_iters
+            inner_iters
+            total_iters = sum(inner_iters)
         end
         
         %% Calculates the minimum of convex problem with equality and inequality constraints.
@@ -395,25 +422,6 @@ classdef NewtonDescent < handle
 
         end
 
-        %% TODO ...
-        function [phi, grad_phi, hess_phi] = calcLogBar(this, x, Fi, gradFi, hessianFi)
-            
-            ni = length(Fi);
-            phi = 0;
-            grad_phi = zeros(n,1);
-            hess_phi = zeros(n,n);
-            for i=1:ni
-                fi = Fi{i}(x);
-                grad_fi = gradFi{i}(x);
-                hess_fi = hessianFi{i}(x);
-                
-                phi = phi -log(-fi);
-                grad_phi = grad_phi - grad_fi/fi;
-                hess_phi = hess_phi - hess_fi/fi + grad_fi*grad_fi'/fi^2;
-            end
-            
-        end
-
         %% Sets the object that will be used in line search.
         %  @param[in] line_search: Pointer to line search object.
         function setLineSearch(this, line_search)
@@ -458,21 +466,16 @@ classdef NewtonDescent < handle
         %% Sets the inequality constraints.
         %  @param[in] Fi: Pointer to function that returns a vector with the value of each inequality constraint.
         %  @param[in] barrierFun: Pointer to function that calculates the value, the gradient and hessian of the log barrier function.
-        function setInEqConstr(this, Fi, barrierFun, ph1barrierFun)
+        function setInEqConstr(this, ineq_const)
             
             this.ineq_constr_flag = true;
-            this.Fi = Fi;
-            this.barrierFun = barrierFun;
-            this.ph1barrierFun = ph1barrierFun;
+            this.ineq_const = ineq_const;
             
         end
         
-        function setLinInEqConstr(this, Ai, hi)
+        function setLinIneqConstr(this, Ai, bi)
             
-            Fi = @(x) Ai*x - hi;
-            
-            
-            this.setInEqConstr(this, Fi, @this.linLogBarFun, @this.linLogBarPh1Fun);
+            this.setInEqConstr(LinIneqConstr(Ai,bi));
             
         end
         
@@ -558,19 +561,19 @@ classdef NewtonDescent < handle
 
         end
         
-        function fo = ph1(x)
+        function fo = ph1(this, x)
             
             fo = x(1);
             
         end
         
-        function g = gradPh1(x)
+        function g = gradPh1(this, x)
             
             g = [1; zeros(this.N_var,1)];
             
         end
         
-        function H = hessPh1(x)
+        function H = hessPh1(this, x)
             
             n = this.N_var + 1;
             H = zeros(n,n);
@@ -578,39 +581,103 @@ classdef NewtonDescent < handle
             
         end
         
-        function fi = ph1Fi(x)
+        function fi = ph1Fi(this, x)
            
             s = x(1);
             x = x(2:end);
             fi = this.Fi(x) - s;
             
         end
-        
-        function [phi, grad_phi, hess_phi] = linLogBarFun(x)
-           
-            phi = this.Ai*x - this.bi;
+
+        function [x, exit_code] = phase1solve(phase1BarrierFun)
             
-            m = size(this.bi);
-            d = ones(m,1)./phi;
+            if (~this.ineq_constr_flag)
+                error('[NewtonDescent::solveIneqInterPoint]: No inequalitiy constraints are set...');
+            end
+            
+            v = [];
+            
+            % calc initial t
+            [~, grad_phi, ~] = this.barrierFun(x0);
+            A0 = this.gradObjFun_ptr(x0);
+            b0 = grad_phi;
+            z = -(A0\b0);
+            t = z(1);
+            
+            x = x0;      
+            iter = 1;
+            x_data = [x];
+            mu = 20;
+            
+            Neq = length(this.Fi(x0));
+            
+            out_iters = 0;
+            inner_iters = [];
+            
+            t = 0.05;
+            
+            phi = this.barrierFun(x);
+            J0 = t*this.objFun_ptr(x) + phi;
+
+            % outer iteration
+            while (Neq/t > this.eps)
                 
-            if (nargout > 1), grad_phi = this.Ai' * d; end
-            if (nargout > 2), hess_phi = this.Ai' * diag(d.^2) * this.Ai; end
-            
-        end
-        
-        function [phi, grad_phi, hess_phi] = linLogBarPh1Fun(x)
-           
-            m = size(this.bi);
-            A = [-ones(m,1) this.Ai];
-            
-            phi = A*x - this.bi;
-            
-            m = size(this.bi);
-            d = ones(m,1)./phi;
+                t = mu*t;
                 
-            if (nargout > 1), grad_phi = A' * d; end
-            if (nargout > 2), hess_phi = A' * diag(d.^2) * A; end
+                out_iters = out_iters + 1;
             
+                [~, grad_phi, hess_phi] = this.barrierFun(x);
+                g = t*this.gradObjFun_ptr(x) + grad_phi;
+                H = t*this.hessianObjFun_ptr(x) + hess_phi;
+                
+                inner_iters(out_iters) = 0;
+
+                % inner iteration
+                while (true)
+                    
+                    inner_iters(out_iters) = inner_iters(out_iters) + 1;
+
+                    if (iter > this.max_iter)
+                        warning('[NewtonDescent::solveIneqInterPoint]: Exiting due to maximum iterations reached...');
+                        exit_code = NewtonDescent.MAX_ITERS_REACHED;
+                        break;
+                    end
+                    iter = iter + 1;
+ 
+                    dx = - H\g;
+                    t1 = this.line_search.run(x, dx, g);
+                    x = x + t1*dx;
+                    
+                    phi = this.barrierFun(x0);
+                    J = t*this.objFun_ptr(x0) + phi
+                    
+                    t1
+                    x
+                    H
+                    g
+                    dx
+                    disp('--------------------------')
+                    pause
+                    
+                    if (nargout > 1), x_data = [x_data x]; end
+
+                    [~, grad_phi, hess_phi] = this.barrierFun(x);
+                    g = t*this.gradObjFun_ptr(x) + grad_phi;
+                    H = t*this.hessianObjFun_ptr(x) + hess_phi;
+
+                    lambda2 = 0.5*dx'*H*dx;
+                    if (lambda2 < this.eps)
+                        exit_code = NewtonDescent.TOLERANCE_REACHED;
+                        break; 
+                    end
+
+                end
+            
+            end
+
+            out_iters
+            inner_iters
+            total_iters = sum(inner_iters)
         end
         
     end
@@ -647,12 +714,12 @@ classdef NewtonDescent < handle
         b % equalities constraint vector
         eq_constr_flag % flag that is true if equality constraints are set
         
-        Ai % linear inequality constraint matrix
-        bi % linear inequality constraint vector
-        Fi % pointer to function that returns a vector with the value of each inequality constraint
+        ineq_constr % @IneqConstr object
+        ineq_constr_flag % flag that is true if inequality constraints are set
+
         barrierFun % pointer to function that calculates the value, the gradient and hessian of the log barrier function
         ph1barrierFun % pointer to function that calculates the value, the gradient and hessian of the log barrier function for the phaseI method
-        ineq_constr_flag % flag that is true if inequality constraints are set
+        
         
         kkt_solve_method % method for solving the KKT system
         solveKKT_ptr % pointer to method for solving the KKT system
