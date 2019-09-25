@@ -26,11 +26,10 @@ x0 = [2; -2];
 
 %% ============= Solve phase1 ==============
 phase1 = Phase1Solver(LinIneqConstr(Ai,bi));
-[x, s] = phase1.solveNoEqConstr(x0);
+[x, s] = phase1.solve(x0);
 
 s
 
-return
 
 %% ============  Solve  ================
 options = optimoptions(@fmincon, 'Algorithm','interior-point', 'MaxIterations',100, 'SpecifyObjectiveGradient',true);
@@ -46,7 +45,7 @@ N_var = length(x0);
 solver = NewtonDescent(N_var, @fun, @gradFun, @hessianFun);
 solver.setStopThreshold(1e-5);
 solver.setMaxIters(100);
-solver.setLinInEqConstr(Ai, bi);
+solver.setLinIneqConstr(Ai, bi);
 tic
 % solver.setKKTsolveMethod(KKTSolveMethod.FULL_INV);
 [x, v, x_data] = solver.solve(x0);
