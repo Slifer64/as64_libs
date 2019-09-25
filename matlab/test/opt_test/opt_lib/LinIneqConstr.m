@@ -22,9 +22,9 @@ classdef LinIneqConstr < IneqConstr
         
         function [phi, grad_phi, hess_phi] = logBarFun(this, x)
             
-            y = this.Ai*x - this.bi;
+            y = this.bi - this.Ai*x;
             
-            phi = -sum(log(-y));
+            phi = -sum(log(y));
             
             m = length(this.bi);
             d = ones(m,1)./y;
@@ -36,14 +36,13 @@ classdef LinIneqConstr < IneqConstr
         
         function [phi, grad_phi, hess_phi] = ph1LogBarFun(this, x)
             
-            m = size(this.bi);
+            m = length(this.bi);
             Ai2 = [-ones(m,1) this.Ai];
             
-            y = Ai2*x - this.bi;
+            y = this.bi - Ai2*x;
             
-            phi = -sum(log(-y));
-            
-            m = size(this.bi);
+            phi = -sum(log(y));
+
             d = ones(m,1)./y;
                 
             if (nargout > 1), grad_phi = Ai2' * d; end

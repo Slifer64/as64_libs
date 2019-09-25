@@ -24,6 +24,13 @@ fi_y = @(x) (bi - Ai(:,1:end-1)*x)./Ai(:,end);
 % x0 = Ai\(0.5*bi);
 x0 = [2; -2];
 
+%% ============= Solve phase1 ==============
+phase1 = Phase1Solver(LinIneqConstr(Ai,bi));
+[x, s] = phase1.solveNoEqConstr(x0);
+
+s
+
+return
 
 %% ============  Solve  ================
 options = optimoptions(@fmincon, 'Algorithm','interior-point', 'MaxIterations',100, 'SpecifyObjectiveGradient',true);

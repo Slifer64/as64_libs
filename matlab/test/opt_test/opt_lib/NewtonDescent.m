@@ -10,7 +10,7 @@ classdef NewtonDescent < handle
         function this = NewtonDescent(N_var, objFun_ptr, gradObjFun_ptr, hessianObjFun_ptr)
 
             this.setLineSearch(BackTrackLineSearch(objFun_ptr, 0.01, 0.5));
-            this.setKKTsolveMethod(KKTSolveMethod.FULL_INV);
+            this.setKKTsolveMethod(KKTSolver.FULL_INV);
             this.clearEqConstr();
             this.clearInEqConstr();
             this.setStopThreshold(1e-5);
@@ -24,6 +24,8 @@ classdef NewtonDescent < handle
             
             this.lowTriangSolve = dsp.LowerTriangularSolver;
             this.upperTriangSolve = dsp.UpperTriangularSolver;
+            
+            this.setDamping(0);
 
         end
         
@@ -37,7 +39,7 @@ classdef NewtonDescent < handle
             
             if (this.eq_constr_flag)
                 
-                if (this.kkt_solve_method == KKTSolveMethod.EQ_ELIM)
+                if (this.kkt_solve_method == KKTSolver.EQ_ELIM)
                     [Q, R] = qr(this.A');
                     m = size(this.A,1);
                     Q1 = Q(:,1:m);
@@ -70,40 +72,36 @@ classdef NewtonDescent < handle
         %  @param[out] exit_code: Indicates the reason why the optimization stopped.
         function [x, v, x_data, exit_code] = solveUnconstr(this, x0)
             
+            Id = this.d*eye(this.N_var, this.N_var);
             v = 0;
-            
             x = x0;
-            df = this.gradObjFun_ptr(x);
-            ddf = this.hessianObjFun_ptr(x);
-            
             iter = 1;
-            
             x_data = [x];
 
             while (true)
-                
+ 
                 if (iter > this.max_iter)
                     warning('[NewtonDescent::solveUnconstr]: Exiting due to maximum iterations reached...');
                     exit_code = NewtonDescent.MAX_ITERS_REACHED;
                     break;
                 end
                 iter = iter + 1;
-  
-                dx = - ddf\df;
-                t = this.line_search.run(x, dx, df);
-                x = x + t*dx;
                 
-                if (nargout > 1), x_data = [x_data x]; end
-
                 df = this.gradObjFun_ptr(x);
-                ddf = this.hessianObjFun_ptr(x);
-
+                ddf = this.hessianObjFun_ptr(x) + Id;
+                dx = - ddf\df;
+                
                 lambda2 = -0.5*df'*dx;
                 if (lambda2 < this.eps)
                     exit_code = NewtonDescent.TOLERANCE_REACHED;
                     break; 
                 end
-                    
+                
+                t = this.line_search.run(x, dx, df);
+                x = x + t*dx;
+                
+                if (nargout > 1), x_data = [x_data x]; end
+ 
             end
 
         end
@@ -116,19 +114,12 @@ classdef NewtonDescent < handle
         %  @param[out] exit_code: Indicates the reason why the optimization stopped.
         function [x, v, x_data, exit_code] = solveEq(this, x0)
             
-            if (~this.eq_constr_flag)
-                error('[NewtonDescent::solveEq]: No equalitiy constraints are set...');
-            end
+            if (~this.eq_constr_flag), error('[NewtonDescent::solveEq]: No equalitiy constraints are set...'); end
             
             m = size(this.A,1);
-            
             x = x0;
-            g = this.gradObjFun_ptr(x);
             h = zeros(m,1);
-            H = this.hessianObjFun_ptr(x);
-            
             iter = 1;
-            
             x_data = [x];
 
             while (true)
@@ -139,22 +130,22 @@ classdef NewtonDescent < handle
                     break;
                 end
                 iter = iter + 1;
-
-                [dx, v] = this.solveKKT_ptr(H, this.A, g, h);
-              
-                t = this.line_search.run(x, dx, g);
-                x = x + t*dx;
                 
-                if (nargout > 2), x_data = [x_data x]; end
-
                 g = this.gradObjFun_ptr(x);
                 H = this.hessianObjFun_ptr(x);
 
+                [dx, v] = this.solveKKT_ptr(H, this.A, g, h);
+                
                 lambda2 = 0.5*dx'*H*dx;
                 if (lambda2 < this.eps)
                     exit_code = NewtonDescent.TOLERANCE_REACHED;
                     break; 
                 end
+              
+                t = this.line_search.run(x, dx, g);
+                x = x + t*dx;
+                
+                if (nargout > 2), x_data = [x_data x]; end
                     
             end
 
@@ -176,8 +167,8 @@ classdef NewtonDescent < handle
             
             m = size(this.A,1);
             
-            if (this.kkt_solve_method == KKTSolveMethod.EQ_ELIM)
-                error('[NewtonDescent::solveEqInfeasStart]: KKTSolveMethod.EQ_ELIM is not supported for this function.');
+            if (this.kkt_solve_method == KKTSolver.EQ_ELIM)
+                error('[NewtonDescent::solveEqInfeasStart]: KKTSolver.EQ_ELIM is not supported for this function.');
             end
             
             x = x0;
@@ -357,7 +348,7 @@ classdef NewtonDescent < handle
                 phase1_solver.setEqConstr(this.A,this.b);
                 phase1_solver.setInEqConstr(this, this.ph1Fi, this.ph1barrierFun);
                 
-                phase1_solver.setKKTsolveMethod(KKTSolveMethod.BLOCK_ELIM);
+                phase1_solver.setKKTsolveMethod(KKTSolver.BLOCK_ELIM);
                 
                 
                 [z, v, x_data] = solver.solve(z0);
@@ -435,9 +426,9 @@ classdef NewtonDescent < handle
         function setKKTsolveMethod(this, kkt_solve_method)
             
             % solveKKT_ptr: pointer to KKT solve function
-            if (kkt_solve_method == KKTSolveMethod.FULL_INV), this.solveKKT_ptr = @this.solveKKTFullInv; 
-            elseif (kkt_solve_method == KKTSolveMethod.BLOCK_ELIM), this.solveKKT_ptr = @this.solveKKTBlockElim; 
-            elseif (kkt_solve_method == KKTSolveMethod.EQ_ELIM), this.solveKKT_ptr = @this.solveKKTEqElim; 
+            if (kkt_solve_method == KKTSolver.FULL_INV), this.solveKKT_ptr = @this.solveKKTFullInv; 
+            elseif (kkt_solve_method == KKTSolver.BLOCK_ELIM), this.solveKKT_ptr = @this.solveKKTBlockElim; 
+            elseif (kkt_solve_method == KKTSolver.EQ_ELIM), this.solveKKT_ptr = @this.solveKKTEqElim; 
             else, error('[NewtonDescent::setKKTsolveMethod]: Unsupported KKT solve method...');
             end
             
@@ -486,6 +477,14 @@ classdef NewtonDescent < handle
             
         end
         
+        %% Set damping for damped Newton method.
+        %  @param[in] d: damping value.
+        function setDamping(this, d)
+            
+            this.d = d;
+            
+        end
+        
         %% Sets the stopping threshold for the solve method.
         %  @param[in] eps: Stopping threshold.
         function setStopThreshold(this, eps)
@@ -514,52 +513,6 @@ classdef NewtonDescent < handle
     
     methods (Access = private)
         
-        %% Solves iteratively the KKT system using full inversion of the KKT matrix.
-        function [dx, v] = solveKKTFullInv(this, H, A, g, h)
-            
-            [m, n] = size(A);
-            
-            z = [H A'; A zeros(m,m)] \ -[g; h];
-            dx = z(1:n);
-            v = z(n+1:end);
-            
-        end
-        
-        %% Solves iteratively the KKT system using variable elimination.
-        function [dx, w] = solveKKTBlockElim(this, H, A, g, h)
-            
-            [m,n] = size(A);
-            
-%             if (rank(H) < n) % (cond(H) > 1e7) or sigma_min/sigma_max<1e-6 
-%                 H = H + A'*A;
-%                 g = g + A'*h;
-%             end
-            
-%             L = chol(H,'lower');
-%             temp = this.upperTriangSolve(L', this.lowTriangSolve(L,[A' g]));
-            temp = H \ [A' g];
-            
-            invH_transA = temp(:,1:m);
-            invH_g = temp(:,m+1);
-            w = (A*invH_transA) \ (h - A*invH_g);
-
-%             lowSolve = dsp.LowerTriangularSolver;
-%             upSolve = dsp.UpperTriangularSolver;
-%             dx = upSolve(L', lowSolve(L, (-A'*w - g) ));
-            % dx = H \ (-A'*w - g);
-            dx = -(invH_transA*w + invH_g);
-            % dx = this.upperTriangSolve(L', this.lowTriangSolve(L, (-A'*w - g) ));
-
-        end
-        
-        %% Solves iteratively the KKT system by eliminating the equality constraints and solving an unconstrained system.
-        function [dx, w] = solveKKTEqElim(this, H, A, g, h)
-            
-            dz = -(this.F'*H*this.F) \ (this.F'*g);
-            dx = this.F * dz;
-            w = [];
-
-        end
         
         function fo = ph1(this, x)
             
@@ -725,6 +678,8 @@ classdef NewtonDescent < handle
         solveKKT_ptr % pointer to method for solving the KKT system
         
         N_var % number of optimization variables
+        
+        d % damping value for damped Newton method
 
     end
     
