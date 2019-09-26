@@ -117,6 +117,8 @@ classdef NewtonDescent < handle
             
             Id = this.d*eye(this.N_var, this.N_var);
             
+            if (max(abs((this.A*x0-this.b))) > 1e-8), x0 = this.A\this.b; end
+            
             m = size(this.A,1);
             x = x0;
             h = zeros(m,1);
@@ -263,7 +265,7 @@ classdef NewtonDescent < handle
             out_iters = 0;
             inner_iters = [];
             
-            t = 1/mu;
+            t = 0.01/mu;
 
             % outer iteration
             while (Neq/t > this.eps)
@@ -276,6 +278,9 @@ classdef NewtonDescent < handle
                 objFun = @(x) t*this.objFun_ptr(x) + this.ineq_constr.logBarFun(x);
                 line_search2 = BackTrackLineSearch(objFun, this.line_search.a, this.line_search.b);
 
+                stop_thres = 0.5;
+                % if (Neq/t <= this.eps), stop_thres = 0.1; end
+                    
                 % inner iteration
                 while (true)
                     
@@ -290,10 +295,10 @@ classdef NewtonDescent < handle
                     g = t*this.gradObjFun_ptr(x) + grad_phi;
                     H = t*this.hessianObjFun_ptr(x) + hess_phi + Id;
  
-                    dx = - H\g;
+                    dx = -H\g;
                     
                     lambda2 = 0.5*dx'*H*dx;
-                    if (lambda2 < 1)
+                    if (lambda2 < stop_thres)
                         exit_code = NewtonDescent.TOLERANCE_REACHED;
                         break; 
                     end
@@ -334,79 +339,88 @@ classdef NewtonDescent < handle
             if (~this.ineq_constr_flag)
                 error('[NewtonDescent::solveEqIneqInterPoint]: No inequalitiy constraints are set...');
             end
+
+            v = [];
+            x = x0;
+            x_data = [];
             
-            if (nargin < 2)
-                
-                x0 = this.A \ this.b;
-                s0 = max(this.Fi(x0));
-                z0 = [s0; x0];
-                
-                phase1_solver = NewtonDescent(@this.ph1, @this.gradPh1, @this.hessPh1);
-                phase1_solver.setEqConstr(this.A,this.b);
-                phase1_solver.setInEqConstr(this, this.ph1Fi, this.ph1barrierFun);
-                
-                phase1_solver.setKKTsolveMethod(KKTSolver.BLOCK_ELIM);
-                
-                
-                [z, v, x_data] = solver.solve(z0);
-                
+            phase1 = Phase1Solver(this.ineq_constr);
+            phase1.setEqConstr(this.A, this.b);
+            [x0, s] = phase1.solve(x0);
+            if (s > 0)
+                exit_code = NewtonDescent.INFEASIBLE;
+                return;
             end
             
-            % calc initial t
-            [~, grad_phi, ~] = this.barrierFun(x0);
-            A0 = [this.gradObjFun_ptr(x0) this.A'];
-            b0 = grad_phi;
-            z = -(A0\b0);
-            t = z(1);
-            v = z(2:end);
+            Id = this.d*eye(this.N_var, this.N_var);
 
-            m = size(this.A,1);
-            
-            x = x0;      
             iter = 1;
+            x = x0;
             x_data = [x];
             mu = 20;
             
+            Neq = length(this.ineq_constr.fi(x0));
+            
+            out_iters = 0;
+            inner_iters = [];
+            
+            t = 0.01/mu;
+            h = zeros(size(this.A,1),1);
+
             % outer iteration
             while (Neq/t > this.eps)
                 
                 t = mu*t;
-            
-                [~, grad_phi, hess_phi] = this.barrierFun(x);
-                g = t*this.gradObjFun_ptr(x) + grad_phi;
-                H = t*this.hessianObjFun_ptr(x) + hess_phi;
+                
+                out_iters = out_iters + 1;
+                inner_iters(out_iters) = 0;
+                
+                objFun = @(x) t*this.objFun_ptr(x) + this.ineq_constr.logBarFun(x);
+                line_search2 = BackTrackLineSearch(objFun, this.line_search.a, this.line_search.b);
 
+                stop_thres = 0.5;
+                % if (Neq/t <= this.eps), stop_thres = 0.1; end
+                    
                 % inner iteration
                 while (true)
+                    
+                    inner_iters(out_iters) = inner_iters(out_iters) + 1;
 
                     if (iter > this.max_iter)
-                        warning('[NewtonDescent::solveIneqInterPoint]: Exiting due to maximum iterations reached...');
-                        exit_code = NewtonDescent.MAX_ITERS_REACHED;
                         break;
                     end
                     iter = iter + 1;
-
-                    h = zeros(m,1); % A*x - b;
-                    [dx, v] = this.kkt_solver(H, A, g, h);
-
-                    t1 = this.line_search.run(x, dx, g);
-                    x = x + t1*dx;
                     
-                    if (nargout > 1), x_data = [x_data x]; end
-
-                    [~, grad_phi, hess_phi] = this.barrierFun(x);
+                    [~, grad_phi, hess_phi] = this.ineq_constr.logBarFun(x);
                     g = t*this.gradObjFun_ptr(x) + grad_phi;
-                    H = t*this.hessianObjFun_ptr(x) + hess_phi;
-
+                    H = t*this.hessianObjFun_ptr(x) + hess_phi + Id;
+ 
+                    [dx, v] = this.kkt_solver(H, this.A, g, h);
+                    
                     lambda2 = 0.5*dx'*H*dx;
-                    if (lambda2 < this.eps)
+                    if (lambda2 < stop_thres)
                         exit_code = NewtonDescent.TOLERANCE_REACHED;
                         break; 
                     end
 
+                    t1 = line_search2.run(x, dx, g);
+                    x = x + t1*dx;
+                    
+                    if (nargout > 1), x_data = [x_data x]; end
+
+                end
+                
+                if (iter > this.max_iter)
+                    warning('[NewtonDescent::solveEqIneqInterPoint]: Exiting due to maximum iterations reached...');
+                    exit_code = NewtonDescent.MAX_ITERS_REACHED;
+                    break;
                 end
             
             end
+            
+            out_iters
+            inner_iters
+            total_iters = sum(inner_iters)
 
         end
 
