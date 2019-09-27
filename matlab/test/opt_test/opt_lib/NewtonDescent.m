@@ -351,7 +351,7 @@ classdef NewtonDescent < handle
                 exit_code = NewtonDescent.INFEASIBLE;
                 return;
             end
-            
+
             Id = this.d*eye(this.N_var, this.N_var);
 
             iter = 1;
@@ -395,7 +395,7 @@ classdef NewtonDescent < handle
                     g = t*this.gradObjFun_ptr(x) + grad_phi;
                     H = t*this.hessianObjFun_ptr(x) + hess_phi + Id;
  
-                    [dx, v] = this.kkt_solver(H, this.A, g, h);
+                    [dx, v] = this.kkt_solver.solve(H, this.A, g, h);
                     
                     lambda2 = 0.5*dx'*H*dx;
                     if (lambda2 < stop_thres)

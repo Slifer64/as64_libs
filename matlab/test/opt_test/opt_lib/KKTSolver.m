@@ -65,7 +65,7 @@ classdef KKTSolver < handle
             this.kkt_solve_method = kkt_solve_method;
             
         end
-        
+   
     end
     
     methods (Static, Access = private)
@@ -74,6 +74,12 @@ classdef KKTSolver < handle
         function [dx, v] = solveKKTFullInv(H, A, g, h)
             
             [m, n] = size(A);
+            
+            H1 = [H A'; A zeros(m,m)];
+            
+            size(H1)
+            rank(H1)
+            pause
             
             z = [H A'; A zeros(m,m)] \ -[g; h];
             dx = z(1:n);
@@ -124,6 +130,7 @@ classdef KKTSolver < handle
         kkt_solve_method
         solveKKT_ptr
         
+        d % damping value
     end
 
 end
