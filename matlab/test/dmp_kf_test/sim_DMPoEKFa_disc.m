@@ -1,4 +1,5 @@
-function sim_DMPoEKFa_disc()
+
+.function sim_DMPoEKFa_disc()
 
 %% ==============================================================
 

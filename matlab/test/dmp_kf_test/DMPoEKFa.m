@@ -155,8 +155,9 @@ classdef DMPoEKFa < matlab.mixin.Copyable
             z_hat = this.msrFun(this.theta, cookie);
 
             % =====  Correction estimates ===== 
-            Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.Rn);
-            % Kg = this.P*this.H_k'/(this.P(1:6,1:6) + this.Rn);
+            % Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.Rn);
+            Kg = this.P*this.H_k'/(this.P(1:6,1:6) + this.Rn);
+            
             this.theta = this.theta + Kg * (z - z_hat);
             
             % =====  Apply projection if enabled  ===== 
