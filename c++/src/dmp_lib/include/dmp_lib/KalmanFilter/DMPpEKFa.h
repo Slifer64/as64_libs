@@ -159,11 +159,11 @@ private:
   std::shared_ptr<dmp_::DMP_pos> dmp;
   double Ts;
 
-  arma::mat F_k; ///< state transition function Jacobian
-  arma::mat H_k; ///< measurement function Jacobian
-  arma::mat K; ///< Kalman gain
-  arma::mat Qn; ///< process noise covariance
-  arma::mat Rn; ///< measurement noise covariance
+  arma::mat::fixed<10,10> F_k; ///< state transition function Jacobian
+  arma::mat::fixed<6,10> H_k; ///< measurement function Jacobian
+  arma::mat::fixed<10,6> K; ///< Kalman gain
+  arma::mat::fixed<10,10> Qn; ///< process noise covariance
+  arma::mat::fixed<6,6> Rn; ///< measurement noise covariance
 
   double a_p; ///< fading memory coefficient
 

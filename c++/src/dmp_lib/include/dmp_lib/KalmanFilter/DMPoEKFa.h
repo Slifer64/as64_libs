@@ -12,6 +12,7 @@
 #include <cmath>
 #include <functional>
 #include <armadillo>
+#include <Eigen/Dense>
 #include <dmp_lib/DMP/DMP_eo.h>
 
 namespace as64_
@@ -157,11 +158,11 @@ private:
   std::shared_ptr<dmp_::DMP_eo> dmp;
   double Ts;
 
-  arma::mat F_k; ///< state transition function Jacobian
-  arma::mat H_k; ///< measurement function Jacobian
-  arma::mat K; ///< Kalman gain
-  arma::mat Qn; ///< process noise covariance
-  arma::mat Rn; ///< measurement noise covariance
+  arma::mat::fixed<10,10> F_k; ///< state transition function Jacobian
+  arma::mat::fixed<6,10> H_k; ///< measurement function Jacobian
+  arma::mat::fixed<10,6> K; ///< Kalman gain
+  arma::mat::fixed<10,10> Qn; ///< process noise covariance
+  arma::mat::fixed<6,6> Rn; ///< measurement noise covariance
 
   double a_p; ///< fading memory coefficient
 
@@ -207,6 +208,9 @@ private:
   arma::mat stateTransFunJacob(const arma::vec &theta, void *cookie);
   arma::mat calcF1Jacob(const arma::vec &theta, double t);
   arma::mat calcF2Jacob(const arma::vec &theta);
+
+  // Eigen::Map<Eigen::Matrix<double,10,6>> K_map;
+  // Eigen::Map<Eigen::Matrix<double,10,10>> P_map;
 };
 
 } // namespace dmp_

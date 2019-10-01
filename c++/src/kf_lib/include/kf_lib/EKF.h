@@ -115,7 +115,7 @@ public:
    *  \note The constraints must be set with 'setParamsConstraints' first.
    *  @param[in] enable_contraints Flag that is true/false for enabling/disabling the constraints.
    */
-  void enableParamsContraints(bool enable_contraints);
+  void enableParamsContraints(bool enable_constraints);
 
   /** \brief Sets linear constraints in the estimation parameters.
    * The constraints are such that A_c*theta <= b_c.

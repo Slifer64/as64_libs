@@ -41,9 +41,9 @@ void EKF::setFadingMemoryCoeff(double a_p)
   this->a_p = a_p;
 }
 
-void EKF::enableParamsContraints(bool enable_contraints)
+void EKF::enableParamsContraints(bool enable_constraints)
 {
-  this->enable_constraints = enable_contraints;
+  this->enable_constraints = enable_constraints;
 }
 
 void EKF::setParamsConstraints(const arma::mat &A_c, const arma::vec &b_c)
@@ -86,7 +86,7 @@ void EKF::correct(const arma::vec &z, void *cookie)
 
   // =====  Correction estimates =====
   arma::vec z_hat = this->msrFun_ptr(this->theta, cookie);
-  arma::mat K_kf = arma::solve((H_k*P*H_k.t() + R).t(), H_k*P.t(), arma::solve_opts::fast).t();
+  K = arma::solve((H_k*P*H_k.t() + R), H_k*P.t(), arma::solve_opts::fast + arma::solve_opts::likely_sympd).t();
   // arma::mat K_kf = P*H_k.t()*arma::inv(H_k*P*H_k.t() + R);
   // arma::mat K_kf = P*H_k.t()*arma::inv_sympd(H_k*P*H_k.t() + R);
 
@@ -115,7 +115,7 @@ void EKF::correct(const arma::vec &z, void *cookie)
   //   std::cout << "============================\n";
   // }
 
-  this->theta = this->theta + K_kf * (z - z_hat);
+  this->theta += K * (z - z_hat);
 
   // =====  Apply projection if enabled  =====
   arma::mat D; // active contraints
@@ -139,14 +139,12 @@ void EKF::correct(const arma::vec &z, void *cookie)
   {
     // K_kf = ( I - P*D.t()*arma::inv_sympd(D*P*D.t())*D ) * K_kf;
     // theta = theta - P*D.t()*arma::inv_sympd(D*P*D.t())*(D*theta-d);
-    K_kf = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K_kf;
+    K = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K;
     this->theta = theta - D.t()*arma::inv_sympd(D*D.t())*(D*theta-d);
   }
 
   // =====  Calculate new covariance  =====
-  this->P = (I - K_kf*H_k) * P * (I - K_kf*H_k).t() + K_kf*R*K_kf.t();
-
-  this->K = K_kf;
+  this->P = (I - K*H_k) * P * (I - K*H_k).t() + K*R*K.t();
 }
 
 arma::mat EKF::calcStateTransFunJacob(const arma::vec &theta, void *cookie)

@@ -6,18 +6,22 @@ set_matlab_utils_path();
 
 rng(0);
 
-global P x_c;
+global c;
 
-n = 100;
-m_i = 50;
+n = 50;
+m_i = 100;
 
-P = genRandSPDmatrix(n) / 10000;
-x_c = rand(n,1);
 
-Ai = rand(m_i, n);
-bi = rand(m_i, 1);
+Ai = randn(m_i, n);
+x0 = randn(n,1);
+s0 = randn(m_i,1);
+lambda0 = -s0/100;
+lambda0(lambda0<0) = 0;
+s0(s0<0) = 0;
+bi = Ai*x0 - s0;
+c = -Ai'*lambda0;
 
-x0 = rand(n,1);
+x0 = zeros(n,1);
 
 %% ============= Solve phase1 ==============
 phase1 = Phase1Solver(LinIneqConstr(Ai,bi));
@@ -26,28 +30,19 @@ phase1 = Phase1Solver(LinIneqConstr(Ai,bi));
 s
 
 %% ============  Solve  ================
-% options = optimoptions(@fmincon, 'Algorithm','interior-point', 'MaxIterations',100, 'SpecifyObjectiveGradient',true);
-% tic
-% x_fmincon = fmincon(@fun,x0,Ai,bi,[],[], [],[], [], options);
-% fprintf('=====================================\n');
-% toc
-% fprintf('fmincon: p_star = %f\n',fun(x_fmincon));
-% fprintf('=====================================\n');
-
 tic
-H = P;
-f = -2*P*x_c;
-x_qp = quadprog(H,f,Ai,bi);
+x_lp = linprog(c,Ai,bi);
 fprintf('=====================================\n');
 toc
-fprintf('quadprog: p_star = %f\n',fun(x_qp));
+fprintf('linprog: p_star = %f\n',fun(x_lp));
 fprintf('=====================================\n');
 
 N_var = length(x0);
 solver = NewtonDescent(N_var, @fun, @gradFun, @hessianFun);
-solver.setStopThreshold(1e-7);
-solver.setMaxIters(100);
+solver.setStopThreshold(1e-6);
+solver.setMaxIters(4000);
 solver.setLinIneqConstr(Ai, bi);
+solver.setDamping(0.01);
 tic
 % solver.setKKTsolveMethod(KKTSolveMethod.FULL_INV);
 [x, v, x_data] = solver.solve(x0);
@@ -56,10 +51,11 @@ toc
 fprintf('Solve ineq: p_star = %f\n',fun(x));
 fprintf('=====================================\n');
 
-
-dgap = fun(x0_1) - fun(x_qp)
+dgap = fun(x0_1) - fun(x_lp)
 t0 = m_i / dgap
 
+fun(x)
+fun(x_lp)
 
 % %% ============================================
 % %% =============  Plot results ================
@@ -88,33 +84,25 @@ t0 = m_i / dgap
 
 function [f, df] = fun(x)
 
-    global P x_c;
+    global c;
     
-    f = (x-x_c)'*P*(x-x_c);
+    f = c'*x;
 
     if (nargout > 1), df = gradFun(x); end
 end
 
 function g = gradFun(x)
 
-    global P x_c;
+    global c;
     
-    g = P*(x-x_c);
+    g = c;
 
 end
 
 function H = hessianFun(x)
-
-    global P;
     
-    H = P;
-
-end
-
-function P = genRandSPDmatrix(n)
-    
-    A = rand(n,n);
-    P = eye(n,n) + A'*A;
+    n = length(x);
+    H = zeros(n,n);
 
 end
 

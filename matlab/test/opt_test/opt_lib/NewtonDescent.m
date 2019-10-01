@@ -265,7 +265,8 @@ classdef NewtonDescent < handle
             out_iters = 0;
             inner_iters = [];
             
-            t = 0.01/mu;
+            t = 1/mu;
+            t = 0.5
 
             % outer iteration
             while (Neq/t > this.eps)
@@ -278,7 +279,7 @@ classdef NewtonDescent < handle
                 objFun = @(x) t*this.objFun_ptr(x) + this.ineq_constr.logBarFun(x);
                 line_search2 = BackTrackLineSearch(objFun, this.line_search.a, this.line_search.b);
 
-                stop_thres = 0.5;
+                stop_thres = 1e-2;
                 % if (Neq/t <= this.eps), stop_thres = 0.1; end
                     
                 % inner iteration

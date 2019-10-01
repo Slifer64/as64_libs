@@ -15,11 +15,11 @@ DMPoEKFa::DMPoEKFa(std::shared_ptr<dmp_::DMP_eo> dmp, double Ts)
   this->Az = arma::vec( {dmp->dmp[0]->a_z, dmp->dmp[1]->a_z, dmp->dmp[2]->a_z} );
   this->Bz = arma::vec( {dmp->dmp[0]->b_z, dmp->dmp[1]->b_z, dmp->dmp[2]->b_z} );
 
-  int N_params = 10;
-  int N_msr = 6;
+  const int N_params = 10;
+  const int N_msr = 6;
 
   this->theta = arma::vec().zeros(N_params);
-  this->P = arma::mat().zeros(N_params,N_params);
+  this->P = arma::mat().eye(N_params,N_params);
 
   this->setProcessNoiseCov(arma::mat().eye(N_params,N_params)*1e-5);
   this->setMeasureNoiseCov(arma::mat().eye(N_msr,N_msr)*0.05);
@@ -30,6 +30,9 @@ DMPoEKFa::DMPoEKFa(std::shared_ptr<dmp_::DMP_eo> dmp, double Ts)
   this->setParamsConstraints(arma::mat().zeros(1,N_params),arma::vec().zeros(1));
 
   this->setPartDerivStep(0.001);
+
+  H_k = arma::join_horiz( arma::mat().eye(6,6), arma::mat().zeros(6,4) );
+  K = arma::mat().zeros(10,6);
 
   // this->stateTransFun_ptr = std::bind(&DMPoEKFa::stateTransFun, *this, std::placeholders::_1, std::placeholders::_2);
   // this->msrFun_ptr = std::bind(&DMPoEKFa::msrFun, *this, std::placeholders::_1, std::placeholders::_2);
@@ -83,42 +86,56 @@ void DMPoEKFa::predict(void *cookie)
 void DMPoEKFa::correct(const arma::vec &z, void *cookie)
 {
   // =====  Retrive the measurement function Jacobian  =====
-  this->H_k = msrFunJacob(theta, cookie);
+  // this->H_k = msrFunJacob(theta, cookie);
 
   // =====  Correction estimates =====
   arma::vec z_hat = msrFun(this->theta, cookie);
-  arma::mat K_kf = arma::solve((H_k*P*H_k.t() + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
+//  arma::mat K_kf = arma::solve((P.submat(0,0,5,5) + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
+  // arma::mat K_kf = arma::solve((H_k*P*H_k.t() + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
 
-  this->theta = this->theta + K_kf * (z - z_hat);
-
-  // =====  Apply projection if enabled  =====
-  arma::mat D; // active contraints
-  arma::vec d;
-  bool proj_flag = false;
-  if ( this->enable_constraints & ~b_c.is_empty() )
-  {
-    arma::uvec ind = arma::find(A_c*theta > b_c);
-    if (~ind.is_empty())
-    {
-      proj_flag = true;
-      D = A_c.rows(ind);
-      d = b_c.elem(ind);
-    }
-  }
-
-  int N_params = theta.size();
-  arma::mat I = arma::mat().eye(N_params, N_params);
-
-  if (proj_flag)
-  {
-    K_kf = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K_kf;
-    this->theta = theta - D.t()*arma::inv_sympd(D*D.t())*(D*theta-d);
-  }
+//  this->theta = this->theta + K_kf * (z - z_hat);
+//
+//  // =====  Apply projection if enabled  =====
+//  arma::mat D; // active contraints
+//  arma::vec d;
+//  bool proj_flag = false;
+//  if ( this->enable_constraints & ~b_c.is_empty() )
+//  {
+//    arma::uvec ind = arma::find(A_c*theta > b_c);
+//    if (~ind.is_empty())
+//    {
+//      proj_flag = true;
+//      D = A_c.rows(ind);
+//      d = b_c.elem(ind);
+//    }
+//  }
+//
+//  int N_params = theta.size();
+//  arma::mat I = arma::mat().eye(N_params, N_params);
+//
+//  if (proj_flag)
+//  {
+//    K_kf = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K_kf;
+//    this->theta = theta - D.t()*arma::inv_sympd(D*D.t())*(D*theta-d);
+//  }
 
   // =====  Calculate new covariance  =====
-  this->P = (I - K_kf*H_k) * P * (I - K_kf*H_k).t() + K_kf*Rn*K_kf.t();
+  // this->P = (I - K_kf*H_k) * P * (I - K_kf*H_k).t() + K_kf*Rn*K_kf.t();
 
-  this->K = K_kf;
+  // K = arma::solve((P.submat(0,0,5,5) + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
+   K = arma::solve((P.submat(0,0,5,5) + Rn), P.rows(0,5), arma::solve_opts::fast+arma::solve_opts::likely_sympd).t();
+
+//  Eigen::Map<Eigen::Matrix<double,10,6>> K_map(K.memptr());
+//  Eigen::Map<Eigen::Matrix<double,10,10>> P_map(P.memptr());
+//  Eigen::Map<Eigen::Matrix<double,6,6>> R_map(Rn.memptr());
+//  Eigen::Matrix<double,6,6> cPc_R = P_map.block(0,0,6,6) + R_map;
+//  Eigen::LLT<Eigen::Matrix<double,6,6>> llt(cPc_R);
+//  K_map = (llt.solve(P_map.block(0,0,6,10))).transpose();
+
+  theta += K*(z - z_hat);
+  P += -K*P.rows(0,5);
+
+  // this->K = K_kf;
 }
 
 arma::mat DMPoEKFa::calcStateTransFunJacob(const arma::vec &theta, void *cookie)

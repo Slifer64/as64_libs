@@ -30,6 +30,8 @@ DMPpEKFa::DMPpEKFa(std::shared_ptr<dmp_::DMP_pos> dmp, double Ts)
 
   this->setPartDerivStep(0.001);
 
+  H_k = arma::join_horiz( arma::mat().eye(6,6), arma::mat().zeros(6,4) );
+
   // this->stateTransFun_ptr = std::bind(&DMPpEKFa::stateTransFun, *this, std::placeholders::_1, std::placeholders::_2);
   // this->msrFun_ptr = std::bind(&DMPpEKFa::msrFun, *this, std::placeholders::_1, std::placeholders::_2);
   // this->stateTransFunJacob_ptr = std::bind(&DMPpEKFa::stateTransFunJacob, *this, std::placeholders::_1, std::placeholders::_2);
@@ -87,42 +89,55 @@ void DMPpEKFa::predict(void *cookie)
 void DMPpEKFa::correct(const arma::vec &z, void *cookie)
 {
   // =====  Retrive the measurement function Jacobian  =====
-  this->H_k = msrFunJacob(theta, cookie);
+  // this->H_k = msrFunJacob(theta, cookie);
 
   // =====  Correction estimates =====
   arma::vec z_hat = msrFun(this->theta, cookie);
-  arma::mat K_kf = arma::solve((P.submat(0,0,5,5) + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
+//  arma::mat K_kf = arma::solve((P.submat(0,0,5,5) + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
 
-  this->theta = this->theta + K_kf * (z - z_hat);
+//  this->theta = this->theta + K_kf * (z - z_hat);
 
-  // =====  Apply projection if enabled  =====
-  arma::mat D; // active contraints
-  arma::vec d;
-  bool proj_flag = false;
-  if ( this->enable_constraints & ~b_c.is_empty() )
-  {
-    arma::uvec ind = arma::find(A_c*theta > b_c);
-    if (~ind.is_empty())
-    {
-      proj_flag = true;
-      D = A_c.rows(ind);
-      d = b_c.elem(ind);
-    }
-  }
-
-  int N_params = theta.size();
-  arma::mat I = arma::mat().eye(N_params, N_params);
-
-  if (proj_flag)
-  {
-    K_kf = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K_kf;
-    this->theta = theta - D.t()*arma::inv_sympd(D*D.t())*(D*theta-d);
-  }
+//  // =====  Apply projection if enabled  =====
+//  arma::mat D; // active contraints
+//  arma::vec d;
+//  bool proj_flag = false;
+//  if ( this->enable_constraints & ~b_c.is_empty() )
+//  {
+//    arma::uvec ind = arma::find(A_c*theta > b_c);
+//    if (~ind.is_empty())
+//    {
+//      proj_flag = true;
+//      D = A_c.rows(ind);
+//      d = b_c.elem(ind);
+//    }
+//  }
+//
+//  int N_params = theta.size();
+//  arma::mat I = arma::mat().eye(N_params, N_params);
+//
+//  if (proj_flag)
+//  {
+//    K_kf = ( I - D.t()*arma::inv_sympd(D*D.t())*D ) * K_kf;
+//    this->theta = theta - D.t()*arma::inv_sympd(D*D.t())*(D*theta-d);
+//  }
 
   // =====  Calculate new covariance  =====
-  this->P = (I - K_kf*H_k) * P * (I - K_kf*H_k).t() + K_kf*Rn*K_kf.t();
+  // this->P = (I - K_kf*H_k) * P * (I - K_kf*H_k).t() + K_kf*Rn*K_kf.t();
 
-  this->K = K_kf;
+  // K = arma::solve((P.submat(0,0,5,5) + Rn).t(), H_k*P.t(), arma::solve_opts::fast).t();
+   K = arma::solve((P.submat(0,0,5,5) + Rn), P.rows(0,5), arma::solve_opts::fast+arma::solve_opts::likely_sympd).t();
+
+//  Eigen::Map<Eigen::Matrix<double,10,6>> K_map(K.memptr());
+//  Eigen::Map<Eigen::Matrix<double,10,10>> P_map(P.memptr());
+//  Eigen::Map<Eigen::Matrix<double,6,6>> R_map(Rn.memptr());
+//  Eigen::Matrix<double,6,6> cPc_R = P_map.block(0,0,6,6) + R_map;
+//  Eigen::LLT<Eigen::Matrix<double,6,6>> llt(cPc_R);
+//  K_map = (llt.solve(P_map.block(0,0,6,10))).transpose();
+
+  theta += K*(z - z_hat);
+  P += -K*P.rows(0,5);
+
+  //this->K = K_kf;
 }
 
 arma::vec DMPpEKFa::msrFun(const arma::vec &theta, void *cookie)
