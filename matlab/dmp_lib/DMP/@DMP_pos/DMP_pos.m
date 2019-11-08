@@ -177,6 +177,21 @@ classdef DMP_pos < matlab.mixin.Copyable
             
         end
         
+        
+        function cp_obj = deepCopy(this)
+        
+            % Make a shallow copy of all properties
+            cp_obj = this.copy();
+            % Make a deep copy of the pointers
+            cp_obj.can_clock_ptr = this.can_clock_ptr.copy();
+            cp_obj.shape_attr_gating_ptr = this.shape_attr_gating_ptr.copy();
+            for i=1:length(this.dmp)
+                cp_obj.dmp{i} = this.dmp{i}.deepCopy();
+                cp_obj.dmp{i}.can_clock_ptr = cp_obj.can_clock_ptr;
+                cp_obj.dmp{i}.shape_attr_gating_ptr = cp_obj.shape_attr_gating_ptr;
+            end
+            
+        end
     end
     
     properties  (Access = public)

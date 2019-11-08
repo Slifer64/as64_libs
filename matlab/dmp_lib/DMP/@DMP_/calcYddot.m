@@ -7,7 +7,7 @@ function ddy = calcYddot(this, x, y, dy, g, tau_dot, yc, zc, yc_dot)
 
     tau = this.getTau();
     z = dy*tau - yc;
-
+    
     shape_attr = this.shapeAttractor(x, g);
     goal_attr = this.goalAttractor(x, y, z, g);
     dz = ( goal_attr + shape_attr + zc) / tau;

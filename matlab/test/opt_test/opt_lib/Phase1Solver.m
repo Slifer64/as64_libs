@@ -18,6 +18,8 @@ classdef Phase1Solver < handle
             
             this.setKKTSolveMethod(KKTSolver.FULL_INV);
             
+            this.setMaxIters(100);
+            
         end
         
         %% Sets the equality constraints.
@@ -60,12 +62,18 @@ classdef Phase1Solver < handle
         %  @param[out] s: Auxiliary variable of phase1 problem. If s<0 the phase1 problem is feasible.
         function [x, s] = solve(this, x0)
             
-            if (this.eq_constr_flag), [x, s] = this.solveWithEqConstr(x0);
+            if (this.eq_constr_flag), [x, s] = this.solveEqInfeasStart(x0);
             else, [x, s] = this.solveNoEqConstr(x0);
             end
             
         end
 
+        function setMaxIters(this, iters)
+            
+            this.max_iters = iters;
+            
+        end
+        
     end
     
     methods (Access = private)
@@ -88,8 +96,9 @@ classdef Phase1Solver < handle
             h = zeros(m,1);
             A2 = [zeros(m,1) this.A];
             
-            while (true)
-                
+            iters = 0;
+            
+            while (true)      
                 if (x(1) <= 0), break; end
                 
                 [~, grad_phi, hess_phi] = this.barrierFun(x);
@@ -100,15 +109,96 @@ classdef Phase1Solver < handle
                 
                 lambda2 = 0.5*dx'*H*dx;
                 if (lambda2 < this.eps), break; end
-                
                 t1 = line_search.run(x, dx, g);
                 x = x + t1*dx;
-                % x_data = [x_data x];
                 
+                iters = iters + 1;
+                if (iters >= this.max_iters)
+                    warning('[Phase1Solver::solveWithEqConstr]: Reached maximum iterations...');
+                    break;
+                end
+                
+                % x_data = [x_data x];    
             end
             
             s = x(1);
             x = x(2:end);
+            
+        end
+        
+        function [x, s] = solveEqInfeasStart(this, x0)
+
+            if (~this.eq_constr_flag), error('[Phase1Solver::solveWithEqConstr]: No equality constraints set...'); end
+            
+            s = max(this.ineq_constr.fi(x0)) + 0.1;
+            x = [s; x0];
+            N_var = length(x);
+            Id = this.d*eye(N_var, N_var);
+            
+            t = 1;
+            this.grad_ts = [t; zeros(length(x)-1,1)];
+            m = size(this.A,1);
+            this.A2 = [1 zeros(1,N_var-1); zeros(m,1) this.A];
+            this.b2 = [0; this.b];
+
+            m = size(this.A2,1);
+            v = zeros(m,1);
+            
+            % x_data = [x];
+            
+            alpha = 0.01;
+            beta = 0.5;
+            
+            iters = 0;
+            
+            while (true)
+
+                [~, grad_phi, hess_phi] = this.barrierFun(x);
+                g = this.grad_ts + grad_phi + this.A2'*v;
+                H = hess_phi + Id;
+                
+                h = this.A2*x - this.b2;
+                [dx, dv] = this.kkt_solver.solve(H, this.A2, g, h);
+
+                % back-tracking line search
+                t1 = 1;
+                r = this.resFun(x,v);
+                while (true)
+                    Dx = t1*dx;
+                    Dv = t1*dv;
+                    r_next = this.resFun(x+Dx,v+Dv);
+                    if (r_next <= (1-alpha*t1)*r), break; end
+                    t1 = beta*t1;         
+                end
+
+                x = x + t1*dx;
+                v = v + t1*dv;
+                
+                % if (nargout > 1), x_data = [x_data x]; end
+                
+                r = this.resFun(x,v);
+
+                if (max(abs(this.A2*x-this.b2))<1e-8 & r<this.eps)
+                    break;
+                end
+                
+                iters = iters + 1;
+                if (iters >= this.max_iters)
+                    warning('[Phase1Solver::solveEqInfeasStart]: Reached maximum iterations...');
+                    break;
+                end
+                    
+            end
+            
+            s = x(1);
+            x = x(2:end);
+
+        end
+        
+        function res = resFun(this, x,v)
+            
+            [~, grad_phi, ~] = this.barrierFun(x);
+            res = norm([this.grad_ts + grad_phi + this.A2'*v; this.A2*x-this.b2]);
             
         end
         
@@ -123,6 +213,8 @@ classdef Phase1Solver < handle
             line_search = BackTrackLineSearch(objFun, 0.01, 0.5);
             grad_ts = [t; zeros(length(x)-1,1)];
 
+            iters = 0;
+            
             while (true)
                 
                 if (x(1) <= 0), break; end
@@ -139,6 +231,12 @@ classdef Phase1Solver < handle
                 t1 = line_search.run(x, dx, g);
                 x = x + t1*dx;
                 % x_data = [x_data x];
+                
+                iters = iters + 1;
+                if (iters >= this.max_iters)
+                    warning('[Phase1Solver::solveNoEqConstr]: Reached maximum iterations...');
+                    break;
+                end
                 
             end
             
@@ -159,6 +257,12 @@ classdef Phase1Solver < handle
         barrierFun
         d                % damping value for damped Newton method.
         kkt_solver       % pointer of type @KKTSolver
+        
+        grad_ts
+        A2
+        b2
+        
+        max_iters
         
     end
     

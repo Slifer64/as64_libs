@@ -75,11 +75,14 @@ classdef KKTSolver < handle
             
             [m, n] = size(A);
             
-            H1 = [H A'; A zeros(m,m)];
-            
-            size(H1)
-            rank(H1)
-            pause
+%             H1 = [H A'; A zeros(m,m)];
+%             r1 = max(size(H1));
+%             r2 = rank(H1);
+%             if (r2 < r1)
+%                r1
+%                r2
+%                pause
+%             end
             
             z = [H A'; A zeros(m,m)] \ -[g; h];
             dx = z(1:n);
@@ -91,10 +94,10 @@ classdef KKTSolver < handle
         function [dx, w] = solveKKTBlockElim(H, A, g, h)
             
             [m,n] = size(A);
-            
+
 %             if (rank(H) < n) % (cond(H) > 1e7) or sigma_min/sigma_max<1e-6 
-%                 H = H + A'*A;
-%                 g = g + A'*h;
+                H = H + A'*A;
+                g = g + A'*h;
 %             end
             
 %             L = chol(H,'lower');

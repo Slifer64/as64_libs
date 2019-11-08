@@ -265,8 +265,8 @@ classdef NewtonDescent < handle
             out_iters = 0;
             inner_iters = [];
             
-            t = 1/mu;
-            t = 0.5
+            % t = 1/mu;
+            t = 20;
 
             % outer iteration
             while (Neq/t > this.eps)
@@ -279,7 +279,7 @@ classdef NewtonDescent < handle
                 objFun = @(x) t*this.objFun_ptr(x) + this.ineq_constr.logBarFun(x);
                 line_search2 = BackTrackLineSearch(objFun, this.line_search.a, this.line_search.b);
 
-                stop_thres = 1e-2;
+                stop_thres = 1e-3;
                 % if (Neq/t <= this.eps), stop_thres = 0.1; end
                     
                 % inner iteration
@@ -348,7 +348,7 @@ classdef NewtonDescent < handle
             phase1 = Phase1Solver(this.ineq_constr);
             phase1.setEqConstr(this.A, this.b);
             [x0, s] = phase1.solve(x0);
-            if (s > 0)
+            if (s > 1e-12)
                 exit_code = NewtonDescent.INFEASIBLE;
                 return;
             end
@@ -365,7 +365,7 @@ classdef NewtonDescent < handle
             out_iters = 0;
             inner_iters = [];
             
-            t = 0.01/mu;
+            t = 0.1/mu;
             h = zeros(size(this.A,1),1);
 
             % outer iteration
@@ -379,7 +379,7 @@ classdef NewtonDescent < handle
                 objFun = @(x) t*this.objFun_ptr(x) + this.ineq_constr.logBarFun(x);
                 line_search2 = BackTrackLineSearch(objFun, this.line_search.a, this.line_search.b);
 
-                stop_thres = 0.5;
+                stop_thres = 1e-3;
                 % if (Neq/t <= this.eps), stop_thres = 0.1; end
                     
                 % inner iteration
@@ -391,6 +391,8 @@ classdef NewtonDescent < handle
                         break;
                     end
                     iter = iter + 1;
+                    
+                    iter
                     
                     [~, grad_phi, hess_phi] = this.ineq_constr.logBarFun(x);
                     g = t*this.gradObjFun_ptr(x) + grad_phi;

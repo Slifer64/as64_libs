@@ -8,43 +8,51 @@ rng(0);
 
 global c;
 
-n = 50;
+n = 100;
+m = 50;
 m_i = 100;
 
+Ai = -eye(m_i,m_i);
+bi = zeros(m_i,1);
 
-Ai = randn(m_i, n);
-x0 = randn(n,1);
-s0 = randn(m_i,1);
-lambda0 = -s0/100;
+A = randn(m, n);
+x0 = rand(n,1) + 0.1;
+b = A*x0;
+lambda0 = randn(m_i,1);
 lambda0(lambda0<0) = 0;
-s0(s0<0) = 0;
-bi = Ai*x0 - s0;
-c = -Ai'*lambda0;
+v0 = randn(m,1);
+c = A'*v0 + lambda0;
+
 
 x0 = zeros(n,1);
 
-%% ============= Solve phase1 ==============
-phase1 = Phase1Solver(LinIneqConstr(Ai,bi));
-[x0_1, s] = phase1.solve(x0);
-
-s
-
 %% ============  Solve  ================
 tic
-x_lp = linprog(c,Ai,bi);
+x_lp = linprog(c, Ai,bi, A,b);
 fprintf('=====================================\n');
 toc
 fprintf('linprog: p_star = %f\n',fun(x_lp));
 fprintf('=====================================\n');
 
+
+%% ============= Solve phase1 ==============
+phase1 = Phase1Solver(LinIneqConstr(Ai,bi));
+phase1.setEqConstr(A,b);
+% phase1.setKKTSolveMethod(KKTSolver.BLOCK_ELIM);
+phase1.setDamping(0.01);
+[x0_1, s] = phase1.solve(x0);
+
+s
+
 N_var = length(x0);
 solver = NewtonDescent(N_var, @fun, @gradFun, @hessianFun);
 solver.setStopThreshold(1e-6);
-solver.setMaxIters(4000);
+solver.setMaxIters(100);
 solver.setLinIneqConstr(Ai, bi);
-solver.setDamping(0.01);
+solver.setEqConstr(A, b);
+solver.setDamping(0.001);
+solver.setKKTSolveMethod(KKTSolver.BLOCK_ELIM);
 tic
-% solver.setKKTSolveMethod(KKTSolver.FULL_INV);
 [x, v, x_data] = solver.solve(x0);
 fprintf('=====================================\n');
 toc

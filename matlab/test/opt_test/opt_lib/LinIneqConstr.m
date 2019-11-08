@@ -36,6 +36,8 @@ classdef LinIneqConstr < IneqConstr
         
         function [phi, grad_phi, hess_phi] = ph1LogBarFun(this, x)
             
+            %'[LinIneqConstr::ph1LogBarFun]' 
+            
             m = length(this.bi);
             Ai2 = [-ones(m,1) this.Ai];
             
