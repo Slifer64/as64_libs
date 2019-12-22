@@ -57,27 +57,8 @@ void JointStatePublisher::publishLoop()
     std::unique_lock<std::mutex> lck(mtx);
 
     sensor_msgs::JointState joint_state_msg;
+    joint_state_msg.header.stamp = ros::Time::now();
     for (int i=0; i<add_joint_state_funs.size(); i++) (add_joint_state_funs[i])(joint_state_msg);
-
-    // std::cout << "==========================================\n";
-    // std::cout << "==========  Joint State msg ==============\n";
-    // int N = joint_state_msg.name.size();
-    // std::cout << "** names **\n";
-    // for (int i=0;i<N; i++)
-    // {
-    //   std::cout << joint_state_msg.name[i] << " ";
-    // }
-    // std::cout << "\n** position **\n";
-    // for (int i=0;i<N; i++)
-    // {
-    //   std::cout << joint_state_msg.position[i] << " ";
-    // }
-    // std::cout << "\n** velocity **\n";
-    // for (int i=0;i<N; i++)
-    // {
-    //   std::cout << joint_state_msg.velocity[i] << " ";
-    // }
-    // std::cout << "\n";
 
     joint_state_pub.publish(joint_state_msg);
 
