@@ -42,6 +42,15 @@ classdef WSoG < handle
             this.h = 1./(kernel_std_scaling*(this.c(2:end)-this.c(1:end-1))).^2;
             this.h = [this.h; this.h(end)];
             
+            d = this.c(2) - this.c(1);
+            c_end = this.c(end);
+            this.c = [-2*d; -d; this.c; c_end+d; c_end+2*d];
+            this.h = [this.h(end); this.h(end); this.h; this.h(end); this.h(end)];
+            
+            this.N_kernels = this.N_kernels + 4;
+            this.w = zeros(this.N_kernels,1);
+            
+            
         end
 
         %% Returns the number of kernels.
@@ -90,7 +99,7 @@ classdef WSoG < handle
         end
         
         
-        function [train_error, F] = train_constr(this, x, Fd, T, v, a)
+        function [train_error, F] = train_qp_constr(this, x, Fd, T, v, a)
             
             this.final_output = Fd(end);
             % Fd = Fd - this.final_output;
@@ -161,7 +170,7 @@ classdef WSoG < handle
         end
 
         
-        function [train_error, F] = train_smooth(this, x, Fd, T, a1, a2)
+        function [train_error, F] = train_qp_smooth(this, x, Fd, T, Wv, Wa)
             
             this.final_output = Fd(end);
             % Fd = Fd - this.final_output;
@@ -169,26 +178,66 @@ classdef WSoG < handle
             N = length(x);
             Phi = zeros(N, this.N_kernels);
             Phi_dot = zeros(N, this.N_kernels);
+            Phi_ddot = zeros(N, this.N_kernels);
             for i=1:N
                Phi(i,:) = this.regressVec(x(i))';
                dx = 1/T;
                Phi_dot(i,:) = this.regressVecDot(x(i), dx)';
+               ddx = 0;
+               Phi_ddot(i,:) = this.regressVecDDot(x(i), dx, ddx)';
             end
             
-            D1 = zeros(this.N_kernels, this.N_kernels);
-            D2 = zeros(this.N_kernels, this.N_kernels);
-            for i=1:N-1
-               d1i = Phi(i+1,:) - Phi(i,:);
-               D1 = D1 + d1i*d1i';
-               
-               d2i = Phi_dot(i+1,:) - Phi_dot(i,:);
-               D2 = D2 + d2i*d2i';
-            end
+            Hp = Phi'*Phi;
+%             H1 = zeros(this.N_kernels, this.N_kernels);
+%             H2 = zeros(this.N_kernels, this.N_kernels);
+%             for i=1:N-1
+%                d1i = Phi(i+1,:) - Phi(i,:);
+%                H1 = H1 + d1i*d1i';
+%                
+%                d2i = Phi_dot(i+1,:) - Phi_dot(i,:);
+%                H2 = H2 + d2i*d2i';
+%             end
             
-            H = Phi'*Phi + a1*D1 + a2*D2;
+            Hv = Phi_dot'*Wv*Phi_dot; 
+            % H2 = Phi_ddot'*Phi_ddot; 
+            
+            i1 = N;
+            i2 = 1;
+            for i=1:N
+                if (x(i) > 0.03)
+                    i1 = i;
+                    break;
+                end
+            end
+            for i=N:-1:i1
+                if (x(i) < 0.97)
+                    i2 = i;
+                    break;
+                end
+            end
+            if (~isscalar(Wa))
+                Wa = Wa(i1:i2,i1:i2);
+            end
+            Ha = Phi_ddot(i1:i2,:)'*Wa*Phi_ddot(i1:i2,:); 
+            
+            H = Hp + Hv + Ha;
             f = -Fd*Phi;
-                        
+         
             this.w = quadprog(H,f);
+            
+            % figure;
+            % plot(x, Phi_ddot*this.w);
+            
+%             dF = Phi_dot*this.w;
+%             abs_dF = abs(dF);
+%             max_v = max(abs_dF);
+%             min_v = min(abs_dF);
+%             temp = 1 + (abs_dF-min_v)*(5 - 1)/(max_v-min_v);
+%             Q1 = diag(1./temp);
+%             
+%             H1 = Phi_dot'*Q1*Phi_dot; 
+%             H = H0 + a1*H1 + a2*H2;
+%             this.w = quadprog(H,f);
 
             if (nargout > 0)
                 F = zeros(size(Fd));
@@ -201,7 +250,70 @@ classdef WSoG < handle
         end
         
         
-        function [train_error, F] = train_cvx(this, x, Fd, T, v, a)
+        function [train_error, F] = train_cvx(this, x, Pd, dPd, ddPd, T, w_v, w_a)
+            
+            this.final_output = Pd(end);
+            % Fd = Fd - this.final_output;
+            
+            N = length(x);
+            Phi = zeros(N, this.N_kernels);
+            Phi_dot = zeros(N, this.N_kernels);
+            Phi_ddot = zeros(N, this.N_kernels);
+            for i=1:N
+               Phi(i,:) = this.regressVec(x(i))';
+               dx = 1/T;
+               Phi_dot(i,:) = this.regressVecDot(x(i), dx)';
+               ddx = 0;
+               Phi_ddot(i,:) = this.regressVecDDot(x(i), dx, ddx)';
+            end
+            
+%             i1 = N;
+%             i2 = 1;
+%             for i=1:N
+%                 if (x(i) > 0.03)
+%                     i1 = i;
+%                     break;
+%                 end
+%             end
+%             for i=N:-1:i1
+%                 if (x(i) < 0.97)
+%                     i2 = i;
+%                     break;
+%                 end
+%             end
+%             if (~isscalar(Wa))
+%                 Wa = Wa(i1:i2,i1:i2);
+%             end
+%             Ha = Phi_ddot(i1:i2,:)'*Wa*Phi_ddot(i1:i2,:); 
+         
+            cvx_begin
+            
+                variable w(this.N_kernels);
+                expressions J1 J2 J3;
+                
+                J1 = norm(Phi*w-Pd', 2);
+                J2 = norm(Phi_dot*w-dPd', 2);
+                J3 = norm(Phi_ddot*w-ddPd', 2);
+                
+                minimize (J1 + w_v*J2 + w_a*J3)
+            
+            cvx_end
+            
+            this.w = w;
+
+            if (nargout > 0)
+                F = zeros(size(Pd));
+                for i=1:size(F,2)
+                    F(i) = this.output(x(i));
+                end
+                train_error = norm(F-Pd)/length(F);
+            end
+
+        end
+        
+        
+        
+        function [train_error, F] = train_cvx_constr(this, x, Fd, T, v, a)
             
             this.final_output = Fd(end);
             % Fd = Fd - this.final_output;
@@ -228,10 +340,12 @@ classdef WSoG < handle
             cvx_begin
                 
                 variable w(this.N_kernels);
-                expression J
+                expressions J e
                 
+                e = Phi*w-Fd';
+                J = e'*e;
                 % J = norm(Phi*w-Fd', 2);
-                J = 0.5*w'*H*w + f*w;
+                % J = 0.5*w'*H*w + f*w;
                 
                 minimize(J);
                 subject to
@@ -252,6 +366,7 @@ classdef WSoG < handle
             end
 
         end
+        
         
         function [train_error, F] = train_cvx2(this, x, Fd, T, v, a)
             
@@ -287,9 +402,12 @@ classdef WSoG < handle
             cvx_begin
                 
                 variable w(this.N_kernels);
-                expression J
+                expressions J e
                 
-                J = 0.5*w'*H*w + f*w;
+                e = Phi*w-Fd';
+                J = e'*e;
+                % J = norm(Phi*w-Fd', 2);
+                % J = 0.5*w'*H*w + f*w;
                 
                 minimize(J);
                 subject to
@@ -310,6 +428,24 @@ classdef WSoG < handle
 
         end
         
+        
+        function [P_data, dP_data, ddP_data] = simulate(this, x, dx, ddx)
+            
+            N = length(x);
+            
+            if (isscalar(dx)), dx = dx*ones(1,N); end
+            if (isscalar(ddx)), ddx = ddx*ones(1,N); end
+            
+            P_data = zeros(1,N);
+            dP_data = zeros(1,N);
+            ddP_data = zeros(1,N);
+            for i=1:N
+               P_data(i) = this.output(x(i));
+               dP_data(i) = this.outputDot(x(i), dx(i));
+               ddP_data(i) = this.outputDDot(x(i), dx(i), ddx(i));
+            end
+            
+        end
         
         %% Returns a column vector with the values of the kernel functions.
         %  @param[in] x: The phase variable.
@@ -340,7 +476,10 @@ classdef WSoG < handle
             sum_psi = sum(psi);
             sum_psi_dot = sum(psi_dot);
             
-            phi_dot = ( psi_dot*sum_psi - psi*sum_psi_dot ) / ( sum_psi^2 + this.zero_tol);
+            % phi_dot = ( psi_dot*sum_psi - psi*sum_psi_dot ) / ( sum_psi^2 + this.zero_tol);
+            
+            phi = psi / ( sum(sum_psi) + this.zero_tol );
+            phi_dot = ( psi_dot - phi*sum_psi_dot ) / ( sum_psi + this.zero_tol);
 
         end
         
@@ -352,10 +491,15 @@ classdef WSoG < handle
             sum_psi = sum(psi);
             sum_psi_dot = sum(psi_dot);
             sum_psi_ddot = sum(psi_ddot);
-            sum_psi2 = sum_psi^2;
+            % sum_psi2 = sum_psi^2;
             
-            phi_ddot = ( ( psi_ddot*sum_psi - 2*psi_dot*sum_psi_dot - psi*sum_psi_ddot )*sum_psi2 - 2*psi*sum_psi*sum_psi_dot^2 ) / ( sum_psi2^2 + this.zero_tol);
+            % phi_ddot2 = ( ( psi_ddot*sum_psi - 2*psi_dot*sum_psi_dot - psi*sum_psi_ddot )*sum_psi2 - 2*psi*sum_psi*sum_psi_dot^2 ) / ( sum_psi2^2 + this.zero_tol);
             
+            % phi_ddot2 = ( ( psi_ddot*sum_psi - psi*sum_psi_ddot )*sum_psi - 2*sum_psi_dot*(psi_dot*sum_psi-psi*sum_psi_dot) ) / ( sum_psi^3 + this.zero_tol);
+
+            phi = psi / ( sum(sum_psi) + this.zero_tol );
+            phi_dot = ( psi_dot - phi*sum_psi_dot ) / ( sum_psi + this.zero_tol);
+            phi_ddot = (psi_ddot - 2*phi_dot*sum_psi_dot - phi*sum_psi_ddot) / ( sum_psi + this.zero_tol);  
 
         end
         
