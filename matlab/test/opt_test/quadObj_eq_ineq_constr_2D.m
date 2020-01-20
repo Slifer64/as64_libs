@@ -13,28 +13,35 @@ m = 25;
 
 % P = genRandSPDmatrix(n);
 % x_c = rand(n,1);
-P = [1 0.7; 0.7 1];
+P = [1.1 0.9; 0.3 1.5];
 x_c = [0; 0];
 
-Ai = [0.7 -0.4];
-bi = -1.5;
+a = -0.55;
+x1 = -1;
+y1 = 0;
+b = y1 - a*x1;
+Ai = [-a 1];
+bi = b;
 
-A = [-0.9 -0.7];
-b = 1;
+a = -1.1;
+x1 = -1;
+y1 = 0.5;
+b = y1 - a*x1;
+A = [-a 1];
+b = b;
+% A = [-0.9 -0.7];
+% b = 1;
 
 fi_y = @(x) (bi - Ai(:,1:end-1)*x)./Ai(:,end);
 feq_y = @(x) (b - A(:,1:end-1)*x)./A(:,end);
 
 % x0 = Ai\(0.5*bi);
-x0 = [2; -2];
+x0 = [2; 2];
 
 %% ============= Solve phase1 ==============
 phase1 = Phase1Solver(LinIneqConstr(Ai,bi));
 phase1.setEqConstr(A,b);
 [x, s] = phase1.solve(x0);
-
-s
-
 
 %% ============  Solve  ================
 options = optimoptions(@fmincon, 'Algorithm','interior-point', 'MaxIterations',100, 'SpecifyObjectiveGradient',true);
@@ -58,9 +65,9 @@ fprintf('=====================================\n');
 
 N_var = length(x0);
 solver = NewtonDescent(N_var, @fun, @gradFun, @hessianFun);
-solver.setStopThreshold(1e-7);
-solver.setKKTSolveMethod(KKTSolver.FULL_INV);
-solver.setMaxIters(30);
+solver.setStopThreshold(1e-4);
+solver.setKKTSolveMethod(KKTSolver.BLOCK_ELIM);
+solver.setMaxIters(150);
 solver.setLinIneqConstr(Ai,bi);
 solver.setEqConstr(A,b);
 tic
@@ -96,8 +103,10 @@ plot([-x1_max x1_max], [feq_y(-x1_max) feq_y(x1_max)], 'LineWidth',2, 'LineStyle
 % plot(x_data(1,:),x_data(2,:), 'Color','red');
 ax.XLim = xlim;
 ax.YLim = ylim;
-Xfill = [xlim(1) xlim(1) xlim(2) xlim(2)];
-Yfill = [ylim(1) min(fi_y(xlim(1)),ylim(2)) max(fi_y(xlim(2)),ylim(2)) ylim(1)];
+% Xfill = [xlim(1) xlim(1) xlim(2) xlim(2)];
+% Yfill = [max(fi_y(xlim(1)),ylim(1)) min(fi_y(xlim(1)),ylim(2)) max(fi_y(xlim(2)),ylim(2)) ylim(1)];
+Xfill = [-10 10 10];
+Yfill = [fi_y(-10), 100, fi_y(10)];
 h = fill(Xfill,Yfill, 'cyan');
 set(h, 'FaceAlpha',0.3, 'EdgeAlpha',0);
 scatter(x0(1,:),x0(2,:), 'Marker','o', 'MarkerFaceColor','green', 'LineWidth',3, 'SizeData',200, 'MarkerEdgeAlpha',0);

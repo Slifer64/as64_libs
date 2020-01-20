@@ -348,6 +348,13 @@ classdef NewtonDescent < handle
             phase1 = Phase1Solver(this.ineq_constr);
             phase1.setEqConstr(this.A, this.b);
             [x0, s] = phase1.solve(x0);
+            
+%             x0
+%             s
+%             fi = this.ineq_constr.fi(x0)
+%             eq_res = this.A*x0 - this.b
+%             stop
+            
             if (s > 1e-12)
                 exit_code = NewtonDescent.INFEASIBLE;
                 return;
@@ -355,7 +362,7 @@ classdef NewtonDescent < handle
 
             Id = this.d*eye(this.N_var, this.N_var);
 
-            iter = 1;
+            iter = 0;
             x = x0;
             x_data = [x];
             mu = 20;
@@ -365,7 +372,7 @@ classdef NewtonDescent < handle
             out_iters = 0;
             inner_iters = [];
             
-            t = 0.1/mu;
+            t = 1000/mu;
             h = zeros(size(this.A,1),1);
 
             % outer iteration
@@ -379,7 +386,7 @@ classdef NewtonDescent < handle
                 objFun = @(x) t*this.objFun_ptr(x) + this.ineq_constr.logBarFun(x);
                 line_search2 = BackTrackLineSearch(objFun, this.line_search.a, this.line_search.b);
 
-                stop_thres = 1e-3;
+                stop_thres = 5e-2;
                 % if (Neq/t <= this.eps), stop_thres = 0.1; end
                     
                 % inner iteration
@@ -387,12 +394,12 @@ classdef NewtonDescent < handle
                     
                     inner_iters(out_iters) = inner_iters(out_iters) + 1;
 
-                    if (iter > this.max_iter)
+                    if (iter >= this.max_iter)
                         break;
                     end
                     iter = iter + 1;
                     
-                    iter
+                    %iter
                     
                     [~, grad_phi, hess_phi] = this.ineq_constr.logBarFun(x);
                     g = t*this.gradObjFun_ptr(x) + grad_phi;
@@ -413,7 +420,7 @@ classdef NewtonDescent < handle
 
                 end
                 
-                if (iter > this.max_iter)
+                if (iter >= this.max_iter)
                     warning('[NewtonDescent::solveEqIneqInterPoint]: Exiting due to maximum iterations reached...');
                     exit_code = NewtonDescent.MAX_ITERS_REACHED;
                     break;

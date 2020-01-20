@@ -62,7 +62,7 @@ classdef Phase1Solver < handle
         %  @param[out] s: Auxiliary variable of phase1 problem. If s<0 the phase1 problem is feasible.
         function [x, s] = solve(this, x0)
             
-            if (this.eq_constr_flag), [x, s] = this.solveEqInfeasStart(x0);
+            if (this.eq_constr_flag), [x, s] = this.solveWithEqConstr(x0);
             else, [x, s] = this.solveNoEqConstr(x0);
             end
             
@@ -83,7 +83,7 @@ classdef Phase1Solver < handle
             if (~this.eq_constr_flag), error('[Phase1Solver::solveWithEqConstr]: No equality constraints set...'); end
                 
             if (max(abs((this.A*x0-this.b))) > 1e-8), x0 = this.A\this.b; end
-            
+
             s = max(this.ineq_constr.fi(x0)) + 0.1;
             x = [s; x0];
             Id = this.d*eye(length(x), length(x)); % damping matrix
@@ -123,6 +123,10 @@ classdef Phase1Solver < handle
             
             s = x(1);
             x = x(2:end);
+            
+%             fi = this.ineq_constr.fi(x)
+%             eq_res = this.A*x0-this.b
+%             iters
             
         end
         
