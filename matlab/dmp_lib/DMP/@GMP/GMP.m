@@ -230,11 +230,16 @@ classdef GMP < matlab.mixin.Copyable
             x_dot = this.phaseDot(x);
             x_ddot = 0;
             
+            tau = this.getTau();
+            
             yd = this.wsog.output(x);
             yd_dot = this.wsog.outputDot(x, x_dot);
             yd_ddot = this.wsog.outputDDot(x, x_dot, x_ddot);
             
-            f = this.taud^2*yd_ddot + this.a_z*this.taud*yd_dot - this.a_z*this.b_z*(this.gd - yd);
+            % yd_dot is already the scaled velocity, i.e. yd_dot = dyd * taud/tau
+            % that's why we mutliply do yd_dot*tau = dyd * taud which is
+            % what we want below. Accordingly for the yd_ddot
+            f = tau^2*yd_ddot + this.a_z*tau*yd_dot - this.a_z*this.b_z*(this.gd - yd);
             
         end
 
