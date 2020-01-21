@@ -11,8 +11,6 @@ classdef WSoG < handle
         c % N_kernels x 1 vector with the kernels' centers
         h % N_kernels x 1 vector with the kernels' inverse width
 
-        shapeAttrGatingFun % Pointer to gating function that ensures the output of WSoG decays to zero at the end (i.e. when the phase variable reaches 1.0)
-
         zero_tol % small value used to avoid divisions with very small numbers
         
         final_output % final output
@@ -22,16 +20,13 @@ classdef WSoG < handle
     methods
         %% Weighted Sum of Gaussians constructor.
         %  @param[in] N_kernels: The number of kernels.
-        %  @param[in] shapeAttrGatingFun: Pointer to gating function that ensures the output of WSoG decays
-        %                                 to zero at the end (i.e. when the phase variable reaches 1.0).
         %  @param[in] kernel_std_scaling: Scaling of the kernel's std. (optional, default=1.0)
         %
-        function this = WSoG(N_kernels, shapeAttrGatingFun, kernel_std_scaling) %, N_kernels, s_gat_ptr
+        function this = WSoG(N_kernels, kernel_std_scaling) %, N_kernels, s_gat_ptr
 
             if (nargin < 3), kernel_std_scaling = 1.0; end
             
             this.N_kernels = N_kernels;
-            this.shapeAttrGatingFun = shapeAttrGatingFun;
             
             this.zero_tol = 1e-100; %realmin;
 
@@ -62,6 +57,7 @@ classdef WSoG < handle
             
         end
         
+        %% =============================================================
         
         %% Trains the WSoG.
         %  @param[in] train_method: The training method (see dmp_::TRAIN_METHOD enum).
@@ -76,11 +72,10 @@ classdef WSoG < handle
             
             n_data = length(x);
 
-            s = zeros(1, n_data);
+            s = ones(1, n_data);
             Psi = zeros(this.N_kernels, n_data);
             for i=1:n_data
-                s(i) = this.shapeAttrGatingFun(x(i));
-                Psi(:,i) = this.kernelFunction(x(i));
+                Psi(:,i) = this.kernelFun(x(i));
             end
 
             if (train_method == DMP_TRAIN.LWR), this.w = LWR(Psi, s, Fd, this.zero_tol);
@@ -428,30 +423,36 @@ classdef WSoG < handle
 
         end
         
+        %% =============================================================
         
-        function [P_data, dP_data, ddP_data] = simulate(this, x, dx, ddx)
+        function [P_data, dP_data, ddP_data, d3P_data] = simulate(this, x, dx, ddx, d3x)
             
             N = length(x);
             
             if (isscalar(dx)), dx = dx*ones(1,N); end
             if (isscalar(ddx)), ddx = ddx*ones(1,N); end
+            if (isscalar(d3x)), d3x = d3x*ones(1,N); end
             
             P_data = zeros(1,N);
             dP_data = zeros(1,N);
             ddP_data = zeros(1,N);
+            d3P_data = zeros(1,N);
             for i=1:N
                P_data(i) = this.output(x(i));
                dP_data(i) = this.outputDot(x(i), dx(i));
                ddP_data(i) = this.outputDDot(x(i), dx(i), ddx(i));
+               d3P_data(i) = this.output3Dot(x(i), dx(i), ddx(i), d3x(i));
             end
             
         end
+        
+        %% =============================================================
         
         %% Returns a column vector with the values of the kernel functions.
         %  @param[in] x: The phase variable.
         %  @return: Column vector with the values of the kernel functions.
         %
-        function psi = kernelFunction(this, x)
+        function psi = kernelFun(this, x)
 
             n = length(x);
             psi = zeros(this.N_kernels, n);
@@ -462,17 +463,64 @@ classdef WSoG < handle
 
         end
         
+        function psi_dot = kernelFunDot(this, x, dx)
+
+            n = length(x);
+            psi = this.kernelFun(x);
+            psi_dot = zeros(this.N_kernels, n);
+            
+            for j=1:n
+                a = (x(j)-this.c)*dx(j);
+                psi_dot(:,j) = -2*this.h.*( psi(:,j).*a);
+            end 
+
+        end
+        
+        function psi_ddot = kernelFunDDot(this, x, dx, ddx)
+
+            n = length(x);
+            psi = this.kernelFun(x);
+            psi_dot = this.kernelFunDot(x,dx);
+            psi_ddot = zeros(this.N_kernels, n);
+
+            for j=1:n
+                a = (x(j)-this.c)*dx(j);
+                a_dot = (x(j)-this.c)*ddx(j) + dx(j)^2;
+                psi_ddot(:,j) = -2*this.h.*( psi_dot(:,j).*a + psi(:,j).*a_dot ); 
+            end 
+
+        end
+        
+        function psi_3dot = kernelFun3Dot(this, x, dx, ddx, d3x)
+
+            n = length(x);
+            psi = this.kernelFun(x);
+            psi_dot = this.kernelFunDot(x,dx);
+            psi_ddot = this.kernelFunDDot(x,dx, ddx);
+            psi_3dot = zeros(this.N_kernels, n);
+            
+            for j=1:n
+                a = (x(j)-this.c)*dx(j);
+                a_dot = (x(j)-this.c)*ddx(j) + dx(j)^2;
+                a_ddot = (x(j)-this.c)*d3x(j) + 3*dx(j)*ddx(j);
+                psi_3dot(:,j) = -2*this.h.*( psi_ddot(:,j).*a + 2*psi_dot(:,j).*a_dot + psi(:,j).*a_ddot ); 
+            end 
+
+        end
+        
+        %% =============================================================
+        
         function phi = regressVec(this, x)
             
-            psi = this.kernelFunction(x);
+            psi = this.kernelFun(x);
             phi = psi / (sum(psi) + this.zero_tol);
 
         end
         
         function phi_dot = regressVecDot(this, x, dx)
             
-            psi = this.kernelFunction(x);
-            psi_dot = this.kernelFunctionDot(x, dx);
+            psi = this.kernelFun(x);
+            psi_dot = this.kernelFunDot(x, dx);
             sum_psi = sum(psi);
             sum_psi_dot = sum(psi_dot);
             
@@ -485,9 +533,9 @@ classdef WSoG < handle
         
         function phi_ddot = regressVecDDot(this, x, dx, ddx)
             
-            psi = this.kernelFunction(x);
-            psi_dot = this.kernelFunctionDot(x, dx);
-            psi_ddot = this.kernelFunctionDDot(x, dx, ddx);
+            psi = this.kernelFun(x);
+            psi_dot = this.kernelFunDot(x, dx);
+            psi_ddot = this.kernelFunDDot(x, dx, ddx);
             sum_psi = sum(psi);
             sum_psi_dot = sum(psi_dot);
             sum_psi_ddot = sum(psi_ddot);
@@ -503,80 +551,58 @@ classdef WSoG < handle
 
         end
         
-        function psi_dot = kernelFunctionDot(this, x, dx)
-
-            n = length(x);
-            psi = this.kernelFunction(x);
-            psi_dot = zeros(this.N_kernels, n);
+        function phi_3dot = regressVec3Dot(this, x, dx, ddx, d3x)
             
-            for j=1:n
-                psi_dot(:,j) = -2*this.h.*((x(j)-this.c)).*psi(:,j) * dx(j);
-            end 
+            psi = this.kernelFun(x);
+            psi_dot = this.kernelFunDot(x, dx);
+            psi_ddot = this.kernelFunDDot(x, dx, ddx);
+            psi_3dot = this.kernelFun3Dot(x, dx, ddx, d3x);
+            sum_psi = sum(psi);
+            sum_psi_dot = sum(psi_dot);
+            sum_psi_ddot = sum(psi_ddot);
+            sum_psi_3dot = sum(psi_3dot);
+
+            phi = psi / ( sum(sum_psi) + this.zero_tol );
+            phi_dot = ( psi_dot - phi*sum_psi_dot ) / ( sum_psi + this.zero_tol);
+            phi_ddot = (psi_ddot - 2*phi_dot*sum_psi_dot - phi*sum_psi_ddot) / ( sum_psi + this.zero_tol);
+            phi_3dot = (psi_3dot - 3*phi_ddot*sum_psi_dot - 3*phi_dot*sum_psi_ddot - phi*sum_psi_3dot) / ( sum_psi + this.zero_tol);
 
         end
         
-        function psi_ddot = kernelFunctionDDot(this, x, dx, ddx)
-
-            n = length(x);
-            psi = this.kernelFunction(x);
-            psi_dot = this.kernelFunctionDot(x,dx);
-            psi_ddot = zeros(this.N_kernels, n);
-            
-            for j=1:n
-                psi_ddot(:,j) = -2*this.h.*( (x(j)-this.c).*psi(:,j)*ddx(j) + psi(:,j)*dx(j)^2 + (x(j)-this.c).*psi_dot(:,j)*dx(j) ); 
-            end 
-
-        end
-         
+        
+        %% =============================================================
+        
         
         %% Returns the normalized weighted sum of the Gaussians for the given phase variable (time instant).
         %  @param[in] x: The phase variable.
         %  @param[out] f: The normalized weighted sum of the Gaussians.
         %
         function f = output(this,x)
-            
-%             Psi = this.kernelFunction(x);         
-%             f = this.shapeAttrGatingFun(x) * dot(Psi,this.w) / (sum(Psi) + this.zero_tol); % add 'zero_tol' to avoid numerical issues
-            
+
             Phi = this.regressVec(x);
-            f = this.shapeAttrGatingFun(x) * dot(Phi,this.w);
+            f = dot(Phi,this.w);
             % f = f + this.final_output;
             
         end
         
         function f_dot = outputDot(this, x, dx)
             
-%             Psi = this.kernelFunction(x);
-%             Psi_dot = this.kernelFunctionDot(x, dx);
-%             sum_Psi = sum(Psi);
-%             sum_Psi_dot = sum(Psi_dot);
-%             
-%             Phi = ( Psi_dot*sum_Psi - Psi*sum_Psi_dot ) / ( sum_Psi^2 + this.zero_tol);
-%             
-%             f_dot = this.shapeAttrGatingFun(x) * dot(Phi,this.w);
-            
-            
             Phi_dot = this.regressVecDot(x,dx);
-            f_dot = this.shapeAttrGatingFun(x) * dot(Phi_dot,this.w);
+            f_dot = dot(Phi_dot,this.w);
             
         end
         
         function f_ddot = outputDDot(this, x, dx, ddx)
             
-%             Psi = this.kernelFunction(x);
-%             Psi_dot = this.kernelFunctionDot(x, dx);
-%             Psi_ddot = this.kernelFunctionDDot(x, dx, ddx);
-%             sum_Psi = sum(Psi);
-%             sum_Psi_dot = sum(Psi_dot);
-%             sum_Psi_ddot = sum(Psi_ddot);
-%             sum_Psi2 = sum_Psi^2;
-%             
-%             Phi = ( ( Psi_ddot*sum_Psi - 2*Psi_dot*sum_Psi_dot - Psi*sum_Psi_ddot )*sum_Psi2 - 2*Psi*sum_Psi*sum_Psi_dot^2 ) / ( sum_Psi2^2 + this.zero_tol);
-%             
-%             f_ddot = this.shapeAttrGatingFun(x) * dot(Phi,this.w);
+            Phi_ddot = this.regressVecDDot(x, dx, ddx);
+            f_ddot = dot(Phi_ddot, this.w);
             
-            Phi_ddot = this.regressVecDDot(x,dx,ddx);
-            f_ddot = this.shapeAttrGatingFun(x) * dot(Phi_ddot,this.w);
+        end
+        
+        function f_3dot = output3Dot(this, x, dx, ddx, d3x)
+            
+            Phi_3dot = this.regressVec3Dot(x, dx, ddx, d3x);
+            f_3dot = dot(Phi_3dot, this.w);
             
         end
 
