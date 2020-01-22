@@ -1,8 +1,10 @@
-%% Simulates a GMP as a DMP
+%% Tests conditioning of GMP on pos/vel/accel and simulation as a DMP
 %  Loads a reference trajecory.
 %  Trains a GMP based on the reference trajectory.
-%  Plots and compares the results.
-function test_gmp_as_dmp()
+%  Conditions GMP weights to pass from a specific point (timestamp, pos/vel/accel).
+%  Specifically, conditioning on intermediate and final point is tested.
+%  Conditioning along with scaling is also tested.
+function test_gmp_cond()
 
 set_matlab_utils_path();
 

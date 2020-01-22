@@ -24,7 +24,7 @@ classdef WSoG < handle
         %
         function this = WSoG(N_kernels, kernel_std_scaling) %, N_kernels, s_gat_ptr
 
-            if (nargin < 3), kernel_std_scaling = 1.0; end
+            if (nargin < 2), kernel_std_scaling = 1.0; end
             
             this.N_kernels = N_kernels;
             
@@ -39,10 +39,11 @@ classdef WSoG < handle
             
             d = this.c(2) - this.c(1);
             c_end = this.c(end);
-            this.c = [-2*d; -d; this.c; c_end+d; c_end+2*d];
-            this.h = [this.h(end); this.h(end); this.h; this.h(end); this.h(end)];
+            extra = [d; 2*d; 3*d];
+            this.c = [-extra+this.c(1); this.c; extra+c_end];
+            this.h = [repmat(this.h(end),length(extra),1); this.h; repmat(this.h(end),length(extra),1)];
             
-            this.N_kernels = this.N_kernels + 4;
+            this.N_kernels = this.N_kernels + 2*length(extra);
             this.w = zeros(this.N_kernels,1);
             
             
@@ -54,6 +55,94 @@ classdef WSoG < handle
         function n_ker = getNumOfKernels(this)
             
             n_ker = length(this.w);
+            
+        end
+        
+        %% =============================================================
+        
+        function updatePos(this, x, p, sigma_p)
+            
+            if (nargin < 4), sigma_p = 0.01; end
+            
+            H = this.regressVec(x)';
+            p_hat = H*this.w;
+            e = p - p_hat;
+            this.updateWeights(H, e, sigma_p);
+            
+        end
+        
+        function updateVel(this, x, dx, v, sigma_v)
+            
+            if (nargin < 5), sigma_v = 0.01; end
+            
+            H = this.regressVecDot(x, dx)';
+            v_hat = H*this.w;
+            e = v - v_hat;
+            
+            this.updateWeights(H, e, sigma_v);
+            
+        end
+        
+        function updateAccel(this, x, dx, a, sigma_a)
+            
+            if (nargin < 5), sigma_a = 0.01; end
+            
+            H = this.regressVecDDot(x, dx, 0)';
+            a_hat = H*this.w;
+            e = a - a_hat;
+            this.updateWeights(H, e, sigma_a);
+            
+        end
+        
+        function updatePosVel(this, x, dx, p, v, sigma_pv)
+            
+            if (nargin < 6), sigma_pv = [0.01; 0.01]; end
+            
+            H = [this.regressVec(x)'; this.regressVecDot(x, dx)'];
+            pv_hat = H*this.w;
+            e = [p; v] - pv_hat;
+            this.updateWeights(H, e, diag(sigma_pv));
+            
+        end
+        
+        function updatePosAccel(this, x, dx, p, a, sigma_pa)
+            
+            if (nargin < 6), sigma_pa = [0.01; 0.01]; end
+            
+            H = [this.regressVec(x)'; this.regressVecDDot(x, dx, 0)'];
+            pa_hat = H*this.w;
+            e = [p; a] - pa_hat;
+            this.updateWeights(H, e, diag(sigma_pa));
+            
+        end
+        
+        function updateVelAccel(this, x, dx, v, a, sigma_va)
+            
+            if (nargin < 6), sigma_va = [0.01; 0.01]; end
+            
+            H = [this.regressVecDot(x, dx)'; this.regressVecDDot(x, dx, 0)'];
+            va_hat = H*this.w;
+            e = [v; a] - va_hat;
+            this.updateWeights(H, e, diag(sigma_va));
+            
+        end
+        
+        function updatePosVelAccel(this, x, dx, p, v, a, sigma_pva)
+            
+            if (nargin < 7), sigma_pva = [0.01; 0.01; 0.01]; end
+            
+            H = [this.regressVec(x)'; this.regressVecDot(x, dx)'; this.regressVecDDot(x, dx, 0)'];
+            pva_hat = H*this.w;
+            e = [p; v; a] - pva_hat;
+            this.updateWeights(H, e, diag(sigma_pva));
+            
+        end
+        
+        function updateWeights(this, H, e, Sigma_z)
+            
+            Sigma_w = eye(this.N_kernels, this.N_kernels);    
+            K = Sigma_w*H' / (Sigma_z + H*Sigma_w*H');
+            this.w = this.w + K*e;
             
         end
         
@@ -606,5 +695,19 @@ classdef WSoG < handle
             
         end
 
+        %% =============================================================
+        
+        function plotPsi(this, x)
+            
+            Psi = this.kernelFun(x);
+            figure;
+            hold on;
+            for i=1:this.N_kernels
+               plot(x, Psi(i,:), 'LineWidth',2); 
+            end
+            hold off
+
+        end
+        
     end
 end

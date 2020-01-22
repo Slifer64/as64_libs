@@ -54,6 +54,7 @@ compareScaledTrajectories(gmp, Timed, Pd_data, dPd_data, ddPd_data, temp_s, spat
 
 end
 
+
 %% Compares the scaled trajectories produced by reference trajectory (Timed, Pd_data, dPd_data, ddPd_data)
 %% and the scaled trajectory produced by a GMP trained with the reference trajectory.
 % param[in] gmp: GMP object
