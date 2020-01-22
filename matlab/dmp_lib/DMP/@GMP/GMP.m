@@ -153,45 +153,6 @@ classdef GMP < matlab.mixin.Copyable
             
         end
         
-        
-        %% Returns the partial derivative of the DMP's acceleration wrt to the goal and tau.
-        %  @param[in] t: current timestamp.
-        %  @param[in] y: position.
-        %  @param[in] dy: velocity.
-        %  @param[in] y0: initial position.
-        %  @param[in] x_hat: phase variable estimate.
-        %  @param[in] g_hat: goal estimate.
-        %  @param[in] tau_hat: time scale estimate.
-        %  @param[out] dC_dtheta: partial derivative of the DMP's acceleration wrt to the goal and tau.
-        function dC_dtheta = getAcellPartDev_g_tau(this, t, y, dy, y0, x, g, tau)
-
-            dC_dtheta = zeros(2,1);
-
-            K_dmp = this.a_z*this.b_z;
-            D_dmp = this.a_z;
-            psi = this.kernelFunction(x);
-            sum_psi = sum(psi) + this.zero_tol;
-            sum_w_psi = psi'*this.w;
-            shape_attr_gat = this.shapeAttrGating(x);
-
-            theta1 = g;
-            theta2 = 1/tau;
-
-            dshape_attr_gat_dtheta2 = this.shape_attr_gating_ptr.getPartDev_1oTau(t,x);
-
-            dPsidtheta2 = -2*t*this.h.*(theta2*t-this.c).*psi;
-            sum_w_dPsidtheta2 = this.w'*dPsidtheta2;
-            dSumWPsi_dtheta2 = (sum_w_dPsidtheta2*sum_psi - sum_w_psi*sum(dPsidtheta2) ) / sum_psi^2;
-
-            dC_dtheta(1) = (K_dmp + shape_attr_gat*sum_w_psi/sum_psi)*theta2^2;
-
-            dC_dtheta(2) = 2*theta2* (K_dmp*(theta1-y) + shape_attr_gat*(theta1-y0)*sum_w_psi/sum_psi) + ...
-                -D_dmp*dy + theta2^2*(theta1-y0)*( dshape_attr_gat_dtheta2*sum_w_psi/sum_psi + shape_attr_gat*dSumWPsi_dtheta2 );
-            dC_dtheta(2) = dC_dtheta(2)*(-1/tau^2);
-
-        end
-
-        
         %% Creates a deep copy of this object
         function cp_obj = deepCopy(this)
             
@@ -202,8 +163,25 @@ classdef GMP < matlab.mixin.Copyable
             cp_obj.shape_attr_gating_ptr = this.shape_attr_gating_ptr.copy();
 
         end
+          
         
+        function p_ref = getRef(this, x)
+            
+            p_ref = this.wsog.output(x);
+            
+        end
         
+        function p_ref_dot = getRefDot(this, x, dx)
+            
+            p_ref_dot = this.wsog.outputDot(x, dx);
+            
+        end
+        
+        function p_ref_ddot = getRefDDot(this, x, dx, ddx)
+            
+            p_ref_ddot = this.wsog.outputDDot(x, dx, ddx);
+            
+        end
  
     end
     
@@ -243,6 +221,7 @@ classdef GMP < matlab.mixin.Copyable
             
         end
 
+        
         %% Returns the forcing term scaling
         function f_scale = forcingTermScaling(this, g)
            
