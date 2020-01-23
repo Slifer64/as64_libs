@@ -21,9 +21,9 @@ a_z = 20;
 b_z = a_z/4;
 train_method = DMP_TRAIN.LS;
 can_clock_ptr = CanonicalClock();
-shape_attr_gat_ptr = SigmoidGatingFunction(1.0, 0.5);
 N_kernels = 50;
-gmp = GMP(N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
+kernels_std_scaling = 2;
+gmp = GMP(N_kernels, a_z, b_z, can_clock_ptr, kernels_std_scaling);
 tic
 offline_train_mse = gmp.train(train_method, Timed, Pd_data);
 offline_train_mse
@@ -33,8 +33,8 @@ toc
 disp('GMP simulation...');
 tic
 
-spat_s = 0.8; % spatial scale
-temp_s = 1.6; % temporal scale
+spat_s = 1.0; % spatial scale
+temp_s = 1.0; % temporal scale
 P0 = Pd_data(1);
 Pgd = Pd_data(end);
 Pg = P0 + spat_s*(Pgd - P0);
@@ -49,7 +49,6 @@ Timed = Timed / temp_s;
 Pd_data = spat_s*( Pd_data-P0 ) + P0;
 dPd_data = spat_s*dPd_data*temp_s;
 ddPd_data = spat_s*ddPd_data*temp_s^2;
-
 
 %% Plot results
 figure;

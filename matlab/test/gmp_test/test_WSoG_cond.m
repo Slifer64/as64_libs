@@ -14,98 +14,171 @@ ddPd_data = Data.Accel(1,:);
 
 Ts = Timed(2)-Timed(1);
 
-
-T = Timed(end);
-Time = Timed;
-x = Time / T;
-dx = 1/T;
-ddx = 0;
-
 %% initialize and train GMP
 N_kernels = 50;
-wsog = WSoG(N_kernels, 2);
+% The scaling affects the smoothness  and update region of the new trajectory.
+% Large overlapping between the kernels:
+%  + smoother updated trajectory
+%  - the locally updated region is larger, so the overall trajectory changes more 
+kernels_std_scaling = 2; % good compromise between smoothness and locallity of update
+wsog = WSoG(N_kernels, kernels_std_scaling);
 tic
+x = Timed/Timed(end);
 offline_train_mse = wsog.train(DMP_TRAIN.LS, x, Pd_data);
 offline_train_mse
 toc
 
 % wsog.plotPsi(x);
 
+p0 = wsog.output(0);
+pd0 = Pd_data(1);
+
+%% update
+temp_s = 0.5;
+spat_s = 2;
+T = Timed(end)/temp_s;
+x_dot = 1/T;
+Time = Timed/temp_s;
+x = Time / T;
+x_ddot = 0;
+
+wsog.setSpatialScaling(spat_s);
+
 N = length(x);
 P_data = zeros(1,N);
 dP_data = zeros(1,N);
 ddP_data = zeros(1,N);
 
-t1 = 2;
-x1 = t1/T;
-p1 = 0.3;
-% wsog.updatePos(x1, p1);
 
-t2 = 3;
-x2 = t2/T;
-dx2 = 1/T;
+t1 = 1.5 / temp_s;
+p1 = 0.4;
+s1 = struct('t',t1, 'x',t1/T, 'x_dot',x_dot, 'p',spat_s*(p1-p0)+p0, 'p_dot',[], 'p_ddot',[]);
+wsog = updateWSoG(wsog, s1);
+
+
+t2 = 3 / temp_s;
 p2_dot = 0.1;
-% wsog.updateVel(x2, dx2, p2_dot);
+s2 = struct('t',t2, 'x',t2/T, 'x_dot',x_dot, 'p',[], 'p_dot',spat_s*p2_dot, 'p_ddot',[]);
+wsog = updateWSoG(wsog, s2);
 
-t3 = 4.25;
-x3 = t3/T;
-dx3 = 1/T;
+t3 = 4.25 / temp_s;
 p3_ddot = 0.3;
-% wsog.updateAccel(x3, dx3, p3_ddot);
+s3 = struct('t',t3, 'x',t3/T, 'x_dot',x_dot, 'p',[], 'p_dot',[], 'p_ddot',spat_s*p3_ddot);
+wsog = updateWSoG(wsog, s3);
 
+t4 = 5.5 / temp_s;
+p4 = 0.35;
+p4_ddot = 0.2;
+s4 = struct('t',t4, 'x',t4/T, 'x_dot',x_dot, 'p',spat_s*(p4-p0)+p0, 'p_dot',[], 'p_ddot',spat_s*p4_ddot);
+wsog = updateWSoG(wsog, s4);
 
-t4 = 8;
-x4 = t4/T;
-dx4 = 1/T;
-p4 = 0.4;
-p4_dot = 0.2;
-p4_ddot = 0.0;
-wsog.updatePosVelAccel(x4, dx4, p4, p4_dot, p4_ddot);
+t5 = 7 / temp_s;
+p5_dot = 0.1;
+p5_ddot = 0.0;
+s5 = struct('t',t5, 'x',t5/T, 'x_dot',1/T, 'p',[], 'p_dot',spat_s*p5_dot, 'p_ddot',spat_s*p5_ddot);
+wsog = updateWSoG(wsog, s5);
 
+t6 = 8.2 / temp_s;
+p6 = 0.4;
+p6_dot = 0.5;
+p6_ddot = 0.0;
+s6 = struct('t',t6, 'x',t6/T, 'x_dot',x_dot, 'p',spat_s*(p6-p0)+p0, 'p_dot',spat_s*p6_dot, 'p_ddot',spat_s*p6_ddot);
+wsog = updateWSoG(wsog, s6);
+
+%% simulate
 for i=1:N
     P_data(i) = wsog.output(x(i));
-    dP_data(i) = wsog.outputDot(x(i), dx);
-    ddP_data(i) = wsog.outputDDot(x(i), dx, ddx);
+    dP_data(i) = wsog.outputDot(x(i), x_dot);
+    ddP_data(i) = wsog.outputDDot(x(i), x_dot, x_ddot);
 end
 
 
 %% Plot results
-figure;
-subplot(3,1,1);
+fig = figure;
+ax1 = subplot(3,1,1);
 hold on;
 plot(Time, P_data, 'LineWidth',2.0 , 'Color','blue');
-plot(Timed, Pd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
-scatter([t1], [p1], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100);
-plot([t1 t1], ylim, 'LineWidth',1, 'Color','green', 'LineStyle','--');
+plot(Timed/temp_s, spat_s*(Pd_data-pd0)+pd0, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('pos [$m$]', 'interpreter','latex', 'fontsize',15);
 legend({'sim','demo'}, 'interpreter','latex', 'fontsize',15);
 
 axis tight;
 hold off;
 
-subplot(3,1,2);
+ax2 = subplot(3,1,2);
 hold on;
 plot(Time, dP_data, 'LineWidth',2.0, 'Color','blue');
-plot(Timed, dPd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
-scatter([t2], [p2_dot], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100);
-plot([t2 t2], ylim, 'LineWidth',1, 'Color','green', 'LineStyle','--');
+plot(Timed/temp_s, spat_s*dPd_data*temp_s, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('vel [$m/s$]', 'interpreter','latex', 'fontsize',15);
+
 axis tight;
 hold off;
 
-subplot(3,1,3);
+ax3 = subplot(3,1,3);
 hold on;
 plot(Time, ddP_data, 'LineWidth',2.0, 'Color','blue');
-plot(Timed, ddPd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
-scatter([t3], [p3_ddot], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100);
-plot([t3 t3], ylim, 'LineWidth',1, 'Color','green', 'LineStyle','--');
+plot(Timed/temp_s, spat_s*ddPd_data*temp_s^2, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('accel [$m/s^2$]', 'interpreter','latex', 'fontsize',15);
 axis tight;
 hold off;
 
+plotUpdatePoint(s1, [ax1 ax2 ax3]);
+plotUpdatePoint(s2, [ax1 ax2 ax3]);
+plotUpdatePoint(s3, [ax1 ax2 ax3]);
+plotUpdatePoint(s4, [ax1 ax2 ax3]);
+plotUpdatePoint(s5, [ax1 ax2 ax3]);
+plotUpdatePoint(s6, [ax1 ax2 ax3]);
 
 
+%% ==================================================================
+%% ==================================================================
+
+function wsog = updateWSoG(wsog, s)
+
+    if (isempty(s)), return; end
+
+    if (~isempty(s.p) && isempty(s.p_dot) && isempty(s.p_ddot))
+        wsog.updatePos(s.x, s.p);
+    elseif (isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
+        wsog.updateVel(s.x, s.x_dot, s.p_dot);
+    elseif (isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
+        wsog.updateAccel(s.x, s.x_dot, s.p_ddot);
+    elseif (~isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
+        wsog.updatePosVel(s.x, s.x_dot, s.p, s.p_dot);
+    elseif (~isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
+        wsog.updatePosAccel(s.x, s.x_dot, s.p, s.p_ddot);
+    elseif (isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
+        wsog.updateVelAccel(s.x, s.x_dot, s.p_dot, s.p_ddot);
+    elseif (~isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
+        wsog.updatePosVelAccel(s.x, s.x_dot, s.p, s.p_dot, s.p_ddot); 
+    end
+        
+end
 
 
+function plotUpdatePoint(s, ax)
 
+    if (isempty(s)), return; end
+      
+    if (~isempty(s.p))
+        hold(ax(1), 'on');
+        scatter([s.t], [s.p], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100, 'Parent',ax(1));
+        plot([s.t s.t], ax(1).YLim, 'LineWidth',1, 'Color','green', 'LineStyle','--', 'Parent',ax(1));
+        hold(ax(1), 'off');
+    end
+    
+    if (~isempty(s.p_dot))
+        hold(ax(2), 'on');
+        scatter([s.t], [s.p_dot], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100, 'Parent',ax(2));
+        plot([s.t s.t], ax(2).YLim, 'LineWidth',1, 'Color','green', 'LineStyle','--', 'Parent',ax(2));
+        hold(ax(2), 'off');
+    end
+    
+    if (~isempty(s.p_ddot))
+        hold(ax(3), 'on');
+        scatter([s.t], [s.p_ddot], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100, 'Parent',ax(3));
+        plot([s.t s.t], ax(3).YLim, 'LineWidth',1, 'Color','green', 'LineStyle','--', 'Parent',ax(3));
+        hold(ax(3), 'off');
+    end
 
+end

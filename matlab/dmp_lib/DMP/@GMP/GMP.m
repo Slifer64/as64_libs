@@ -11,19 +11,21 @@ classdef GMP < matlab.mixin.Copyable
         %  @param[in] a_z: Parameter 'a_z' relating to the spring-damper system.
         %  @param[in] b_z: Parameter 'b_z' relating to the spring-damper system.
         %  @param[in] can_clock_ptr: Pointer to a DMP canonical system object.
-        function this = GMP(N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gating_ptr)
-
-            % if (nargin < 4), can_clock_ptr = CanonicalClock(); end
-            % if (nargin < 5), shape_attr_gating_ptr=SigmoidGatingFunction(1.0, 0.5); end
+        %  @param[in] kernels_std_scaling: Scaling for std of kernels (optional, default=2).
+        function this = GMP(N_kernels, a_z, b_z, can_clock_ptr, kernels_std_scaling)
                 
+            if (nargin < 5), kernels_std_scaling = 2.0; end
+            
             this.a_z = a_z;
             this.b_z = b_z;
             this.can_clock_ptr = can_clock_ptr;
-            this.shape_attr_gating_ptr = shape_attr_gating_ptr;
+            this.shape_attr_gating_ptr = SigmoidGatingFunction(1.0, 0.5);
             
-            this.wsog = WSoG(N_kernels);
+            this.wsog = WSoG(N_kernels, kernels_std_scaling);
             
-            this.setY0(0.0);
+            this.setY0(0);
+            this.setGoal(1);
+            
         end
 
         
@@ -33,8 +35,6 @@ classdef GMP < matlab.mixin.Copyable
         function train_error = train(this, train_method, Time, yd_data)
         
             this.taud = Time(end);
-            this.y0d = yd_data(1);
-            this.gd = yd_data(end);
             
             x = Time / Time(end);
             train_error = this.wsog.train(train_method, x, yd_data);
@@ -57,9 +57,11 @@ classdef GMP < matlab.mixin.Copyable
 
             if (nargin < 6), y_c=0; end
             if (nargin < 7), z_c=0; end
+            
+            this.setGoal(g);
 
             tau = this.getTau();
-            shape_attr = this.shapeAttractor(x, g);
+            shape_attr = this.shapeAttractor(x);
             goal_attr = this.goalAttractor(x, y, z, g);
             
             this.dz = ( goal_attr + shape_attr + z_c) / tau;
@@ -94,7 +96,7 @@ classdef GMP < matlab.mixin.Copyable
             tau = this.getTau();
             z = dy*tau - yc;
 
-            shape_attr = this.shapeAttractor(x, g);
+            shape_attr = this.shapeAttractor(x);
             goal_attr = this.goalAttractor(x, y, z, g);
             dz = ( goal_attr + shape_attr + zc) / tau;
 
@@ -108,7 +110,19 @@ classdef GMP < matlab.mixin.Copyable
 
         
         %% Sets the initial position.
-        function setY0(this, y0), this.y0 = y0; end
+        function setY0(this, y0)
+            
+            this.wsog.setStartValue(y0); 
+            
+        end
+        
+        
+        %% Set goal position.
+        function setGoal(this, g)
+            
+            this.wsog.setFinalValue(g); 
+            
+        end
 
         
         %% Returns the time scale of the DMP.
@@ -147,9 +161,9 @@ classdef GMP < matlab.mixin.Copyable
         
         
         %% Returns the shape attractor
-        function shape_attr = shapeAttractor(this, x, g)
+        function shape_attr = shapeAttractor(this, x)
             
-            shape_attr = this.shapeAttrGating(x) * this.forcingTermScaling(g) * this.forcingTerm(x);
+            shape_attr = this.shapeAttrGating(x) * this.forcingTermScaling() * this.forcingTerm(x);
             
         end
         
@@ -210,14 +224,20 @@ classdef GMP < matlab.mixin.Copyable
             
             tau = this.getTau();
             
-            yd = this.wsog.output(x);
-            yd_dot = this.wsog.outputDot(x, x_dot);
-            yd_ddot = this.wsog.outputDDot(x, x_dot, x_ddot);
+            % get unscaled trajectory
+            y0_d = this.wsog.getStartDemoValue();
+            y0 = this.wsog.getStartValue();
+            spat_s = this.wsog.getSpatialScaling();
+            
+            yd = (this.wsog.output(x) + spat_s*y0_d - y0) / spat_s;
+            yd_dot = this.wsog.outputDot(x, x_dot) / spat_s;
+            yd_ddot = this.wsog.outputDDot(x, x_dot, x_ddot) / spat_s;
             
             % yd_dot is already the scaled velocity, i.e. yd_dot = dyd * taud/tau
             % that's why we mutliply do yd_dot*tau = dyd * taud which is
             % what we want below. Accordingly for the yd_ddot
-            f = tau^2*yd_ddot + this.a_z*tau*yd_dot - this.a_z*this.b_z*(this.gd - yd);
+            gd = this.wsog.getFinalDemoValue();
+            f = tau^2*yd_ddot + this.a_z*tau*yd_dot - this.a_z*this.b_z*(gd - yd);
             
         end
 
@@ -225,7 +245,7 @@ classdef GMP < matlab.mixin.Copyable
         %% Returns the forcing term scaling
         function f_scale = forcingTermScaling(this, g)
            
-            f_scale = (g - this.y0) / (this.gd - this.y0d);
+            f_scale = this.wsog.getSpatialScaling();
             
         end
         
@@ -245,10 +265,6 @@ classdef GMP < matlab.mixin.Copyable
     
     
     properties (Access = protected)
-
-        y0 % initial position
-        y0d % initial demo position
-        gd % initial demo goal
         
         taud % time duration of demo
         
