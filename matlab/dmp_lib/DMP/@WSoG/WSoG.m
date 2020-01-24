@@ -2,7 +2,7 @@
 %  Weighted sum of Guassians.
 %
 
-classdef WSoG < handle
+classdef WSoG < matlab.mixin.Copyable
 
     methods (Access = public)
         %% Weighted Sum of Gaussians constructor.

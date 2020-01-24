@@ -137,10 +137,11 @@ function [Time, P_data, dP_data, ddP_data] = getScaledTrajectory(gmp, Time0, tem
     
     dx = 1/T;
     ddx = 0;
-    P0 = gmp.getRef(0);
+    p0 = gmp.getRef(0);
+    p0_d = gmp.getRef(0);
     
     for i=1:N
-        P_data(i) = spat_s * ( gmp.getRef(x(i))  - P0 ) + P0;
+        P_data(i) = spat_s * ( gmp.getRef(x(i))  - p0 ) + p0;
         dP_data(i) = spat_s * gmp.getRefDot(x(i), dx);
         ddP_data(i) = spat_s * gmp.getRefDDot(x(i), dx, ddx);
     end
