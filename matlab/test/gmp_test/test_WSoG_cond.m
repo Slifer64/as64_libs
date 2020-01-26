@@ -36,13 +36,17 @@ pd0 = Pd_data(1);
 %% update
 temp_s = 0.5;
 spat_s = 2;
+Pgd = Pd_data(end);
+P0d = Pd_data(1);
+P0 = P0d;
+Pg = spat_s*(Pgd-P0d) + P0;
 T = Timed(end)/temp_s;
 x_dot = 1/T;
 Time = Timed/temp_s;
 x = Time / T;
 x_ddot = 0;
 
-wsog.setSpatialScaling(spat_s);
+wsog.setFinalValue(Pg);
 
 N = length(x);
 P_data = zeros(1,N);

@@ -33,8 +33,8 @@ toc
 disp('GMP simulation...');
 tic
 
-spat_s = 1.0; % spatial scale
-temp_s = 1.0; % temporal scale
+spat_s = 1.5; % spatial scale
+temp_s = 1.3; % temporal scale
 P0 = Pd_data(1);
 Pgd = Pd_data(end);
 Pg = P0 + spat_s*(Pgd - P0);
@@ -57,6 +57,7 @@ hold on;
 plot(Time, P_data, 'LineWidth',2.0 , 'Color','blue');
 plot(Timed, Pd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('pos [$m$]', 'interpreter','latex', 'fontsize',15);
+title(['temporal scale: $' num2str(temp_s) '$     ,     spatial scale: $' num2str(spat_s) '$'], 'interpreter','latex', 'fontsize',18);
 legend({'sim','demo'}, 'interpreter','latex', 'fontsize',15);
 
 axis tight;

@@ -19,7 +19,8 @@ Ts = Timed(2)-Timed(1);
 
 %% initialize and train GMP
 N_kernels = 50;
-gmp = GMP(N_kernels, 20, 5, CanonicalClock(), SigmoidGatingFunction(1.0, 0.5));
+kernels_std_scaling = 2;
+gmp = GMP(N_kernels, 20, 5, CanonicalClock(), kernels_std_scaling);
 tic
 offline_train_mse = gmp.train(DMP_TRAIN.LS, Timed, Pd_data);
 offline_train_mse
@@ -66,12 +67,17 @@ end
 % param[in] spat_s: spatial scaling
 function compareScaledTrajectories(gmp, Timed, Pd_data, dPd_data, ddPd_data, temp_s, spat_s)
 
+    Pgd = Pd_data(end);
+    P0d = Pd_data(1);
+    P0 = P0d;
+    Pg = spat_s*(Pgd-P0d) + P0;
+    
     % scaled trajectory of GMP
-    [Time, P_data, dP_data, ddP_data] = getScaledTrajectory(gmp, Timed, temp_s, spat_s);
+    [Time, P_data, dP_data, ddP_data] = getScaledTrajectory(gmp, Timed, temp_s, Pg);
 
     % scaled result of reference trajectory
     Time2 = Timed / temp_s;
-    P_data2 = spat_s*(Pd_data - Pd_data(1)) + Pd_data(1);
+    P_data2 = spat_s*(Pd_data - P0d) + P0;
     dP_data2 = spat_s*dPd_data * temp_s;
     ddP_data2 = spat_s*ddPd_data * temp_s^2 ;
 
@@ -120,30 +126,28 @@ end
 % param[in] gmp: GMP object
 % param[in] Time0: initial timestamps (before scaling)
 % param[in] temp_s: temporal scaling
-% param[in] spat_s: spatial scaling
+% param[in] Pg: New goal (which will result in spatial scaling)
 % param[out] Time: timestamps of scaled trajectory
 % param[out] P_data: scaled position
 % param[out] dP_data: scaled velocity
 % param[out] ddP_data: scaled acceleration
-function [Time, P_data, dP_data, ddP_data] = getScaledTrajectory(gmp, Time0, temp_s, spat_s)
+function [Time, P_data, dP_data, ddP_data] = getScaledTrajectory(gmp, Time0, temp_s, Pg)
 
-    T = Time0(end) / temp_s;
+    tau = Time0(end) / temp_s;
     Time = Time0 / temp_s;
-    x = Time / T;
+    x = Time / tau;
     N = length(x);
     P_data = zeros(1,N);
     dP_data = zeros(1,N);
     ddP_data = zeros(1,N);
     
-    dx = 1/T;
-    ddx = 0;
-    p0 = gmp.getRef(0);
-    p0_d = gmp.getRef(0);
+    gmp.setTau(tau);
+    gmp.setGoal(Pg);
     
     for i=1:N
-        P_data(i) = spat_s * ( gmp.getRef(x(i))  - p0 ) + p0;
-        dP_data(i) = spat_s * gmp.getRefDot(x(i), dx);
-        ddP_data(i) = spat_s * gmp.getRefDDot(x(i), dx, ddx);
+        P_data(i) = gmp.getYd(x(i));
+        dP_data(i) = gmp.getYdDot(x(i));
+        ddP_data(i) = gmp.getYdDDot(x(i));
     end
 
 end

@@ -36,7 +36,7 @@ classdef WSoG < matlab.mixin.Copyable
             
             this.f0_d = 0;
             this.fg_d = 1;
-            this.setStartValue(this.f0_d);
+            this.f0 = this.f0_d;
             this.setFinalValue(this.fg_d);
             
         end
@@ -64,7 +64,7 @@ classdef WSoG < matlab.mixin.Copyable
         function setFinalValue(this, fg)
             
             this.fg = fg;
-            this.spat_s = (this.fg - this.f0) / (this.fg_d - this.f0_d);
+            this.calcSpatialScaling();
             
         end
         
@@ -240,7 +240,7 @@ classdef WSoG < matlab.mixin.Copyable
             end
             
             this.f0_d = dot(this.regressVec(0),this.w);
-            this.fg_d = dot(this.regressVec(0),this.w);
+            this.fg_d = dot(this.regressVec(1),this.w);
             this.setStartValue(this.f0_d);
             this.setFinalValue(this.fg_d);
 

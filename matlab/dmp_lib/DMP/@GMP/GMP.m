@@ -179,21 +179,24 @@ classdef GMP < matlab.mixin.Copyable
         end
           
         
-        function p_ref = getRef(this, x)
+        function p_ref = getYd(this, x)
             
             p_ref = this.wsog.output(x);
             
         end
         
-        function p_ref_dot = getRefDot(this, x, dx)
+        function p_ref_dot = getYdDot(this, x)
             
-            p_ref_dot = this.wsog.outputDot(x, dx);
+            x_dot = this.phaseDot(x);
+            p_ref_dot = this.wsog.outputDot(x, x_dot);
             
         end
         
-        function p_ref_ddot = getRefDDot(this, x, dx, ddx)
+        function p_ref_ddot = getYdDDot(this, x)
             
-            p_ref_ddot = this.wsog.outputDDot(x, dx, ddx);
+            x_dot = this.phaseDot(x);
+            x_ddot = 0;
+            p_ref_ddot = this.wsog.outputDDot(x, x_dot, x_ddot);
             
         end
  
@@ -243,7 +246,7 @@ classdef GMP < matlab.mixin.Copyable
 
         
         %% Returns the forcing term scaling
-        function f_scale = forcingTermScaling(this, g)
+        function f_scale = forcingTermScaling(this)
            
             f_scale = this.wsog.getSpatialScaling();
             
