@@ -22,7 +22,7 @@ N_kernels = 50;
 kernels_std_scaling = 2;
 gmp = GMP(N_kernels, 20, 5, CanonicalClock(), kernels_std_scaling);
 tic
-offline_train_mse = gmp.train(DMP_TRAIN.LS, Timed, Pd_data);
+offline_train_mse = gmp.train(GMP_TRAIN.LS, Timed, Pd_data);
 offline_train_mse
 toc
 

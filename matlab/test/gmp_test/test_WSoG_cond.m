@@ -24,7 +24,7 @@ kernels_std_scaling = 2; % good compromise between smoothness and locallity of u
 wsog = WSoG(N_kernels, kernels_std_scaling);
 tic
 x = Timed/Timed(end);
-offline_train_mse = wsog.train(DMP_TRAIN.LS, x, Pd_data);
+offline_train_mse = wsog.train(GMP_TRAIN.LS, x, Pd_data);
 offline_train_mse
 toc
 

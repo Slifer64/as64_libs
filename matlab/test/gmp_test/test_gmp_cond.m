@@ -1,10 +1,6 @@
-%% Tests conditioning of GMP on pos/vel/accel and simulation as a DMP
-%  Loads a reference trajecory.
-%  Trains a GMP based on the reference trajectory.
-%  Conditions GMP weights to pass from a specific point (timestamp, pos/vel/accel).
-%  Specifically, conditioning on intermediate and final point is tested.
-%  Conditioning along with scaling is also tested.
-function test_gmp_cond()
+clc;
+% close all;
+clear;
 
 set_matlab_utils_path();
 
@@ -19,69 +15,173 @@ ddPd_data = Data.Accel(1,:);
 Ts = Timed(2)-Timed(1);
 
 %% initialize and train GMP
-a_z = 20;
-b_z = a_z/4;
-train_method = DMP_TRAIN.LS;
-can_clock_ptr = CanonicalClock();
-shape_attr_gat_ptr = SigmoidGatingFunction(1.0, 0.5);
 N_kernels = 50;
-gmp = GMP(N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
+% The scaling affects the smoothness  and update region of the new trajectory.
+% Large overlapping between the kernels:
+%  + smoother updated trajectory
+%  - the locally updated region is larger, so the overall trajectory changes more 
+kernels_std_scaling = 2; % good compromise between smoothness and locallity of update
+gmp = GMP(N_kernels, 20, 5, CanonicalClock(), kernels_std_scaling);
 tic
-offline_train_mse = gmp.train(train_method, Timed, Pd_data);
+x = Timed/Timed(end);
+offline_train_mse = gmp.train(GMP_TRAIN.LS, x, Pd_data);
 offline_train_mse
 toc
 
-%% DMP simulation
-disp('GMP simulation...');
-tic
+% gmp.wsog.plotPsi(x);
 
-spat_s = 0.8; % spatial scale
-temp_s = 1.6; % temporal scale
-P0 = Pd_data(1);
+p0 = gmp.getYd(0);
+pd0 = Pd_data(1);
+
+%% update
+temp_s = 0.5;
+spat_s = 2;
 Pgd = Pd_data(end);
-Pg = P0 + spat_s*(Pgd - P0);
-T = Timed(end) / temp_s;
-dt = Ts;
-[Time, P_data, dP_data, ddP_data] = simulateDMP(gmp, P0, Pg, T, dt);
-toc
+P0d = Pd_data(1);
+P0 = P0d;
+Pg = spat_s*(Pgd-P0d) + P0;
+T = Timed(end)/temp_s;
+Time = Timed/temp_s;
+x = Time / T;
+
+gmp.setTau(T);
+gmp.setGoal(Pg);
+
+N = length(x);
+P_data = zeros(1,N);
+dP_data = zeros(1,N);
+ddP_data = zeros(1,N);
 
 
-%% Reference trajectory (scaled)
-Timed = Timed / temp_s;
-Pd_data = spat_s*( Pd_data-P0 ) + P0;
-dPd_data = spat_s*dPd_data*temp_s;
-ddPd_data = spat_s*ddPd_data*temp_s^2;
+t1 = 1.5 / temp_s;
+p1 = 0.4;
+s1 = struct('t',t1, 'x',t1/T, 'p',spat_s*(p1-p0)+p0, 'p_dot',[], 'p_ddot',[]);
+gmp = updateGMP(gmp, s1);
+
+
+t2 = 3 / temp_s;
+p2_dot = 0.1;
+s2 = struct('t',t2, 'x',t2/T, 'p',[], 'p_dot',spat_s*p2_dot, 'p_ddot',[]);
+gmp = updateGMP(gmp, s2);
+
+t3 = 4.25 / temp_s;
+p3_ddot = 0.3;
+s3 = struct('t',t3, 'x',t3/T, 'p',[], 'p_dot',[], 'p_ddot',spat_s*p3_ddot);
+gmp = updateGMP(gmp, s3);
+
+t4 = 5.5 / temp_s;
+p4 = 0.35;
+p4_ddot = 0.2;
+s4 = struct('t',t4, 'x',t4/T, 'p',spat_s*(p4-p0)+p0, 'p_dot',[], 'p_ddot',spat_s*p4_ddot);
+gmp = updateGMP(gmp, s4);
+
+t5 = 7 / temp_s;
+p5_dot = 0.1;
+p5_ddot = 0.0;
+s5 = struct('t',t5, 'x',t5/T, 'x_dot',1/T, 'p',[], 'p_dot',spat_s*p5_dot, 'p_ddot',spat_s*p5_ddot);
+gmp = updateGMP(gmp, s5);
+
+t6 = 8.2 / temp_s;
+p6 = 0.4;
+p6_dot = 0.5;
+p6_ddot = 0.0;
+s6 = struct('t',t6, 'x',t6/T, 'p',spat_s*(p6-p0)+p0, 'p_dot',spat_s*p6_dot, 'p_ddot',spat_s*p6_ddot);
+gmp = updateGMP(gmp, s6);
+
+%% simulate
+for i=1:N
+    P_data(i) = gmp.getYd(x(i));
+    dP_data(i) = gmp.getYdDot(x(i));
+    ddP_data(i) = gmp.getYdDDot(x(i));
+end
 
 
 %% Plot results
-figure;
-subplot(3,1,1);
+fig = figure;
+ax1 = subplot(3,1,1);
 hold on;
 plot(Time, P_data, 'LineWidth',2.0 , 'Color','blue');
-plot(Timed, Pd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
+plot(Timed/temp_s, spat_s*(Pd_data-pd0)+pd0, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('pos [$m$]', 'interpreter','latex', 'fontsize',15);
 legend({'sim','demo'}, 'interpreter','latex', 'fontsize',15);
 
 axis tight;
 hold off;
 
-subplot(3,1,2);
+ax2 = subplot(3,1,2);
 hold on;
 plot(Time, dP_data, 'LineWidth',2.0, 'Color','blue');
-plot(Timed, dPd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
+plot(Timed/temp_s, spat_s*dPd_data*temp_s, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('vel [$m/s$]', 'interpreter','latex', 'fontsize',15);
+
 axis tight;
 hold off;
 
-subplot(3,1,3);
+ax3 = subplot(3,1,3);
 hold on;
 plot(Time, ddP_data, 'LineWidth',2.0, 'Color','blue');
-plot(Timed, ddPd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
+plot(Timed/temp_s, spat_s*ddPd_data*temp_s^2, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('accel [$m/s^2$]', 'interpreter','latex', 'fontsize',15);
 axis tight;
 hold off;
 
+plotUpdatePoint(s1, [ax1 ax2 ax3]);
+plotUpdatePoint(s2, [ax1 ax2 ax3]);
+plotUpdatePoint(s3, [ax1 ax2 ax3]);
+plotUpdatePoint(s4, [ax1 ax2 ax3]);
+plotUpdatePoint(s5, [ax1 ax2 ax3]);
+plotUpdatePoint(s6, [ax1 ax2 ax3]);
 
+
+%% ==================================================================
+%% ==================================================================
+
+function gmp = updateGMP(gmp, s)
+
+    if (isempty(s)), return; end
+
+    if (~isempty(s.p) && isempty(s.p_dot) && isempty(s.p_ddot))
+        gmp.updateWeights([s.x], [s.p], [GMP_UPDATE_TYPE.POS]);
+    elseif (isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
+        gmp.updateWeights([s.x], [s.p_dot], [GMP_UPDATE_TYPE.VEL]);
+    elseif (isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
+        gmp.updateWeights([s.x], [s.p_ddot], [GMP_UPDATE_TYPE.ACCEL]);
+    elseif (~isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
+        gmp.updateWeights([s.x; s.x], [s.p; s.p_dot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL]);
+    elseif (~isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
+        gmp.updateWeights([s.x; s.x], [s.p; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.ACCEL]);
+    elseif (isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
+        gmp.updateWeights([s.x; s.x], [s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
+    elseif (~isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
+        gmp.updateWeights([s.x; s.x; s.x], [s.p; s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
+    end
+        
 end
 
 
+function plotUpdatePoint(s, ax)
+
+    if (isempty(s)), return; end
+      
+    if (~isempty(s.p))
+        hold(ax(1), 'on');
+        scatter([s.t], [s.p], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100, 'Parent',ax(1));
+        plot([s.t s.t], ax(1).YLim, 'LineWidth',1, 'Color','green', 'LineStyle','--', 'Parent',ax(1));
+        hold(ax(1), 'off');
+    end
+    
+    if (~isempty(s.p_dot))
+        hold(ax(2), 'on');
+        scatter([s.t], [s.p_dot], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100, 'Parent',ax(2));
+        plot([s.t s.t], ax(2).YLim, 'LineWidth',1, 'Color','green', 'LineStyle','--', 'Parent',ax(2));
+        hold(ax(2), 'off');
+    end
+    
+    if (~isempty(s.p_ddot))
+        hold(ax(3), 'on');
+        scatter([s.t], [s.p_ddot], 'MarkerEdgeColor','red', 'LineWidth',2, 'SizeData', 100, 'Parent',ax(3));
+        plot([s.t s.t], ax(3).YLim, 'LineWidth',1, 'Color','green', 'LineStyle','--', 'Parent',ax(3));
+        hold(ax(3), 'off');
+    end
+
+end

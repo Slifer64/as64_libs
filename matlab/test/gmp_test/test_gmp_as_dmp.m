@@ -19,7 +19,7 @@ Ts = Timed(2)-Timed(1);
 %% initialize and train GMP
 a_z = 20;
 b_z = a_z/4;
-train_method = DMP_TRAIN.LS;
+train_method = GMP_TRAIN.LS;
 can_clock_ptr = CanonicalClock();
 N_kernels = 50;
 kernels_std_scaling = 2;

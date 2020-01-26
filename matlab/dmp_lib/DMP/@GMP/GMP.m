@@ -3,7 +3,7 @@
 %
 
 classdef GMP < matlab.mixin.Copyable
-
+    
     methods (Access = public)
         
         %% DMP constructor.
@@ -41,6 +41,46 @@ classdef GMP < matlab.mixin.Copyable
             
         end
 
+        
+        %% Updates the weights so that the generated trajectory passes from the given points.
+        %  @param[in] x: Vector of timestamps.
+        %  @param[in] z: Vector with the desired value for each timestamp.
+        %  @param[in] z: Vector with the type of each point (GMP_UPDATE_TYPE).
+        %  @param[in] z_var: Vector with the variance of each point (optional, default = 1e-3).
+        function updateWeights(this, x, z, type, z_var)
+            
+            if (nargin < 5), z_var = 1e-3; end
+            
+            n = length(x);
+            
+            if (isscalar(z_var)), z_var = z_var*ones(n,1); end
+            
+            k = this.wsog.numOfKernels();
+            
+            H = zeros(n, k);
+            z_hat = zeros(n,1);
+            
+            for i=1:n
+                if (type(i) == GMP_UPDATE_TYPE.POS)
+                    Hi = this.wsog.regressVec(x(i))';
+                    z_hat(i) = this.wsog.output(x(i));
+                elseif (type(i) == GMP_UPDATE_TYPE.VEL)
+                    x_dot = this.phaseDot(x(i));
+                    Hi = this.wsog.regressVecDot(x(i), x_dot)';
+                    z_hat(i) = this.wsog.outputDot(x(i), x_dot);
+                elseif (type(i) == GMP_UPDATE_TYPE.ACCEL)
+                    x_dot = this.phaseDot(x(i));
+                    x_ddot = 0;
+                    Hi = this.wsog.regressVecDDot(x(i), x_dot, x_ddot)';
+                    z_hat(i) = this.wsog.outputDDot(x(i), x_dot, x_ddot);
+                end
+                H(i,:) = Hi;
+            end
+            
+            e = z - z_hat;
+            this.wsog.updateWeights(H, e, diag(z_var));
+            
+        end
         
         %% Returns the derivatives of the DMP states.
         %  @param[in] x: phase variable.
