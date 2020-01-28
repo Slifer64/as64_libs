@@ -2,6 +2,9 @@
 %  y_ddot(t) = Phi(x) * w
 %  y_dot(t) = y_dot(t0) + int_{t0}_{t}(Phi(x) * w)
 %  y(t) = y(t0) + y_dot(t0)(t-t0) + int_{t0}_{t}(int_{t0}_{t}(Phi(x) * w))
+%
+%  y_ddot = az*bz*(yd - y) + az*(yd_dot - y_dot) + yd_ddot
+%
 
 classdef QPMP < matlab.mixin.Copyable
 
@@ -13,10 +16,12 @@ classdef QPMP < matlab.mixin.Copyable
         %  @param[in] yd0: Training data initial position.
         %  @param[in] gd: Training data goal position.
         %  @param[in] kernel_std_scaling: Scaling of the kernel's std. (optional, default=1.0)
-        function this = QPMP(N_kernels, yd_ddot, taud, yd0, gd, kernel_std_scaling)
+        function this = QPMP(N_kernels, a_z, b_z, kernel_std_scaling)
 
             if (nargin < 2), kernel_std_scaling = 1.0; end
             
+            this.a_z = a_z;
+            this.b_z = b_z;
             this.N_kernels = N_kernels;
             
             this.zero_tol = 1e-30; %realmin;
@@ -37,13 +42,11 @@ classdef QPMP < matlab.mixin.Copyable
             this.N_kernels = this.N_kernels + 2*length(extra);
             this.w = zeros(this.N_kernels,1);
             
-            this.yd_ddot = yd_ddot;
-            this.taud = taud;
-            this.yd0 = yd0;
-            this.gd = gd;
+            this.setIntStep(0.002);
             
         end
 
+        
         %% Returns the number of kernels.
         %  @return The number of kernels.
         function n_ker = numOfKernels(this)
@@ -52,85 +55,220 @@ classdef QPMP < matlab.mixin.Copyable
             
         end
        
-        %% =============================================================
         
-        
-        %% Returns the normalized weighted sum of the Gaussians for the given phase variable (time instant).
-        %  @param[in] x: The phase variable.
-        %  @param[out] f: The normalized weighted sum of the Gaussians.
-        %
-        function f = output(this,x)
-
-            Phi = this.regressVec(x);
-            f = dot(Phi,this.w) - this.spat_s*this.f0_d + this.f0;
+        %% Sets the integration step that is used to numerically calculate 
+        %% position/velocity contraints during training.
+        %  @param[in] dt: integration step
+        function setIntStep(this, dt)
+            
+            this.dt = dt;
             
         end
         
-        function f_dot = outputDot(this, x, dx)
+        
+        %% Sets the demo data.
+        function setDemo(this, demo_accel, taud, yd0, gd)
             
-            Phi_dot = this.regressVecDot(x,dx);
-            f_dot = dot(Phi_dot,this.w);
+            this.demo_accel = demo_accel;
+            this.taud = taud;
+            this.yd0 = yd0;
+            this.gd = gd;
             
         end
         
-        function f_ddot = outputDDot(this, x, dx, ddx)
-            
-            Phi_ddot = this.regressVecDDot(x, dx, ddx);
-            f_ddot = dot(Phi_ddot, this.w);
-            
-        end
         
-        function f_3dot = output3Dot(this, x, dx, ddx, d3x)
-            
-            Phi_3dot = this.regressVec3Dot(x, dx, ddx, d3x);
-            f_3dot = dot(Phi_3dot, this.w);
-            
-        end
-
-        
-        %% =============================================================
-        
-        %% Trains the WSoG.
-        %  @param[in] train_method: The training method (see dmp_::TRAIN_METHOD enum).
-        %  @param[in] x: Row vector with the timestamps of the training data points. Must take values in [0 1].
-        %  @param[in] Fd: Row vector with the desired values.
-        %  @param[in] train_error: Optinal pointer to return the training error as norm(F-Fd)/n_data.
-        function train(this, tau, y0, g)
+        %% Trains the model.
+        %  One can optionally pass position/velocity constraints.
+        %  @param[in] tau: Duration of motion.
+        %  @param[in] y0: Initial position.
+        %  @param[in] ydot_0: Initial velocity.
+        %  @param[in] g: Goal/Final position.
+        %  @param[in] pos_constr: Vector of position constraints. Each element is a 
+        %                         struct('t',t_c,'pos',p_c, 'type','=/</>'). For no constraints pass '[]'.
+        %  @param[in] vel_constr: Vector of velocity constraints. Each element is a 
+        %                         struct('t',t_c,'vel',v_c, 'type','=/</>'). For no constraints pass '[]'.
+        %  @param[in] accel_constr: Vector of acceleration constraints. Each element is a 
+        %                         struct('t',t_c,'accel',a_c, 'type','=/</>'). For no constraints pass '[]'.
+        function train(this, tau, y0, ydot_0, g, pos_constr, vel_constr, accel_constr)
  
             this.tau = tau;
+            t0 = 0;
             
+            this.y0 = y0;
+            this.ydot_0 = ydot_0;
+            
+            % calculate spatial/temporal scalings
             spat_s = (g - y0) / (this.gd - this.yd0);
             temp_s = this.taud / tau;
             
-            y_ddot = spat_s * temp_s^2 * this.yd_ddot;
+            % calculate scaled trajectory
+            z = spat_s * temp_s^2 * this.demo_accel;
+
+            % calculate cost function: J = 0.5w'Hw + f'w
+            N = length(z);
+            x = (0:(N-1)) / (N-1);
+            H = zeros(this.N_kernels, this.N_kernels);
+            f = zeros(this.N_kernels, 1);
+            for i=1:N
+                phi = this.regressVec(x(i));
+                H = H + phi*phi';
+                f = f - phi*z(i);
+            end
+
+            % calculate constraints
+            A = [];
+            b = [];
+            Aeq = [];
+            beq = [];
+            
+            % acceleration contraints
+            if (~isempty(accel_constr))
+               
+                for i=1:length(accel_constr)
+                    t_c = accel_constr(i).t;
+                    a_c = accel_constr(i).accel;
+                    type = accel_constr(i).type;
+                    
+                    phi = this.regressVec(t_c/this.tau);
+                                        
+                    b_i = a_c;
+                    if (type == '=')
+                        Aeq = [Aeq; phi'];
+                        beq = [beq; b_i];
+                    elseif (type == '<')
+                        A = [A; phi'];
+                        b = [b; b_i];
+                    elseif (type == '>')
+                        A = [A; -phi'];
+                        b = [b; b_i];
+                    end
+
+                end  
+                
+            end
             
             
+            % velocity contraints
+            if (~isempty(vel_constr))
+               
+                for i=1:length(vel_constr)
+                    t_c = vel_constr(i).t;
+                    v_c = vel_constr(i).vel;
+                    type = vel_constr(i).type;
+                    
+                    phi2 = zeros(this.N_kernels, 1);
+                    n_steps = round(t_c/this.dt);
+                    t = t0;
+                    for j=1:n_steps
+                       phi2 = phi2 + this.regressVec(t/this.tau)*this.dt;
+                       t = t + this.dt;
+                    end
+                    
+                    b_i = v_c-ydot_0;
+                    if (type == '=')
+                        Aeq = [Aeq; phi2'];
+                        beq = [beq; b_i];
+                    elseif (type == '<')
+                        A = [A; phi2'];
+                        b = [b; b_i];
+                    elseif (type == '>')
+                        A = [A; -phi2'];
+                        b = [b; -b_i];
+                    end
+
+                end  
+                
+            end
+            
+            % position contraints
+            if (~isempty(pos_constr))
+               
+                for i=1:length(pos_constr)
+                    t_c = pos_constr(i).t;
+                    y_c = pos_constr(i).pos;
+                    type = pos_constr(i).type;
+                    
+                    phi2 = zeros(this.N_kernels, 1);
+                    phi3 = zeros(this.N_kernels, 1);
+                    n_steps = round(t_c/this.dt);
+                    t = t0;
+                    for j=1:n_steps
+                       phi2 = phi2 + this.regressVec(t/this.tau)*this.dt;
+                       phi3 = phi3 + phi2*this.dt;
+                       t = t + this.dt;
+                    end
+                    
+                    b_i = y_c - y0 - (tau-t0)*ydot_0;
+                    if (type == '=')
+                        Aeq = [Aeq; phi3'];
+                        beq = [beq; b_i];
+                    elseif (type == '<')
+                        A = [A; phi3'];
+                        b = [b; b_i];
+                    elseif (type == '>')
+                        A = [A; -phi3'];
+                        b = [b; b_i];
+                    end
+
+                end  
+                
+            end
+            
+            % solve optimization problem
+            this.w = quadprog(H,f, A,b, Aeq,beq);
+            
+
+%             y_ddot = zeros(1,N);
+%             for i=1:N, y_ddot(i) = dot(this.regressVec(x(i)), this.w); end
+%             
+%             Time = x*tau;
+% 
+%             figure
+%             hold on
+%             plot(Time, this.demo_accel, 'LineWidth',2);
+%             plot(Time, z, 'LineWidth',2);
+%             plot(Time, y_ddot, 'LineWidth',2);
+%             legend({'demo','s-demo','sim'}, 'interpreter','latex', 'fontsize',15);
+%             xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
+%             ylabel('accel [$m/s^2$]', 'interpreter','latex', 'fontsize',15);
+% 
+%             figure;
+%             bar(this.c, this.w)
+%             axis tight;
+%             pause
 
         end
         
-        function init(this, y0, y_dot0)
+        %% Initialization for trajectory generation.
+        function init(this)
            
-            this.yd = y0;
-            this.yd_dot = y_dot0;
-            
+            this.t = 0;
+            this.yd = this.y0;
+            this.yd_dot = this.ydot_0;
+
         end
         
-        function y_ddot = getAccel(this, y, y_dot, dt)
-           
+        %% =============================================================
+        
+        %% Returns the acceleration and the current time instant.
+        function [t, y_ddot] = getAccel(this, y, y_dot, dt)
+
             this.t = this.t + dt;
             x = this.t / this.tau;
+
+            yd_ddot = dot(regressVec(this, x), this.w);
+            
+            y_ddot = this.a_z*this.b_z*(this.yd - y) + this.a_z*(this.yd_dot - y_dot) + yd_ddot;
+            t = this.t;
             
             this.yd = this.yd + this.yd_dot*dt;
-            this.yd_dot = this.yd_dot + this.yd_ddot*dt;
-            this.yd_ddot = dot(regressVec(this, x), this.w);
-            
-            y_ddot = this.az*this.bz*(this.yd - y) + this.az*(this.yd_dot - y_dot) + this.yd_ddot;
+            this.yd_dot = this.yd_dot + yd_ddot*dt;
             
         end
         
         function [Time, y, y_dot, y_ddot] = trajGen(this, y0, y_dot0, dt)
             
-            N = length(this.yd_ddot);
+            N = length(this.demo_accel);
             
             this.init(y0, y_dot0);
             
@@ -148,33 +286,11 @@ classdef QPMP < matlab.mixin.Copyable
             
         end
         
-        
-        %% =============================================================
-        
-        function [P_data, dP_data, ddP_data, d3P_data] = simulate(this, x, dx, ddx, d3x)
-            
-            N = length(x);
-            
-            if (isscalar(dx)), dx = dx*ones(1,N); end
-            if (isscalar(ddx)), ddx = ddx*ones(1,N); end
-            if (isscalar(d3x)), d3x = d3x*ones(1,N); end
-            
-            P_data = zeros(1,N);
-            dP_data = zeros(1,N);
-            ddP_data = zeros(1,N);
-            d3P_data = zeros(1,N);
-            for i=1:N
-               P_data(i) = this.output(x(i));
-               dP_data(i) = this.outputDot(x(i), dx(i));
-               ddP_data(i) = this.outputDDot(x(i), dx(i), ddx(i));
-               d3P_data(i) = this.output3Dot(x(i), dx(i), ddx(i), d3x(i));
-            end
-            
-        end
 
-        
-        %% =============================================================
-        
+    end
+    
+    methods (Access = private)
+
         function phi = regressVec(this, x)
             
             psi = this.kernelFun(x);
@@ -182,65 +298,6 @@ classdef QPMP < matlab.mixin.Copyable
 
         end
         
-        function phi_dot = regressVecDot(this, x, dx)
-            
-            psi = this.kernelFun(x);
-            psi_dot = this.kernelFunDot(x, dx);
-            sum_psi = sum(psi);
-            sum_psi_dot = sum(psi_dot);
-            
-            % phi_dot = ( psi_dot*sum_psi - psi*sum_psi_dot ) / ( sum_psi^2 + this.zero_tol);
-            
-            phi = psi / ( sum(sum_psi) + this.zero_tol );
-            phi_dot =  this.spat_s * ( psi_dot - phi*sum_psi_dot ) / ( sum_psi + this.zero_tol);
-
-        end
-        
-        function phi_ddot = regressVecDDot(this, x, dx, ddx)
-            
-            psi = this.kernelFun(x);
-            psi_dot = this.kernelFunDot(x, dx);
-            psi_ddot = this.kernelFunDDot(x, dx, ddx);
-            sum_psi = sum(psi);
-            sum_psi_dot = sum(psi_dot);
-            sum_psi_ddot = sum(psi_ddot);
-            % sum_psi2 = sum_psi^2;
-            
-            % phi_ddot2 = ( ( psi_ddot*sum_psi - 2*psi_dot*sum_psi_dot - psi*sum_psi_ddot )*sum_psi2 - 2*psi*sum_psi*sum_psi_dot^2 ) / ( sum_psi2^2 + this.zero_tol);
-            
-            % phi_ddot2 = ( ( psi_ddot*sum_psi - psi*sum_psi_ddot )*sum_psi - 2*sum_psi_dot*(psi_dot*sum_psi-psi*sum_psi_dot) ) / ( sum_psi^3 + this.zero_tol);
-
-            phi = psi / ( sum(sum_psi) + this.zero_tol );
-            phi_dot = ( psi_dot - phi*sum_psi_dot ) / ( sum_psi + this.zero_tol);
-            phi_ddot = this.spat_s * (psi_ddot - 2*phi_dot*sum_psi_dot - phi*sum_psi_ddot) / ( sum_psi + this.zero_tol);  
-
-        end
-        
-        function phi_3dot = regressVec3Dot(this, x, dx, ddx, d3x)
-            
-            psi = this.kernelFun(x);
-            psi_dot = this.kernelFunDot(x, dx);
-            psi_ddot = this.kernelFunDDot(x, dx, ddx);
-            psi_3dot = this.kernelFun3Dot(x, dx, ddx, d3x);
-            sum_psi = sum(psi);
-            sum_psi_dot = sum(psi_dot);
-            sum_psi_ddot = sum(psi_ddot);
-            sum_psi_3dot = sum(psi_3dot);
-
-            phi = psi / ( sum(sum_psi) + this.zero_tol );
-            phi_dot = ( psi_dot - phi*sum_psi_dot ) / ( sum_psi + this.zero_tol);
-            phi_ddot = (psi_ddot - 2*phi_dot*sum_psi_dot - phi*sum_psi_ddot) / ( sum_psi + this.zero_tol);
-            phi_3dot = this.spat_s * (psi_3dot - 3*phi_ddot*sum_psi_dot - 3*phi_dot*sum_psi_ddot - phi*sum_psi_3dot) / ( sum_psi + this.zero_tol);
-
-        end
-
-        %% =============================================================
-
-    end
-    
-    methods (Access = private)
-        
-        %% =============================================================
         
         %% Returns a column vector with the values of the kernel functions.
         %  @param[in] x: The phase variable.
@@ -256,67 +313,33 @@ classdef QPMP < matlab.mixin.Copyable
 
         end
         
-        function psi_dot = kernelFunDot(this, x, dx)
-
-            n = length(x);
-            psi = this.kernelFun(x);
-            psi_dot = zeros(this.N_kernels, n);
-            
-            for j=1:n
-                a = (x(j)-this.c)*dx(j);
-                psi_dot(:,j) = -2*this.h.*( psi(:,j).*a);
-            end 
-
-        end
-        
-        function psi_ddot = kernelFunDDot(this, x, dx, ddx)
-
-            n = length(x);
-            psi = this.kernelFun(x);
-            psi_dot = this.kernelFunDot(x,dx);
-            psi_ddot = zeros(this.N_kernels, n);
-
-            for j=1:n
-                a = (x(j)-this.c)*dx(j);
-                a_dot = (x(j)-this.c)*ddx(j) + dx(j)^2;
-                psi_ddot(:,j) = -2*this.h.*( psi_dot(:,j).*a + psi(:,j).*a_dot ); 
-            end 
-
-        end
-        
-        function psi_3dot = kernelFun3Dot(this, x, dx, ddx, d3x)
-
-            n = length(x);
-            psi = this.kernelFun(x);
-            psi_dot = this.kernelFunDot(x,dx);
-            psi_ddot = this.kernelFunDDot(x,dx, ddx);
-            psi_3dot = zeros(this.N_kernels, n);
-            
-            for j=1:n
-                a = (x(j)-this.c)*dx(j);
-                a_dot = (x(j)-this.c)*ddx(j) + dx(j)^2;
-                a_ddot = (x(j)-this.c)*d3x(j) + 3*dx(j)*ddx(j);
-                psi_3dot(:,j) = -2*this.h.*( psi_ddot(:,j).*a + 2*psi_dot(:,j).*a_dot + psi(:,j).*a_ddot ); 
-            end 
-
-        end
-        
-        
     end
     
     properties (Access = private)
         
         N_kernels % number of kernels (basis functions)
+        a_z
+        b_z
         w % N_kernels x 1 vector with the kernels' weights
         c % N_kernels x 1 vector with the kernels' centers
         h % N_kernels x 1 vector with the kernels' inverse width
         
+        dt % euler integration steps for calculating position/velocity constraints
+        
         zero_tol % small value used to avoid divisions with very small numbers
         
-        yd_ddot; % training data acceleration
+        demo_accel; % training data acceleration
         taud % training data time duration
         yd0
         gd
+        
+        yd
+        yd_dot
+        y0
+        ydot_0
+        
+        tau
+        t
         
     end
     
