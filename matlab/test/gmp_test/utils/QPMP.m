@@ -84,15 +84,14 @@ classdef QPMP < matlab.mixin.Copyable
         %  @param[in] ydot_0: Initial velocity.
         %  @param[in] g: Goal/Final position.
         %  @param[in] pos_constr: Vector of position constraints. Each element is a 
-        %                         struct('t',t_c,'pos',p_c, 'type','=/</>'). For no constraints pass '[]'.
+        %                         struct('t',t_c,'value',p_c, 'type','=/</>'). For no constraints pass '[]'.
         %  @param[in] vel_constr: Vector of velocity constraints. Each element is a 
-        %                         struct('t',t_c,'vel',v_c, 'type','=/</>'). For no constraints pass '[]'.
+        %                         struct('t',t_c,'value',v_c, 'type','=/</>'). For no constraints pass '[]'.
         %  @param[in] accel_constr: Vector of acceleration constraints. Each element is a 
-        %                         struct('t',t_c,'accel',a_c, 'type','=/</>'). For no constraints pass '[]'.
+        %                         struct('t',t_c,'value',a_c, 'type','=/</>'). For no constraints pass '[]'.
         function train(this, tau, y0, ydot_0, g, pos_constr, vel_constr, accel_constr)
  
             this.tau = tau;
-            t0 = 0;
             
             this.y0 = y0;
             this.ydot_0 = ydot_0;
@@ -115,18 +114,42 @@ classdef QPMP < matlab.mixin.Copyable
                 f = f - phi*z(i);
             end
 
-            % calculate constraints
+            % calculate constraint matrices in canonical form
+            [A,b, Aeq,beq] = this.getConstrMat(pos_constr, vel_constr, accel_constr);
+            
+            % solve optimization problem
+            tic
+            this.w = quadprog(H,f, A,b, Aeq,beq);
+            toc
+
+        end
+        
+        
+        %% Extracts the constraint matrices in canonical form.
+        %  That is: A*w <= b, Aeq*w = beq
+        %  Each input argument constraint is of the form struct('t',t_c,'value',val, 'type','=/</>').
+        %  @param[in] pos_constr: Vector of position constraints.
+        %  @param[in] vel_constr: Vector of velocity constraints.
+        %  @param[in] accel_constr: Vector of acceleration constraints.
+        %  @param[out] A: Inequality constraint matrix.
+        %  @param[out] b: Inequality constraint vector.
+        %  @param[out] Aeq: Equality constraint matrix.
+        %  @param[out] beq: Equality constraint vector.
+        function [A,b, Aeq,beq] = getConstrMat(this, pos_constr, vel_constr, accel_constr)
+           
             A = [];
             b = [];
             Aeq = [];
             beq = [];
             
+            t0 = 0;
+
             % acceleration contraints
             if (~isempty(accel_constr))
                
                 for i=1:length(accel_constr)
                     t_c = accel_constr(i).t;
-                    a_c = accel_constr(i).accel;
+                    a_c = accel_constr(i).value;
                     type = accel_constr(i).type;
                     
                     phi = this.regressVec(t_c/this.tau);
@@ -140,31 +163,31 @@ classdef QPMP < matlab.mixin.Copyable
                         b = [b; b_i];
                     elseif (type == '>')
                         A = [A; -phi'];
-                        b = [b; b_i];
+                        b = [b; -b_i];
                     end
 
                 end  
                 
             end
             
-            
             % velocity contraints
+            vel_constr = this.sortConstr(vel_constr);
+            phi2 = zeros(this.N_kernels, 1);
+            t = t0;
             if (~isempty(vel_constr))
                
                 for i=1:length(vel_constr)
                     t_c = vel_constr(i).t;
-                    v_c = vel_constr(i).vel;
+                    v_c = vel_constr(i).value;
                     type = vel_constr(i).type;
-                    
-                    phi2 = zeros(this.N_kernels, 1);
-                    n_steps = round(t_c/this.dt);
-                    t = t0;
+
+                    n_steps = round((t_c-t)/this.dt);
                     for j=1:n_steps
                        phi2 = phi2 + this.regressVec(t/this.tau)*this.dt;
                        t = t + this.dt;
                     end
                     
-                    b_i = v_c-ydot_0;
+                    b_i = v_c-this.ydot_0;
                     if (type == '=')
                         Aeq = [Aeq; phi2'];
                         beq = [beq; b_i];
@@ -181,24 +204,25 @@ classdef QPMP < matlab.mixin.Copyable
             end
             
             % position contraints
+            pos_constr = this.sortConstr(pos_constr);
+            phi2 = zeros(this.N_kernels, 1);
+            phi3 = zeros(this.N_kernels, 1);
+            t = t0;
             if (~isempty(pos_constr))
                
                 for i=1:length(pos_constr)
                     t_c = pos_constr(i).t;
-                    y_c = pos_constr(i).pos;
+                    y_c = pos_constr(i).value;
                     type = pos_constr(i).type;
-                    
-                    phi2 = zeros(this.N_kernels, 1);
-                    phi3 = zeros(this.N_kernels, 1);
-                    n_steps = round(t_c/this.dt);
-                    t = t0;
+
+                    n_steps = round((t_c-t)/this.dt);
                     for j=1:n_steps
                        phi2 = phi2 + this.regressVec(t/this.tau)*this.dt;
                        phi3 = phi3 + phi2*this.dt;
                        t = t + this.dt;
                     end
                     
-                    b_i = y_c - y0 - (tau-t0)*ydot_0;
+                    b_i = y_c - this.y0 - (this.tau-t0)*this.ydot_0;
                     if (type == '=')
                         Aeq = [Aeq; phi3'];
                         beq = [beq; b_i];
@@ -207,37 +231,15 @@ classdef QPMP < matlab.mixin.Copyable
                         b = [b; b_i];
                     elseif (type == '>')
                         A = [A; -phi3'];
-                        b = [b; b_i];
+                        b = [b; -b_i];
                     end
 
                 end  
                 
             end
             
-            % solve optimization problem
-            this.w = quadprog(H,f, A,b, Aeq,beq);
-            
-
-%             y_ddot = zeros(1,N);
-%             for i=1:N, y_ddot(i) = dot(this.regressVec(x(i)), this.w); end
-%             
-%             Time = x*tau;
-% 
-%             figure
-%             hold on
-%             plot(Time, this.demo_accel, 'LineWidth',2);
-%             plot(Time, z, 'LineWidth',2);
-%             plot(Time, y_ddot, 'LineWidth',2);
-%             legend({'demo','s-demo','sim'}, 'interpreter','latex', 'fontsize',15);
-%             xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
-%             ylabel('accel [$m/s^2$]', 'interpreter','latex', 'fontsize',15);
-% 
-%             figure;
-%             bar(this.c, this.w)
-%             axis tight;
-%             pause
-
         end
+        
         
         %% Initialization for trajectory generation.
         function init(this)
@@ -311,6 +313,18 @@ classdef QPMP < matlab.mixin.Copyable
                 psi(:,j) = exp(-this.h.*((x(j)-this.c).^2));
             end 
 
+        end
+        
+        function constr = sortConstr(this, constr)
+          
+            n = length(constr);
+            t = zeros(n, 1);
+            for i=1:n, t(i) = constr(i).t; end
+            
+            [~, ind] = sort(t, 'ascend');
+            
+            constr = constr(ind);
+            
         end
         
     end
