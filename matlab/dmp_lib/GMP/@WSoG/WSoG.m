@@ -25,7 +25,7 @@ classdef WSoG < matlab.mixin.Copyable
             
             d = this.c(2) - this.c(1);
             c_end = this.c(end);
-            extra = [d; 2*d; 3*d];
+            extra = [];%[d; 2*d; 3*d];
             this.c = [-extra+this.c(1); this.c; extra+c_end];
             this.h = [repmat(this.h(end),length(extra),1); this.h; repmat(this.h(end),length(extra),1)];
             
@@ -680,6 +680,87 @@ classdef WSoG < matlab.mixin.Copyable
         
         %% =============================================================
         
+        %% Trajectory optimization.
+        %  One can optionally pass position/velocity constraints.
+        %  @param[in] x: Vector of canonical timestamps.
+        %  @param[in] ref_data: struct('pos',[], 'vel',[], 'accel',[], 'w_p',[], 'w_v',[], 'w_a',[]).
+        %  @param[in] tau: Duration of motion.
+        %  @param[in] pos_constr: Vector of @GMPConstr position constraints. For no constraints pass '[]'.
+        %  @param[in] vel_constr: Vector of @GMPConstr velocity constraints. For no constraints pass '[]'.
+        %  @param[in] accel_constr: Vector of @GMPConstr acceleration constraints. For no constraints pass '[]'.
+        %  @param[in] opt_set: Object of type @GMPOptSet for setting optimization options.
+        function constrOpt(this, x, ref_data, tau, pos_constr, vel_constr, accel_constr, opt_set)
+
+            % calculate cost function: J = 0.5w'Hw + f'w
+            N = length(x);
+            
+            H = 1e-5*ones(this.N_kernels, this.N_kernels); % for numerical stability
+            f = zeros(this.N_kernels, 1);
+            
+            if (opt_set.opt_pos)
+                H1 = zeros(this.N_kernels, this.N_kernels);
+                f1 = zeros(this.N_kernels, 1);
+                for i=1:N
+                    phi = this.regressVec(x(i));
+                    H1 = H1 + phi*phi';
+                    f1 = f1 - phi*ref_data.pos(i);
+                end
+                H = H + opt_set.w_p*H1;
+                f = f + opt_set.w_p*f1;
+            end
+            
+            if (opt_set.opt_vel)
+                H2 = zeros(this.N_kernels, this.N_kernels);
+                f2 = zeros(this.N_kernels, 1);
+                for i=1:N
+                    phi = this.regressVecDot(x(i), 1/tau);
+                    H2 = H2 + phi*phi';
+                    f2 = f2 - phi*ref_data.vel(i);
+                end
+                H = H + opt_set.w_v*H2;
+                f = f + opt_set.w_v*f2;
+            end
+            
+            if (opt_set.opt_accel)
+                H3 = zeros(this.N_kernels, this.N_kernels);
+                f3 = zeros(this.N_kernels, 1);
+                for i=1:N
+                    phi = this.regressVecDDot(x(i), 1/tau, 0);
+                    H3 = H3 + phi*phi';
+                    f3 = f3 - phi*ref_data.accel(i);
+                end
+                H = H + opt_set.w_a*H3;
+                f = f + opt_set.w_a*f3;
+            end
+
+            % calculate constraint matrices in canonical form
+            [A,b, Aeq,beq] = this.getConstrMat(tau, pos_constr, vel_constr, accel_constr);
+            
+            % solve optimization problem
+            tic
+            this.w = quadprog(H,f, A,b, Aeq,beq);
+            toc
+            
+%             sim_data = zeros(1, N);
+%             for i=1:N
+%                 phi = this.regressVecDDot(x(i), 1/tau, 0);
+%                 sim_data(i) = dot(phi, this.w);
+%             end
+%             
+%             Time = x*tau;
+%             figure;
+%             hold on;
+%             plot(Time, ref_data, 'LineWidth',2, 'LineStyle','-','Color','blue');
+%             plot(Time, sim_data, 'LineWidth',2, 'LineStyle',':','Color','magenta');
+%             legend({'demo','sim'}, 'interpreter','latex', 'fontsize',15);
+%             axis tight;
+%             hold off;
+            
+
+        end
+        
+        %% =============================================================
+        
         function plotPsi(this, x)
             
             Psi = this.kernelFun(x);
@@ -692,6 +773,14 @@ classdef WSoG < matlab.mixin.Copyable
 
         end
         
+        %% Returns a deep copy of this object.
+        %  @param[out] cp_obj: Deep copy of current object.
+        function cp_obj = deepCopy(this)
+
+            cp_obj = this.copy();
+            
+        end
+        
     end
     
     methods (Access = private)
@@ -701,6 +790,99 @@ classdef WSoG < matlab.mixin.Copyable
             this.spat_s = (this.fg - this.f0) / (this.fg_d - this.f0_d);
             
         end
+        
+        
+        %% Extracts the constraint matrices in canonical form.
+        %  That is: A*w <= b, Aeq*w = beq
+        %  Each input argument constraint is of the form struct('t',t_c,'value',val, 'type','=/</>').
+        %  @param[in] pos_constr: Vector of position constraints.
+        %  @param[in] vel_constr: Vector of velocity constraints.
+        %  @param[in] accel_constr: Vector of acceleration constraints.
+        %  @param[out] A: Inequality constraint matrix.
+        %  @param[out] b: Inequality constraint vector.
+        %  @param[out] Aeq: Equality constraint matrix.
+        %  @param[out] beq: Equality constraint vector.
+        function [A,b, Aeq,beq] = getConstrMat(this, tau, pos_constr, vel_constr, accel_constr)
+           
+            A = [];
+            b = [];
+            Aeq = [];
+            beq = [];
+            
+            t0 = 0;
+            
+            y0 = this.f0;
+            ydot_0 = 0;
+            
+            % position contraints
+            if (~isempty(pos_constr))
+                for i=1:length(pos_constr)
+                    t_c = pos_constr(i).t;
+                    val = pos_constr(i).value;
+                    type = pos_constr(i).type;
+                    
+                    phi = this.regressVec(t_c/tau);                   
+                    b_i = val;
+                    if (type == '=')
+                        Aeq = [Aeq; phi'];
+                        beq = [beq; b_i];
+                    elseif (type == '<')
+                        A = [A; phi'];
+                        b = [b; b_i];
+                    elseif (type == '>')
+                        A = [A; -phi'];
+                        b = [b; -b_i];
+                    end
+                end   
+            end
+            
+            
+            % velocity contraints
+            if (~isempty(vel_constr))
+                for i=1:length(vel_constr)
+                    t_c = vel_constr(i).t;
+                    val = vel_constr(i).value;
+                    type = vel_constr(i).type;
+                    
+                    phi = this.regressVecDot(t_c/tau, 1/tau);                 
+                    b_i = val;
+                    if (type == '=')
+                        Aeq = [Aeq; phi'];
+                        beq = [beq; b_i];
+                    elseif (type == '<')
+                        A = [A; phi'];
+                        b = [b; b_i];
+                    elseif (type == '>')
+                        A = [A; -phi'];
+                        b = [b; -b_i];
+                    end
+                end  
+            end
+
+            % acceleration contraints
+            if (~isempty(accel_constr))
+                for i=1:length(accel_constr)
+                    t_c = accel_constr(i).t;
+                    val = accel_constr(i).value;
+                    type = accel_constr(i).type;
+                    
+                    phi = this.regressVecDDot(t_c/tau, 1/tau, 0);                 
+                    b_i = val;
+                    if (type == '=')
+                        Aeq = [Aeq; phi'];
+                        beq = [beq; b_i];
+                    elseif (type == '<')
+                        A = [A; phi'];
+                        b = [b; b_i];
+                    elseif (type == '>')
+                        A = [A; -phi'];
+                        b = [b; -b_i];
+                    end
+                end  
+            end
+            
+        end
+        
         
         %% =============================================================
         

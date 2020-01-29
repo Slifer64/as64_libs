@@ -20,8 +20,12 @@ classdef GMP < matlab.mixin.Copyable
             this.b_z = b_z;
             this.can_clock_ptr = can_clock_ptr;
             this.shape_attr_gating_ptr = SigmoidGatingFunction(1.0, 0.5);
+%             this.shape_attr_gating_ptr = LinGatingFunction(1.0, 1.0);
             
             this.wsog = WSoG(N_kernels, kernels_std_scaling);
+            this.wsog_opt = this.wsog.deepCopy();
+            
+            this.setOptTraj(false);
             
             this.setY0(0);
             this.setGoal(1);
@@ -34,14 +38,58 @@ classdef GMP < matlab.mixin.Copyable
         %  @param[in] yd_data: Row vector with the desired potition.
         function train_error = train(this, train_method, Time, yd_data)
         
-            this.taud = Time(end);
+            tau = Time(end);
+            this.setTau(tau);
             
             x = Time / Time(end);
             train_error = this.wsog.train(train_method, x, yd_data);
             
+            this.wsog_opt = this.wsog.deepCopy();
+            
         end
 
         
+        %% Constrained optimization.
+        %  @param[in] pos_constr: Vector of @GMPConstr position constraints. For no constraints pass '[]'.
+        %  @param[in] vel_constr: Vector of @GMPConstr velocity constraints. For no constraints pass '[]'.
+        %  @param[in] accel_constr: Vector of @GMPConstr acceleration constraints. For no constraints pass '[]'.
+        %  @param[in] opt_set: Object of type @GMPOptSet for setting optimization options.
+        function constrOpt(this, pos_constr, vel_constr, accel_constr, opt_set)
+        
+            ref_data = struct('pos',[], 'vel',[], 'accel',[], 'w_p',[], 'w_v',[], 'w_a',[]);
+            
+            N = 4000;
+            
+            x = (0:(N-1))/(N-1);
+            this.setOptTraj(false);
+            
+            if (opt_set.opt_pos)
+                ref_data.pos = zeros(1, N);
+                for i=1:N
+                    ref_data.pos(i) = this.getYd(x(i));
+                end
+            end
+            
+            if (opt_set.opt_vel)
+                ref_data.vel = zeros(1, N);
+                for i=1:N
+                    ref_data.vel(i) = this.getYdDot(x(i));
+                end
+            end
+            
+            if (opt_set.opt_accel)
+                ref_data.accel = zeros(1, N);
+                for i=1:N
+                    ref_data.accel(i) = this.getYdDDot(x(i));
+                end
+            end
+            
+            tau = this.getTau();
+            
+            this.wsog_opt.constrOpt(x, ref_data, tau, pos_constr, vel_constr, accel_constr, opt_set);
+            
+        end
+            
         %% Updates the weights so that the generated trajectory passes from the given points.
         %  @param[in] x: Vector of timestamps.
         %  @param[in] z: Vector with the desired value for each timestamp.
@@ -55,30 +103,30 @@ classdef GMP < matlab.mixin.Copyable
             
             if (isscalar(z_var)), z_var = z_var*ones(n,1); end
             
-            k = this.wsog.numOfKernels();
+            k = this.wsog_.numOfKernels();
             
             H = zeros(n, k);
             z_hat = zeros(n,1);
             
             for i=1:n
                 if (type(i) == GMP_UPDATE_TYPE.POS)
-                    Hi = this.wsog.regressVec(x(i))';
-                    z_hat(i) = this.wsog.output(x(i));
+                    Hi = this.wsog_.regressVec(x(i))';
+                    z_hat(i) = this.wsog_.output(x(i));
                 elseif (type(i) == GMP_UPDATE_TYPE.VEL)
                     x_dot = this.phaseDot(x(i));
-                    Hi = this.wsog.regressVecDot(x(i), x_dot)';
-                    z_hat(i) = this.wsog.outputDot(x(i), x_dot);
+                    Hi = this.wsog_.regressVecDot(x(i), x_dot)';
+                    z_hat(i) = this.wsog_.outputDot(x(i), x_dot);
                 elseif (type(i) == GMP_UPDATE_TYPE.ACCEL)
                     x_dot = this.phaseDot(x(i));
                     x_ddot = 0;
-                    Hi = this.wsog.regressVecDDot(x(i), x_dot, x_ddot)';
-                    z_hat(i) = this.wsog.outputDDot(x(i), x_dot, x_ddot);
+                    Hi = this.wsog_.regressVecDDot(x(i), x_dot, x_ddot)';
+                    z_hat(i) = this.wsog_.outputDDot(x(i), x_dot, x_ddot);
                 end
                 H(i,:) = Hi;
             end
             
             e = z - z_hat;
-            this.wsog.updateWeights(H, e, diag(z_var));
+            this.wsog_.updateWeights(H, e, diag(z_var));
             
         end
         
@@ -146,13 +194,13 @@ classdef GMP < matlab.mixin.Copyable
         
         
         %% Returns the number of kernels.
-        function n_ker = numOfKernels(this), n_ker = length(this.wsog.w); end
+        function n_ker = numOfKernels(this), n_ker = length(this.wsog_.w); end
 
         
         %% Sets the initial position.
         function setY0(this, y0)
             
-            this.wsog.setStartValue(y0); 
+            this.wsog_.setStartValue(y0); 
             
         end
         
@@ -160,7 +208,7 @@ classdef GMP < matlab.mixin.Copyable
         %% Set goal position.
         function setGoal(this, g)
             
-            this.wsog.setFinalValue(g); 
+            this.wsog_.setFinalValue(g); 
             
         end
 
@@ -218,17 +266,37 @@ classdef GMP < matlab.mixin.Copyable
 
         end
           
+        function p_ref = getYdOpt(this, x)
+            
+            p_ref = this.wsog_opt.output(x);
+            
+        end
         
+        function p_ref_dot = getYdDotOpt(this, x)
+            
+            x_dot = this.phaseDot(x);
+            p_ref_dot = this.wsog_opt.outputDot(x, x_dot);
+            
+        end
+        
+        function p_ref_ddot = getYdDDotOpt(this, x)
+            
+            x_dot = this.phaseDot(x);
+            x_ddot = 0;
+            p_ref_ddot = this.wsog_opt.outputDDot(x, x_dot, x_ddot);
+            
+        end
+
         function p_ref = getYd(this, x)
             
-            p_ref = this.wsog.output(x);
+            p_ref = this.wsog_.output(x);
             
         end
         
         function p_ref_dot = getYdDot(this, x)
             
             x_dot = this.phaseDot(x);
-            p_ref_dot = this.wsog.outputDot(x, x_dot);
+            p_ref_dot = this.wsog_.outputDot(x, x_dot);
             
         end
         
@@ -236,10 +304,21 @@ classdef GMP < matlab.mixin.Copyable
             
             x_dot = this.phaseDot(x);
             x_ddot = 0;
-            p_ref_ddot = this.wsog.outputDDot(x, x_dot, x_ddot);
+            p_ref_ddot = this.wsog_.outputDDot(x, x_dot, x_ddot);
             
         end
- 
+
+        
+        %% Enables/Disables the use of the optimized mp-model
+        function setOptTraj(this, set)
+           
+            if (set), this.wsog_ = this.wsog_opt;
+            else, this.wsog_ = this.wsog;
+            end
+            
+        end
+        
+        
     end
     
     methods (Access = protected)
@@ -268,18 +347,18 @@ classdef GMP < matlab.mixin.Copyable
             tau = this.getTau();
             
             % get unscaled trajectory
-            y0_d = this.wsog.getStartDemoValue();
-            y0 = this.wsog.getStartValue();
-            spat_s = this.wsog.getSpatialScaling();
+            y0_d = this.wsog_.getStartDemoValue();
+            y0 = this.wsog_.getStartValue();
+            spat_s = this.wsog_.getSpatialScaling();
             
-            yd = (this.wsog.output(x) + spat_s*y0_d - y0) / spat_s;
-            yd_dot = this.wsog.outputDot(x, x_dot) / spat_s;
-            yd_ddot = this.wsog.outputDDot(x, x_dot, x_ddot) / spat_s;
+            yd = (this.wsog_.output(x) + spat_s*y0_d - y0) / spat_s;
+            yd_dot = this.wsog_.outputDot(x, x_dot) / spat_s;
+            yd_ddot = this.wsog_.outputDDot(x, x_dot, x_ddot) / spat_s;
             
             % yd_dot is already the scaled velocity, i.e. yd_dot = dyd * taud/tau
             % that's why we mutliply do yd_dot*tau = dyd * taud which is
             % what we want below. Accordingly for the yd_ddot
-            gd = this.wsog.getFinalDemoValue();
+            gd = this.wsog_.getFinalDemoValue();
             f = tau^2*yd_ddot + this.a_z*tau*yd_dot - this.a_z*this.b_z*(gd - yd);
             
         end
@@ -288,10 +367,11 @@ classdef GMP < matlab.mixin.Copyable
         %% Returns the forcing term scaling
         function f_scale = forcingTermScaling(this)
            
-            f_scale = this.wsog.getSpatialScaling();
+            f_scale = this.wsog_.getSpatialScaling();
             
         end
         
+
     end
     
     properties (Access = public)
@@ -302,14 +382,15 @@ classdef GMP < matlab.mixin.Copyable
         can_clock_ptr % pointer to the canonical clock
         shape_attr_gating_ptr % pointer to gating function for the shape attractor
         
+        wsog_ % abstract WSoG object
+        
         wsog % WSoG object
+        wsog_opt % optimized WSoG object
 
     end
     
     
     properties (Access = protected)
-        
-        taud % time duration of demo
         
         %% output state
         dy % position derivative

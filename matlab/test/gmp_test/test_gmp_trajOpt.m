@@ -19,12 +19,14 @@ Ts = Timed(2)-Timed(1);
 a_z = 20;
 b_z = a_z/4;
 N_kernels = 50;
-kernels_std_scaling = 1;
-qpmp = QPMP(N_kernels, a_z, b_z, kernels_std_scaling);
+kernels_std_scaling = 2;
+gmp = GMP(N_kernels, a_z, b_z, CanonicalClock(), kernels_std_scaling);
+
+gmp.train(DMP_TRAIN.LS, Timed, Pd_data);
+
 taud = Timed(end);
 yd0 = Pd_data(1);
 gd = Pd_data(end);
-qpmp.setDemo(ddPd_data, taud, yd0, gd);
 
 temp_s = 1; % temporal scaling
 spat_s = 1; % spatial scaling
@@ -33,21 +35,27 @@ y0 = yd0; % + 0.1;
 g = spat_s*(gd - yd0) + y0;
 ydot_0 = 0;
 % =======  Position constraints  =======
-pos_constr = [struct('t',3, 'value',0.45, 'type','='); struct('t',tau, 'value',0.7, 'type','=')];
+pos_constr = [GMPConstr(0,y0,'='); GMPConstr(3,0.45,'='); GMPConstr(tau,0.7,'=')];
 ti = 0:0.04:tau;
 pos_constr = [pos_constr; lowerBoundConstr(ti, 0.4)];
 % =======  Velocity constraints  =======
-vel_constr = [struct('t',tau, 'value',0.1, 'type','='); struct('t',6, 'value',-0.05, 'type','=')];
+vel_constr = [GMPConstr(0,0,'='); GMPConstr(6,-0.05,'='); GMPConstr(tau,0.1,'=')];
 ti = 0:0.04:tau;
 vel_thres = 0.12;
 vel_constr = [vel_constr; thresholdConstr(ti, 0.12)];
 % =======  Acceleration constraints  =======
-accel_constr = [struct('t',0, 'value',0.0, 'type','='); struct('t',2, 'value',0.15, 'type','='); struct('t',tau, 'value',0, 'type','=')];
+accel_constr = [GMPConstr(0,0,'='); GMPConstr(2,0.15,'='); GMPConstr(tau,0,'=')];
 ti = 0:0.04:tau;
 accel_constr = [accel_constr; upperBoundConstr(ti, 0.4); lowerBoundConstr(ti, -0.2)];
 % tic
-qpmp.train(tau, y0, ydot_0, g, pos_constr, vel_constr, accel_constr);
+gmp.setY0(y0);
+gmp.setGoal(g);
+gmp.setTau(tau);
+opt_set = GMPOptSet(true, true, true, 1, 0.5, 0.1);
+gmp.constrOpt(pos_constr, vel_constr, accel_constr, opt_set);
+gmp.setOptTraj(true);
 % toc
+
 
 %% calculate scaled demo trajectory
 Time2 = Timed / temp_s;
@@ -65,23 +73,31 @@ ddP_data = [];
 
 p = y0;
 p_dot = ydot_0;
+p_ddot = 0;
 
-dt = 0.005;
-qpmp.init();
+t = 0;
+dt = 0.01;
 
 while (true)
-    
-    [t, p_ddot] = qpmp.getAccel(p, p_dot, dt);
     
     Time = [Time t];
     P_data = [P_data p];
     dP_data = [dP_data p_dot];
     ddP_data = [ddP_data p_ddot];
     
-    p = p + p_dot*dt;
-    p_dot = p_dot + p_ddot*dt;
+    x = t/tau;
+    p = gmp.getYdOpt(x);
+    p_dot = gmp.getYdDotOpt(x);
+    p_ddot = gmp.getYdDDotOpt(x);
     
-    if (t >= tau), break; end
+%     x = t/tau;
+%     p_ddot = gmp.calcYddot(x, p, p_dot, g);
+%     
+    t = t + dt;
+%     p = p + p_dot*dt;
+%     p_dot = p_dot + p_ddot*dt;
+    
+    if (t >= 1.05*tau), break; end
     
 end
 
@@ -98,7 +114,7 @@ title(['temporal scale: $' num2str(temp_s) '$     ,     spatial scale: $' num2st
 scatter(nan, nan, 'MarkerEdgeColor',[0 0.7 0], 'Marker','o', 'MarkerEdgeAlpha',0.6, 'LineWidth',4, 'SizeData', 100); % dummy plot for legend
 scatter(nan, nan, 'MarkerEdgeColor',[1 0 0], 'Marker','^', 'MarkerEdgeAlpha',0.3, 'LineWidth',2, 'SizeData', 100); % dummy plot for legend
 scatter(nan, nan, 'MarkerEdgeColor',[1 0 0], 'Marker','v', 'MarkerEdgeAlpha',0.3, 'LineWidth',2, 'SizeData', 100); % dummy plot for legend
-legend({'QPMP','ref','eq-constr','low-bound','upper-bound'}, 'interpreter','latex', 'fontsize',15);
+% legend({'GMP','ref','eq-constr','low-bound','upper-bound'}, 'interpreter','latex', 'fontsize',15);
 axis tight;
 hold off;
 
@@ -160,18 +176,18 @@ end
 
 function constr = upperBoundConstr(ti, bound)
 
-    constr = repmat(struct('t',[], 'value',[], 'type',[]), length(ti), 1);
+    constr = repmat(GMPConstr(), length(ti), 1);
     for i=1:length(ti)
-        constr(i) = struct('t',ti(i), 'value',bound, 'type','<');
+        constr(i) = GMPConstr(ti(i),bound,'<');
     end
 
 end
 
 function constr = lowerBoundConstr(ti, bound)
 
-    constr = repmat(struct('t',[], 'value',[], 'type',[]), length(ti), 1);
+    constr = repmat(GMPConstr(), length(ti), 1);
     for i=1:length(ti)
-        constr(i) = struct('t',ti(i), 'value',bound, 'type','>');
+        constr(i) = GMPConstr(ti(i),bound,'>');
     end
 
 end

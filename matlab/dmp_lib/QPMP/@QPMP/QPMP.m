@@ -124,7 +124,59 @@ classdef QPMP < matlab.mixin.Copyable
 
         end
         
+
+        %% Initialization for trajectory generation.
+        function init(this)
+           
+            this.t = 0;
+            this.yd = this.y0;
+            this.yd_dot = this.ydot_0;
+
+        end
         
+        %% =============================================================
+        
+        %% Returns the acceleration and the current time instant.
+        function [t, y_ddot] = getAccel(this, y, y_dot, dt)
+
+            this.t = this.t + dt;
+            x = this.t / this.tau;
+
+            yd_ddot = dot(regressVec(this, x), this.w);
+            
+            y_ddot = this.a_z*this.b_z*(this.yd - y) + this.a_z*(this.yd_dot - y_dot) + yd_ddot;
+            t = this.t;
+            
+            this.yd = this.yd + this.yd_dot*dt;
+            this.yd_dot = this.yd_dot + yd_ddot*dt;
+            
+        end
+        
+        function [Time, y, y_dot, y_ddot] = trajGen(this, y0, y_dot0, dt)
+            
+            N = length(this.demo_accel);
+            
+            this.init(y0, y_dot0);
+            
+            y = zeros(1,N);
+            y_dot = zeros(1,N);
+            y_ddot = zeros(1,N);
+            
+            for i=1:N-1
+                y_ddot(i) = this.getAccel(y(i), y_dot(i), dt);
+                y(i+1) = y(i) + y_dot(i)*dt;
+                y_dot(i+1) = y_dot(i) + y_ddot(i)*dt;
+            end
+            
+            Time = dt*(0:(N-1))/(N-1);
+            
+        end
+        
+
+    end
+    
+    methods (Access = private)
+
         %% Extracts the constraint matrices in canonical form.
         %  That is: A*w <= b, Aeq*w = beq
         %  Each input argument constraint is of the form struct('t',t_c,'value',val, 'type','=/</>').
@@ -241,58 +293,6 @@ classdef QPMP < matlab.mixin.Copyable
         end
         
         
-        %% Initialization for trajectory generation.
-        function init(this)
-           
-            this.t = 0;
-            this.yd = this.y0;
-            this.yd_dot = this.ydot_0;
-
-        end
-        
-        %% =============================================================
-        
-        %% Returns the acceleration and the current time instant.
-        function [t, y_ddot] = getAccel(this, y, y_dot, dt)
-
-            this.t = this.t + dt;
-            x = this.t / this.tau;
-
-            yd_ddot = dot(regressVec(this, x), this.w);
-            
-            y_ddot = this.a_z*this.b_z*(this.yd - y) + this.a_z*(this.yd_dot - y_dot) + yd_ddot;
-            t = this.t;
-            
-            this.yd = this.yd + this.yd_dot*dt;
-            this.yd_dot = this.yd_dot + yd_ddot*dt;
-            
-        end
-        
-        function [Time, y, y_dot, y_ddot] = trajGen(this, y0, y_dot0, dt)
-            
-            N = length(this.demo_accel);
-            
-            this.init(y0, y_dot0);
-            
-            y = zeros(1,N);
-            y_dot = zeros(1,N);
-            y_ddot = zeros(1,N);
-            
-            for i=1:N-1
-                y_ddot(i) = this.getAccel(y(i), y_dot(i), dt);
-                y(i+1) = y(i) + y_dot(i)*dt;
-                y_dot(i+1) = y_dot(i) + y_ddot(i)*dt;
-            end
-            
-            Time = dt*(0:(N-1))/(N-1);
-            
-        end
-        
-
-    end
-    
-    methods (Access = private)
-
         function phi = regressVec(this, x)
             
             psi = this.kernelFun(x);
