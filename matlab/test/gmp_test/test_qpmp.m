@@ -14,7 +14,6 @@ ddPd_data = Data.Accel(1,:);
 
 Ts = Timed(2)-Timed(1);
 
-
 %% initialization and training
 a_z = 20;
 b_z = a_z/4;
@@ -54,7 +53,6 @@ Time2 = Timed / temp_s;
 P_data2 = spat_s*(Pd_data - Pd_data(1)) + y0;
 dP_data2 = temp_s*spat_s*dPd_data;
 ddP_data2 = (temp_s^2)*spat_s*ddPd_data;
-
 
 %% simulation
 

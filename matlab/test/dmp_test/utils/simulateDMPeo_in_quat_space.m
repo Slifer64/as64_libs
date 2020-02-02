@@ -85,37 +85,37 @@ while (true)
     
 end
 
-figure;
-hold on;
-plot(Time, rotAccel_data(1,:), 'LineWidth',2.5, 'LineStyle','-');
-plot(Time, rotAccel_data2(1,:), 'LineWidth',2.5, 'LineStyle','--');
-legend({'$\dot{\omega}$','$\dot{\omega}_2$'}, 'interpreter','latex', 'fontsize',15);
-axis tight;
-hold off;
-
-t1_mu = mean(T1);
-t1_std = std(T1);
-T1 = T1(T1<=t1_mu+3*t1_std);
-
-t2_mu = mean(T2);
-t2_std = std(T2);
-T2 = T2(T2<=t2_mu+3*t2_std);
-
-t1_total = sum(T1)
-t2_total = sum(T2)
-
-t1_mean = t1_total/length(T1)
-t2_mean = t2_total/length(T2)
-
-figure;
-hold on;
-plot(1000*T1, 'LineWidth',2.5, 'LineStyle','-', 'Color','blue');
-plot(1000*T2, 'LineWidth',2.5, 'LineStyle','-', 'Color','magenta');
-legend({'indirect','direct'}, 'interpreter','latex', 'fontsize',15);
-ylabel('time [$ms$]', 'interpreter','latex', 'fontsize',15);
-xlabel('iter \#', 'interpreter','latex', 'fontsize',15);
-axis tight;
-hold off;
+% figure;
+% hold on;
+% plot(Time, rotAccel_data(1,:), 'LineWidth',2.5, 'LineStyle','-');
+% plot(Time, rotAccel_data2(1,:), 'LineWidth',2.5, 'LineStyle','--');
+% legend({'$\dot{\omega}$','$\dot{\omega}_2$'}, 'interpreter','latex', 'fontsize',15);
+% axis tight;
+% hold off;
+% 
+% t1_mu = mean(T1);
+% t1_std = std(T1);
+% T1 = T1(T1<=t1_mu+3*t1_std);
+% 
+% t2_mu = mean(T2);
+% t2_std = std(T2);
+% T2 = T2(T2<=t2_mu+3*t2_std);
+% 
+% t1_total = sum(T1)
+% t2_total = sum(T2)
+% 
+% t1_mean = t1_total/length(T1)
+% t2_mean = t2_total/length(T2)
+% 
+% figure;
+% hold on;
+% plot(1000*T1, 'LineWidth',2.5, 'LineStyle','-', 'Color','blue');
+% plot(1000*T2, 'LineWidth',2.5, 'LineStyle','-', 'Color','magenta');
+% legend({'indirect','direct'}, 'interpreter','latex', 'fontsize',15);
+% ylabel('time [$ms$]', 'interpreter','latex', 'fontsize',15);
+% xlabel('iter \#', 'interpreter','latex', 'fontsize',15);
+% axis tight;
+% hold off;
 
 % stop
 
