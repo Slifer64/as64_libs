@@ -1,4 +1,4 @@
-function [Time, Q_data, rotVel_data, rotAccel_data] = simulateDMPeo_in_eo_space(dmp_o, Q0, Qg, T, dt)
+function [Time, Q_data, rotVel_data, rotAccel_data] = simulateDMPeo_in_eo_space(dmp_o, Q0, Qg, T, dt, Qo)
 %% Simulates a dmp encoding Cartesian orientation usning unit quaternions.
 
 
@@ -21,7 +21,7 @@ Q_prev = Q;
 rotVel = zeros(3,1);
 rotAccel = zeros(3,1);
 rotAccel2 = zeros(3,1);
-eo = DMP_eo.quat2eo(Q0, Qg);
+eo = DMP_eo.quat2eo(Q0, Qo);
 deo = zeros(3,1);
 dy = zeros(3,1);
 dz = zeros(3,1);
@@ -91,17 +91,17 @@ while (true)
     deo = dy;
     
     Q_prev = Q;
-    Q = DMP_eo.eo2quat(eo, Qg);
+    Q = DMP_eo.eo2quat(eo, Qo);
     if (Q_prev'*Q<0), Q = -Q; end
     
-    Qe = DMP_eo.quatError(Q, Qg);
+    Qe = DMP_eo.quatError(Q, Qo);
     rotVel = DMP_eo.deo2rotVel(deo, Qe);
     
 end
 
 eo_data2 = zeros(size(eo_data));
 for j=1:size(eo_data2,2)
-    eo_data2(:,j) = DMP_eo.quat2eo(Q_data(:,j), Qg);
+    eo_data2(:,j) = DMP_eo.quat2eo(Q_data(:,j), Qo);
 end
 
 % figure

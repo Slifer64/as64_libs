@@ -55,9 +55,11 @@ while (true)
     
     tic();
     
-    rotAccel = dmp_o.calcRotAccel(x, Q, rotVel, Qg, tau_dot, yc, zc, yc_dot);
+    % rotAccel = dmp_o.calcRotAccel(x, Q, rotVel, Qg, tau_dot, yc, zc, yc_dot);
     
     T2 = [T2 toc()];
+    
+    rotAccel = rotAccel2;
 
 
     %% Update phase variable
