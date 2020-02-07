@@ -60,7 +60,7 @@ ks = quatLog( quatProd( Qg, quatInv(Q0) ) ) ./ quatLog( quatProd( Qgd, quatInv(Q
 
 ks
 
-% [Time, Q_data, vRot_data, dvRot_data] = simulateDMPeo_in_quat_space(dmp_o, Q0, Qg, T, dt); %simulateDMPeo_in_eo_space(dmp_o, Q0, Qg, T, dt, Qg);
+[Time, Q_data, vRot_data, dvRot_data] = simulateDMPeo_in_quat_space(dmp_o, Q0, Qg, T, dt); %simulateDMPeo_in_eo_space(dmp_o, Q0, Qg, T, dt, Qg);
 toc
 
 disp('DMP new simulation...');

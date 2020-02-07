@@ -1,12 +1,12 @@
-%% DMP_eo2 class
+%% DMPo class
 %  For encoding Cartesian Orientation.
 %
 
 
-classdef DMP_eo2 < matlab.mixin.Copyable
+classdef DMPo < matlab.mixin.Copyable
     
     methods  (Access = public)
-        %% DMP_eo2 constructor.
+        %% DMPo constructor.
         %  @param[in] N_kernels: 3x3 matrix where each row contains the kernels for position,
         %                       velocity and acceleration and each row for x, y and z coordinate.
         %                       If 'N_kernels' is a column vector then every coordinate will have the
@@ -16,7 +16,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] can_clock_ptr: Pointer to a DMP canonical system object.
         %  @param[in] shape_attr_gating_ptr: Pointer to a DMP gating function object.
         %
-        function this = DMP_eo2(dmp_type, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gating_ptr)
+        function this = DMPo(dmp_type, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gating_ptr)
 
             if (nargin < 5), can_clock_ptr = CanonicalClock(); end
             if (nargin < 6), shape_attr_gating_ptr = SigmoidGatingFunction(1.0, 0.5); end
@@ -29,7 +29,6 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             this.shape_attr_gating_ptr = shape_attr_gating_ptr;
             
             this.Q0 = [1 0 0 0]';
-            this.Qg = [1 0 0 0]';
             
             if (dmp_type == DMP_TYPE.STD)
                 for i=1:3
@@ -40,7 +39,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
                     this.dmp{i} = DMP_bio(N_kernels(i), a_z(i), b_z(i), can_clock_ptr, shape_attr_gating_ptr);
                 end
             else
-                error('[DMP_eo2::DMP_eo2]: Unsupported DMP type!');
+                error('[DMPo::DMPo]: Unsupported DMP type!');
             end
             
             for i=1:length(this.dmp), this.dmp{i}.setY0(0); end
@@ -48,7 +47,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         end
         
         
-        %% Trains the DMP_eo2.
+        %% Trains the DMPo.
         %  @param[in] train_method: The training method (see dmp_::TRAIN_METHOD enum).
         %  @param[in] Time: 1xN row vector with the timestamps of the training data points.
         %  @param[in] Quat_data: 3xN matrix with desired position at each column for each timestep.
@@ -61,29 +60,29 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             this.setTau(tau);
 
             n_data = length(Time);
-            eo_data = zeros(3, n_data);
-            deo_data = zeros(3, n_data);
-            ddeo_data = zeros(3, n_data);
+            q_data = zeros(3, n_data);
+            qdot_data = zeros(3, n_data);
+            qddot_data = zeros(3, n_data);
 
             Q0 = Quat_data(:,1);
             
             this.setQ0(Q0);
 
             for j=1:n_data
-               Qe = DMP_eo2.quatError(Quat_data(:,j), Q0);
-               eo_data(:,j) = quatLog(Qe);
-               deo_data(:,j) = DMP_eo2.rotVel2deo(rotVel_data(:,j), Qe);
-               ddeo_data(:,j) = DMP_eo2.rotAccel2ddeo(rotAccel_data(:,j), rotVel_data(:,j), Qe);
+               Q1 = DMPo.quatTf(Quat_data(:,j), Q0);
+               q_data(:,j) = quatLog(Q1);
+               qdot_data(:,j) = DMPo.rotVel2qdot(rotVel_data(:,j), Q1);
+               qddot_data(:,j) = DMPo.rotAccel2qddot(rotAccel_data(:,j), rotVel_data(:,j), Q1);
             end
 
             if (nargout > 0)
                 train_err = zeros(3,1);
                 for i=1:3
-                    train_err(i) = this.dmp{i}.train(train_method, Time, eo_data(i,:), deo_data(i,:), ddeo_data(i,:));
+                    train_err(i) = this.dmp{i}.train(train_method, Time, q_data(i,:), qdot_data(i,:), qddot_data(i,:));
                 end
             else
                 for i=1:3
-                    this.dmp{i}.train(train_method, Time, eo_data(i,:), deo_data(i,:), ddeo_data(i,:));
+                    this.dmp{i}.train(train_method, Time, q_data(i,:), qdot_data(i,:), qddot_data(i,:));
                 end
             end
 
@@ -93,27 +92,18 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         function setQ0(this, Q0)
             
             this.Q0 = Q0; 
-            this.eg = DMP_eo2.quat2eo(this.Qg, this.Q0);
             
         end
+
         
-        
-        function setQg(this, Qg)
-            
-            this.Qg = Qg; 
-            this.eg = DMP_eo2.quat2eo(Qg, this.Q0);
-            
-        end
-        
-        
-        function y = getY(this, Q), y = DMP_eo2.quat2eo(Q, this.Q0); end
+        function y = getY(this, Q), y = DMPo.quat2q(Q, this.Q0); end
 
         
         function z = getZ(this, rotVel, Q)
 
-            Qe = DMP_eo2.quatError(Q, this.Q0);
-            deo = DMP_eo2.rotVel2deo(rotVel, Qe);
-            dy = deo;
+            Q1 = DMPo.quatTf(Q, this.Q0);
+            qdot = DMPo.rotVel2qdot(rotVel, Q1);
+            dy = qdot;
 
             z = this.getTau()*dy; 
 
@@ -128,7 +118,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Y0: Initial position.
         %  @param[in] Yc: Coupling term for the deonamical equation of the 'y' state.
         %  @param[in] Zc: Coupling term for the deonamical equation of the 'z' state.
-        function update(this, x, Y, Z, Yc, Zc)
+        function update(this, x, Y, Z, G, Yc, Zc)
 
             if (nargin < 6), Yc = zeros(3,1); end
             if (nargin < 7), Zc = zeros(3,1); end
@@ -136,7 +126,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             if (isscalar(Yc)), Yc = ones(3,1)*Yc; end
             if (isscalar(Zc)), Zc = ones(3,1)*Zc; end
 
-            for i=1:3, this.dmp{i}.update(x, Y(i), Z(i), this.eg(i), Yc(i), Zc(i)); end
+            for i=1:3, this.dmp{i}.update(x, Y(i), Z(i), G(i), Yc(i), Zc(i)); end
 
             this.dY = zeros(3,1);
             this.dZ = zeros(3,1);
@@ -163,9 +153,9 @@ classdef DMP_eo2 < matlab.mixin.Copyable
 
         function rotVel = getRotVel(this, Q)
 
-            Qe = DMP_eo2.quatError(Q, this.Q0);
-            deo = this.getYdot(); 
-            rotVel = DMP_eo2.deo2rotVel(deo, Qe);
+            Q1 = DMPo.quatTf(Q, this.Q0);
+            qdot = this.getYdot(); 
+            rotVel = DMPo.qdot2rotVel(qdot, Q1);
 
         end
         
@@ -174,10 +164,10 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             if (nargin < 3), tau_dot=0; end
             if (nargin < 4), yc_dot=0; end
 
-            Qe = DMP_eo2.quatError(Q, this.Q0);
-            ddeo = this.getYddot(tau_dot, yc_dot);
+            Q1 = DMPo.quatTf(Q, this.Q0);
+            qddot = this.getYddot(tau_dot, yc_dot);
             rotVel = this.getRotVel(Q);
-            rotAccel = DMP_eo2.ddeo2rotAccel(ddeo, rotVel, Qe);
+            rotAccel = DMPo.qddot2rotAccel(qddot, rotVel, Q1);
 
         end
         
@@ -192,30 +182,23 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             b_z = [this.dmp{1}.b_z; this.dmp{2}.b_z; this.dmp{3}.b_z];
             tau = this.getTau();
 
+            qg = DMPo.quat2q(Qg, this.Q0);
 
-            Qg_prev = this.Qg;
-            this.setQg(Qg);
+            Q1 = DMPo.quatTf(Q, this.Q0);
+            q = DMPo.quat2q(Q, this.Q0);
+            invQ1 = quatInv(Q1);
 
-            Qe = DMP_eo2.quatError(Q, Qg);
-            eo = DMP_eo2.quat2eo(Q, Qg);
-            invQe = quatInv(Qe);
-
-            J_Q_eo = DMP_eo2.jacobDquatDeo(Qe);
-            dJ_Q_eo = DMP_eo2.jacobDotDquatDeo(Qe, rotVel);
+            JQq = DMPo.jacobQq(Q1);
+            JQq_dot = DMPo.jacobDotQq(Q1, rotVel);
 
             fo = zeros(3,1);
-            for i=1:3, fo(i) = this.dmp{i}.shapeAttractor(x, this.eg(i)); end
+            for i=1:3, fo(i) = this.dmp{i}.shapeAttractor(x, qg(i)); end
 
-            deo = DMP_eo2.rotVel2deo(rotVel, Qe);
-            ddeo = (a_z.*b_z.*(this.eg - eo) - tau*a_z.*deo + a_z.*yc + fo + tau*yc_dot - tau*tau_dot*deo + zc)/tau^2;
+            qdot = DMPo.rotVel2qdot(rotVel, Q1);
+            qddot = (a_z.*b_z.*(qg - q) - tau*a_z.*qdot + a_z.*yc + fo + tau*yc_dot - tau*tau_dot*qdot + zc)/tau^2;
             
-            this.update(x, eo, tau*deo);
-            
-            
-            rotAccel = 2*quatProd(dJ_Q_eo*deo + J_Q_eo*ddeo, invQe);
+            rotAccel = 2*quatProd(JQq_dot*qdot + JQq*qddot, invQ1);
             rotAccel = rotAccel(2:4);
-
-            this.setQg(Qg_prev);
 
         end
 
@@ -257,7 +240,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Q0: The initial quaternion.
         %  @return: The derivative of the orientation error.
         %
-        function Qe = quatError(Q, Q0), Qe = quatProd(Q, quatInv(Q0)); end
+        function Q1 = quatTf(Q, Q0), Q1 = quatProd(Q, quatInv(Q0)); end
 
         
         %% Given a quaternion, its rotational velocity and a target quaternion, returns
@@ -267,7 +250,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Qg: The target quaternion.
         %  @return: The derivative of the orientation error.
         %
-        function eo = quat2eo(Q, Q0), eo = quatLog(DMP_eo2.quatError(Q,Q0)); end
+        function q = quat2q(Q, Q0), q = quatLog(DMPo.quatTf(Q,Q0)); end
         
         
         %% Given a quaternion, its rotational velocity and a target quaternion, returns
@@ -277,7 +260,7 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Qg: The target quaternion.
         %  @return: The derivative of the orientation error.
         %
-        function Q = eo2quat(eo, Q0), Q = quatProd( quatExp(eo), Q0); end
+        function Q = q2quat(q, Q0), Q = quatProd( quatExp(q), Q0); end
         
         
         %% Given a quaternion, its rotational velocity and a target quaternion, returns
@@ -287,10 +270,10 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Qg: The target quaternion.
         %  @return: The derivative of the orientation error.
         %
-        function deo = rotVel2deo(rotVel, Qe)
+        function qdot = rotVel2qdot(rotVel, Q1)
             
-            J_eo_Q = DMP_eo2.jacobDeoDquat(Qe);
-            deo = 0.5*J_eo_Q * quatProd([0; rotVel], Qe);
+            JqQ = DMPo.jacobqQ(Q1);
+            qdot = 0.5*JqQ * quatProd([0; rotVel], Q1);
 
         end
         
@@ -302,10 +285,10 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Qg: The target quaternion.
         %  @return: The rotational velocity of the quaternion.
         %
-        function rotVel = deo2rotVel(deo, Qe)
+        function rotVel = qdot2rotVel(qdot, Q1)
             
-            J_Q_eo = DMP_eo2.jacobDquatDeo(Qe);
-            rotVel = 2 * quatProd( J_Q_eo*deo, quatInv(Qe) );
+            JQq = DMPo.jacobQq(Q1);
+            rotVel = 2 * quatProd( JQq*qdot, quatInv(Q1) );
             rotVel = rotVel(2:4);
 
         end
@@ -319,15 +302,15 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Qg: The target quaternion.
         %  @return: The second derivative of the orientation error.
         %
-        function ddeo = rotAccel2ddeo(rotAccel, rotVel, Qe)
+        function qddot = rotAccel2qddot(rotAccel, rotVel, Q1)
             
             rotVelQ = [0; rotVel];
             rotAccelQ = [0; rotAccel];
 
-            J = DMP_eo2.jacobDeoDquat(Qe);
-            dJ = DMP_eo2.jacobDotDeoDquat(Qe, rotVel);
+            J = DMPo.jacobqQ(Q1);
+            Jdot = DMPo.jacobDotqQ(Q1, rotVel);
 
-            ddeo = 0.5 * (dJ * quatProd(rotVelQ, Qe) + J * quatProd( rotAccelQ+0.5*quatProd(rotVelQ,rotVelQ), Qe ) );
+            qddot = 0.5 * (Jdot * quatProd(rotVelQ, Q1) + J * quatProd( rotAccelQ+0.5*quatProd(rotVelQ,rotVelQ), Q1 ) );
 
         end
         
@@ -340,14 +323,14 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Qg: The target quaternion.
         %  @return: The second derivative of the orientation error.
         %
-        function rotAccel = ddeo2rotAccel(ddeo, rotVel, Qe)
+        function rotAccel = qddot2rotAccel(qddot, rotVel, Q1)
 
-            deo = DMP_eo2.rotVel2deo(rotVel, Qe);
-            invQe = quatInv(Qe);
-            J = DMP_eo2.jacobDquatDeo(Qe);
-            dJ = DMP_eo2.jacobDotDquatDeo(Qe, rotVel);
+            qdot = DMPo.rotVel2qdot(rotVel, Q1);
+            invQ1 = quatInv(Q1);
+            J = DMPo.jacobQq(Q1);
+            Jdot = DMPo.jacobDotQq(Q1, rotVel);
 
-            rotAccel = 2 * ( quatProd( dJ*deo+J*ddeo, invQe ) );
+            rotAccel = 2 * ( quatProd( Jdot*qdot+J*qddot, invQ1 ) );
             rotAccel = rotAccel(2:4);
 
         end
@@ -357,15 +340,15 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Q: The quaternion for which we want to calculate the Jacobian.
         %  @return: Jacobian from derivative of orientation error to quaternion derivative.
         %
-        function J_Q_eo = jacobDquatDeo(Qe)
+        function JQq = jacobQq(Q1)
 
-            if (abs(Qe(1)-1) <= DMP_eo2.zero_tol)
-                J_Q_eo = [zeros(1, 3); eye(3,3)];
+            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+                JQq = [zeros(1, 3); eye(3,3)];
                 return;
             end
 
-            w = Qe(1);
-            v = Qe(2:4);
+            w = Q1(1);
+            v = Q1(2:4);
             norm_v = norm(v);
             eta = v / norm_v;
             s_th = norm_v;
@@ -373,9 +356,9 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             th = atan2(s_th, c_th);
             Eta = eta*eta';
 
-            J_Q_eo = zeros(4,3);
-            J_Q_eo(1,:) = -0.5 * s_th * eta';
-            J_Q_eo(2:4,:) = 0.5 * ( (eye(3,3) - Eta)*s_th/th + c_th*Eta );
+            JQq = zeros(4,3);
+            JQq(1,:) = -0.5 * s_th * eta';
+            JQq(2:4,:) = 0.5 * ( (eye(3,3) - Eta)*s_th/th + c_th*Eta );
 
         end
         
@@ -384,24 +367,24 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] Q: The quaternion for which we want to calculate the Jacobian.
         %  @return: Jacobian from quaternion derivative to derivative of orientation error.
         %
-        function J_eo_Q = jacobDeoDquat(Qe)
+        function JqQ = jacobqQ(Q1)
             
-            if (abs(Qe(1)-1) <= DMP_eo2.zero_tol)
-                J_eo_Q = [zeros(3,1) eye(3,3)];
+            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+                JqQ = [zeros(3,1) eye(3,3)];
                 return;
             end
 
-            w = Qe(1);
-            v = Qe(2:4);
+            w = Q1(1);
+            v = Q1(2:4);
             norm_v = norm(v);
             eta = v / norm_v;
             s_th = norm_v;
             c_th = w;
             th = atan2(s_th, c_th);
 
-            J_eo_Q = zeros(3,4);
-            J_eo_Q(:,1) = 2*eta*(th*c_th - s_th)/s_th^2;
-            J_eo_Q(:,2:4) = 2*eye(3,3)*th/s_th;
+            JqQ = zeros(3,4);
+            JqQ(:,1) = 2*eta*(th*c_th - s_th)/s_th^2;
+            JqQ(:,2:4) = 2*eye(3,3)*th/s_th;
 
         end
        
@@ -411,17 +394,17 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] deo: The derivative of the orientation error.
         %  @return: The derivative of the Jacobian from derivative of orientation error to quaternion derivative.
         %
-        function dJ_eo_Q = jacobDotDeoDquat(Qe, rotVel)
+        function JqQ_dot = jacobDotqQ(Q1, rotVel)
 
-            deo = DMP_eo2.rotVel2deo(rotVel, Qe);
+            qdot = DMPo.rotVel2qdot(rotVel, Q1);
 
-            if (abs(Qe(1)-1) <= DMP_eo2.zero_tol)
-                dJ_eo_Q = [-deo/3 zeros(3,3)];
+            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+                JqQ_dot = [-qdot/3 zeros(3,3)];
                 return;
             end
 
-            w = Qe(1);
-            v = Qe(2:4);
+            w = Q1(1);
+            v = Q1(2:4);
             norm_v = norm(v);
             eta = v / norm_v;
             s_th = norm_v;
@@ -430,9 +413,9 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             Eta = eta*eta';
             temp = (th*c_th-s_th)/s_th^2;
 
-            dJ_eo_Q = zeros(3,4);
-            dJ_eo_Q(:,1) = ((-th/s_th - 2*c_th*temp/s_th)*Eta + temp*(eye(3,3)-Eta)/th)*deo;
-            dJ_eo_Q(:,2:4) = -temp*dot(eta,deo)*eye(3,3);
+            JqQ_dot = zeros(3,4);
+            JqQ_dot(:,1) = ((-th/s_th - 2*c_th*temp/s_th)*Eta + temp*(eye(3,3)-Eta)/th)*qdot;
+            JqQ_dot(:,2:4) = -temp*dot(eta,qdot)*eye(3,3);
 
         end
         
@@ -442,17 +425,17 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         %  @param[in] deo: The derivative of the orientation error.
         %  @return: The derivative of the Jacobian from derivative of orientation error to quaternion derivative.
         %
-        function dJ_Q_eo = jacobDotDquatDeo(Qe, rotVel)
+        function JQq_dot = jacobDotQq(Q1, rotVel)
             
-            deo = DMP_eo2.rotVel2deo(rotVel, Qe);
+            qdot = DMPo.rotVel2qdot(rotVel, Q1);
 
-            if (abs(Qe(1)-1) <= DMP_eo2.zero_tol)
-                dJ_Q_eo = [-deo'/4; zeros(3,3)];
+            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+                JQq_dot = [-qdot'/4; zeros(3,3)];
                 return;
             end
 
-            w = Qe(1);
-            v = Qe(2:4);
+            w = Q1(1);
+            v = Q1(2:4);
             norm_v = norm(v);
             eta = v / norm_v;
             s_th = norm_v;
@@ -462,9 +445,9 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             I_eta = eye(3,3) - Eta;
             temp = ((th*c_th-s_th)/th^2);
 
-            dJ_Q_eo = zeros(4,3);
-            dJ_Q_eo(1,:) = -0.25 * deo' * (c_th*Eta + (s_th/th)*I_eta);
-            dJ_Q_eo(2:4,:) = 0.25*dot(eta,deo)*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(deo'*I_eta) + (I_eta*deo)*eta' );
+            JQq_dot = zeros(4,3);
+            JQq_dot(1,:) = -0.25 * qdot' * (c_th*Eta + (s_th/th)*I_eta);
+            JQq_dot(2:4,:) = 0.25*dot(eta,qdot)*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(qdot'*I_eta) + (I_eta*qdot)*eta' );
 
         end
         
@@ -488,11 +471,8 @@ classdef DMP_eo2 < matlab.mixin.Copyable
     end
        
     properties  (Access = protected)
-   
-        eg 
         
         Q0
-        Qg
         
         dZ % second derivative of the orientation error
         dY % first derivative of the orientation error

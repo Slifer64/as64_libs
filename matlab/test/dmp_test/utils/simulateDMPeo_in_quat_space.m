@@ -49,7 +49,7 @@ while (true)
     tau_dot = 0;
     yc_dot = 0; % derivative of coupling for 'y' state
     rotVel = dmp_o.getRotVel(Q);
-    rotAccel2 = dmp_o.getRotAccel(Q, tau_dot, yc_dot);
+%     rotAccel2 = dmp_o.getRotAccel(Q, tau_dot, yc_dot);
 
     T1 = [T1 toc()];
     
@@ -59,10 +59,10 @@ while (true)
     
     T2 = [T2 toc()];
     
-    rotAccel
-    rotAccel2
-    norm(rotAccel-rotAccel2)
-    pause
+%     rotAccel
+%     rotAccel2
+%     norm(rotAccel-rotAccel2)
+%     pause
 
 
     %% Update phase variable
