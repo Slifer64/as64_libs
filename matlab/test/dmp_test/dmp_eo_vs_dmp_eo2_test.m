@@ -60,7 +60,7 @@ ks = quatLog( quatProd( Qg, quatInv(Q0) ) ) ./ quatLog( quatProd( Qgd, quatInv(Q
 
 ks
 
-[Time, Q_data, vRot_data, dvRot_data] = simulateDMPeo_in_quat_space(dmp_o, Q0, Qg, T, dt); %simulateDMPeo_in_eo_space(dmp_o, Q0, Qg, T, dt, Qg);
+% [Time, Q_data, vRot_data, dvRot_data] = simulateDMPeo_in_quat_space(dmp_o, Q0, Qg, T, dt); %simulateDMPeo_in_eo_space(dmp_o, Q0, Qg, T, dt, Qg);
 toc
 
 disp('DMP new simulation...');
@@ -71,24 +71,21 @@ toc
 
 % scaled demo
 Qd_data2 = Qd_data;
-Qd_data2 = Qd_data;
 for j=1:size(Qd_data,2)
    Qd_data2(:,j) = quatProd( quatExp(ks.*quatLog( quatProd(Qd_data(:,j),quatInv(Q0d))) ), Q0);
 end
-
-
 
 
 %% Plot results
 
 Pqd_data = zeros(3, size(Qd_data,2));
 for j=1:size(Pqd_data,2)
-    Pqd_data(:,j) = DMP_eo2.quat2eo(Qd_data(:,j), Q0);
+    Pqd_data(:,j) = DMP_eo2.quat2eo(Qd_data(:,j), Q0d);
 end
 
 Pq_data = zeros(3, size(Q_data,2));
 for j=1:size(Pq_data,2)
-    Pq_data(:,j) = DMP_eo2.quat2eo(Q_data2(:,j), Qg);
+    Pq_data(:,j) = DMP_eo.quat2eo(Q_data2(:,j), Qg);
 end
 
 Pq_data2 = zeros(3, size(Q_data2,2));
@@ -118,8 +115,9 @@ figure;
 hold on;
 plot3(Pq_data(1,:), Pq_data(2,:), Pq_data(3,:), 'LineWidth', line_width, 'LineStyle','-');
 plot3(Pq_data2(1,:), Pq_data2(2,:), Pq_data2(3,:), 'LineWidth', line_width, 'LineStyle','-');
-plot3(Pqd_data(1,:), Pqd_data(2,:), Pqd_data(3,:), 'LineWidth', line_width, 'LineStyle','--');
-legend('proposed','new','ks*demo');
+plot3(ks(1)*Pqd_data(1,:), ks(2)*Pqd_data(2,:), ks(3)*Pqd_data(3,:), 'LineWidth', line_width, 'LineStyle','--');
+plot3(Pqd_data(1,:), Pqd_data(2,:), Pqd_data(3,:), 'LineWidth', line_width, 'LineStyle','-.');
+legend('proposed','new','ks*demo','demo');
 hold off;
 
 figure;

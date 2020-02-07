@@ -182,10 +182,6 @@ classdef DMP_eo2 < matlab.mixin.Copyable
         end
         
         function rotAccel = calcRotAccel(this, x, Q, rotVel, Qg, tau_dot, yc, zc, yc_dot)
-
-            rotAccel = [];
-            return;
-            error('Needs adjustment!');
             
             if (nargin < 6), tau_dot = 0; end
             if (nargin < 7), yc = zeros(3,1); end
@@ -204,28 +200,22 @@ classdef DMP_eo2 < matlab.mixin.Copyable
             eo = DMP_eo2.quat2eo(Q, Qg);
             invQe = quatInv(Qe);
 
-            rotVelQ = [0; rotVel];
-            QeRotVel = quatProd(Qe,rotVelQ);
-
-            J_eo_Q = DMP_eo2.jacobDeoDquat(Qe);
             J_Q_eo = DMP_eo2.jacobDquatDeo(Qe);
             dJ_Q_eo = DMP_eo2.jacobDotDquatDeo(Qe, rotVel);
 
             fo = zeros(3,1);
-            for i=1:3, fo(i) = this.dmp{i}.shapeAttractor(x, 0); end
+            for i=1:3, fo(i) = this.dmp{i}.shapeAttractor(x, this.eg(i)); end
 
             deo = DMP_eo2.rotVel2deo(rotVel, Qe);
-            ddeo = (-a_z.*b_z.*eo - tau*a_z.*deo + a_z.*yc + fo + tau*yc_dot - tau*tau_dot*deo + zc)/tau^2;
-
-            rotAccel1 = quatProd(invQe, dJ_Q_eo*J_eo_Q*QeRotVel);
-            % rotAccel2 = 2*quatProd(invQe, J_Q_eo* (a_z.*b_z.*eo - 0.5*tau*a_z.*(J_eo_Q*QeRotVel) - fo) ) / tau^2;
-            rotAccel2 = 2*quatProd(invQe, J_Q_eo*-ddeo);   
-            rotAccel = rotAccel1 + rotAccel2;  
+            ddeo = (a_z.*b_z.*(this.eg - eo) - tau*a_z.*deo + a_z.*yc + fo + tau*yc_dot - tau*tau_dot*deo + zc)/tau^2;
+            
+            this.update(x, eo, tau*deo);
+            
+            
+            rotAccel = 2*quatProd(dJ_Q_eo*deo + J_Q_eo*ddeo, invQe);
             rotAccel = rotAccel(2:4);
 
             this.setQg(Qg_prev);
-
-            % norm(rotAccel-rotAccel_2)
 
         end
 

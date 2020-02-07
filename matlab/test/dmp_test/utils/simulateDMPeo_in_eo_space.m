@@ -21,7 +21,7 @@ Q_prev = Q;
 rotVel = zeros(3,1);
 rotAccel = zeros(3,1);
 rotAccel2 = zeros(3,1);
-eo = DMP_eo.quat2eo(Q0, Qo);
+eo = dmp_o.quat2eo(Q0, Qo);
 deo = zeros(3,1);
 dy = zeros(3,1);
 dz = zeros(3,1);
@@ -74,7 +74,7 @@ while (true)
         break;
     end
     
-    eo = DMP_eo.quat2eo(Q, Qg);
+    eo = dmp_o.quat2eo(Q, Qg);
     if (t>=t_end && norm(eo)<0.02)
         break;
     end
@@ -91,17 +91,17 @@ while (true)
     deo = dy;
     
     Q_prev = Q;
-    Q = DMP_eo.eo2quat(eo, Qo);
+    Q = dmp_o.eo2quat(eo, Qo);
     if (Q_prev'*Q<0), Q = -Q; end
     
-    Qe = DMP_eo.quatError(Q, Qo);
-    rotVel = DMP_eo.deo2rotVel(deo, Qe);
+    Qe = dmp_o.quatError(Q, Qo);
+    rotVel = dmp_o.deo2rotVel(deo, Qe);
     
 end
 
 eo_data2 = zeros(size(eo_data));
 for j=1:size(eo_data2,2)
-    eo_data2(:,j) = DMP_eo.quat2eo(Q_data(:,j), Qo);
+    eo_data2(:,j) = dmp_o.quat2eo(Q_data(:,j), Qo);
 end
 
 % figure
