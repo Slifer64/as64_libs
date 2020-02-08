@@ -25,7 +25,7 @@ dvRotd_data = Data.RotAccel;
 Ts = Timed(2)-Timed(1);
 
 %% initialize DMP
-a_z = 600;
+a_z = 5;
 b_z = a_z/4;
 train_method = DMP_TRAIN.LS;
 can_clock_ptr = CanonicalClock();
@@ -44,21 +44,20 @@ toc
 disp('DMP simulation...');
 tic
 Qd0 = Qd_data(:,1);
-Q0 = Qd0;
 Qgd = Qd_data(:,end);
-ks = [1.0; 1.0; 1.0];
-e0 = ks.*quatLog( quatProd( Qgd, quatInv(Q0) ) );
+Q0 = quatProd(rotm2quat(rotx(80)*rotz(40))', Qd0);
+ks = [2.0; 1.5; 1.8];
+e0 = ks.*quatLog( quatProd( Qgd, quatInv(Qd0) ) );
 Qg = quatProd(quatExp(e0), Q0);
-Qg = quatProd(rotm2quat(rotx(0))', Qgd);
 T = 1.0*Timed(end);
 dt = Ts;
 
-ks = quatLog( quatProd( Qg, quatInv(Q0) ) ) ./ quatLog( quatProd( Qgd, quatInv(Q0) ) );
+ks = quatLog( quatProd( Qg, quatInv(Q0) ) ) ./ quatLog( quatProd( Qgd, quatInv(Qd0) ) );
 
 ks
 
-[Time, Q_data, vRot_data, dvRot_data] = simulateDMPo_in_quat_space(dmp_o, Q0, Qg, T, dt);
-% [Time, Q_data, vRot_data, dvRot_data] = simulateDMPo_in_log_space(dmp_o, Q0, Qg, T, dt);
+% [Time, Q_data, vRot_data, dvRot_data] = simulateDMPo_in_quat_space(dmp_o, Q0, Qg, T, dt);
+[Time, Q_data, vRot_data, dvRot_data] = simulateDMPo_in_log_space(dmp_o, Q0, Qg, T, dt);
 toc
 
 
@@ -95,7 +94,8 @@ figure;
 hold on;
 plot3(q_data(1,:), q_data(2,:), q_data(3,:), 'LineWidth', line_width, 'LineStyle','-');
 plot3(ks(1)*qd_data(1,:), ks(2)*qd_data(2,:), ks(3)*qd_data(3,:), 'LineWidth', line_width, 'LineStyle','--');
-legend('$dmp_o$', '$k_s*demo$');
+plot3(qd_data(1,:), qd_data(2,:), qd_data(3,:), 'LineWidth', line_width, 'LineStyle','-.');
+legend({'$dmp_o$', '$k_s*demo$', '$demo$'}, 'interpreter','latex', 'fontsize',15);
 hold off;
 
 figure;

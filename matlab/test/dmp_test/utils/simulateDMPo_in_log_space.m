@@ -1,17 +1,15 @@
-function [Time, Q_data, rotVel_data, rotAccel_data] = simulateDMPeo_in_log_space(dmp_o, Q0, Qg, T, dt, Qo)
+function [Time, Q_data, rotVel_data, rotAccel_data] = simulateDMPo_in_log_space(dmp_o, Q0, Qg, T, dt)
 %% Simulates a dmp encoding Cartesian orientation usning unit quaternions.
 
 
 %% set initial values
 t_end = T;
-dmp_o.setTau(t_end);
 
 iters = 0;
 Time = [];
 Q_data = [];
 rotVel_data = [];
 rotAccel_data = [];
-rotAccel_data2 = [];
 
 t = 0.0;
 x = 0.0;
@@ -20,19 +18,18 @@ Q = Q0;
 Q_prev = Q;
 rotVel = zeros(3,1);
 rotAccel = zeros(3,1);
-rotAccel2 = zeros(3,1);
-eo = dmp_o.quat2eo(Q0, Qo);
-deo = zeros(3,1);
+q = dmp_o.quat2q(Q0, Q0);
+qdot = zeros(3,1);
 dy = zeros(3,1);
 dz = zeros(3,1);
 
+dmp_o.setTau(t_end);
 dmp_o.setQ0(Q0);
-dmp_o.setQg(Qg);
 y = dmp_o.getY(Q);
 z = dmp_o.getZ(rotVel, Q);
+g = dmp_o.quat2q(Qg, Q0);
 
-
-eo_data = [];
+q_data = [];
 
 %% simulate
 while (true)
@@ -42,28 +39,21 @@ while (true)
     Q_data = [Q_data Q];
     rotVel_data = [rotVel_data rotVel];  
     rotAccel_data = [rotAccel_data rotAccel];
-    rotAccel_data2 = [rotAccel_data2 rotAccel2];
     
     tau_dot = 0;
     yc_dot = 0;
     
-    eo_data = [eo_data eo];
+    q_data = [q_data q];
 
     %% DMP simulation
     yc = zeros(3,1);
     zc = zeros(3,1);
 
-    dmp_o.update(x, y, z, yc, zc);
+    dmp_o.update(x, y, z, g, yc, zc);
 
     dy = dmp_o.getYdot();
     dz = dmp_o.getZdot();
-    
     rotAccel = dmp_o.getRotAccel(Q, tau_dot, yc_dot);
-    rotAccel2 = dmp_o.calcRotAccel(x, Q, rotVel, Qg);
-    
-%     disp('=====================================');
-%     rotAccel_err = rotAccel-rotAccel2
-%     if (norm(rotAccel_err)>1e-6), pause; end
 
     %% Update phase variable
     dx = dmp_o.phaseDot(x);
@@ -74,7 +64,7 @@ while (true)
         break;
     end
     
-    eo = dmp_o.quat2eo(Q, Qg);
+    eo = quatLog(quatProd(Qg, quatInv(Q)));
     if (t>=t_end && norm(eo)<0.02)
         break;
     end
@@ -86,33 +76,18 @@ while (true)
     y = y + dy*dt;
     z = z + dz*dt;
     
-    eo = y;
+    q = y;
     dy = z/dmp_o.getTau();
-    deo = dy;
+    qdot = dy;
     
     Q_prev = Q;
-    Q = dmp_o.eo2quat(eo, Qo);
+    Q = dmp_o.q2quat(q, Q0);
     if (Q_prev'*Q<0), Q = -Q; end
     
-    Qe = dmp_o.quatError(Q, Qo);
-    rotVel = dmp_o.deo2rotVel(deo, Qe);
+    Q1 = dmp_o.quatTf(Q, Q0);
+    rotVel = dmp_o.qdot2rotVel(qdot, Q1);
     
 end
-
-eo_data2 = zeros(size(eo_data));
-for j=1:size(eo_data2,2)
-    eo_data2(:,j) = dmp_o.quat2eo(Q_data(:,j), Qo);
-end
-
-% figure
-% plot(Time, eo_data(1,:), Time, eo_data(2,:), Time, eo_data(3,:))
-% legend({'e_1','e_2','e_3'});
-
-% figure
-% plot(Time, rotAccel_data(1,:), Time, rotAccel_data2(1,:));
-% legend({'$\dot{\omega}$', '$\dot{\omega}_2$'}, 'interpreter','latex', 'fontsize',15);
-% 
-% stop
 
 end
 

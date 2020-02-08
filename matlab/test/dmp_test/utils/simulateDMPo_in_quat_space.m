@@ -5,7 +5,6 @@ function [Time, Q_data, rotVel_data, rotAccel_data] = simulateDMPo_in_quat_space
 %% set initial values
 t_end = T;
 tau = t_end;
-dmp_o.setTau(tau);
 
 Time = [];
 Q_data = [];
@@ -19,7 +18,8 @@ Q = Q0;
 rotVel = zeros(3,1);
 rotAccel = zeros(3,1);
 
-dmp_o.setQ0(Q0);
+dmp_o.setTau(tau); % set time scaling
+dmp_o.setQ0(Q0);   % set initial orientation
 
 %% simulate
 while (true)
@@ -59,7 +59,7 @@ while (true)
     Q = quatProd( quatExp(rotVel*dt), Q);
     rotVel = rotVel + rotAccel*dt;  
     
-    dmp_o.setTau(tau);
+    dmp_o.setTau(tau); % set tau, if it changes online
     
 end
 

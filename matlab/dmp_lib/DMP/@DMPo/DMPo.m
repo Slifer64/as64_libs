@@ -7,10 +7,7 @@ classdef DMPo < matlab.mixin.Copyable
     
     methods  (Access = public)
         %% DMPo constructor.
-        %  @param[in] N_kernels: 3x3 matrix where each row contains the kernels for position,
-        %                       velocity and acceleration and each row for x, y and z coordinate.
-        %                       If 'N_kernels' is a column vector then every coordinate will have the
-        %                       same number of kernels.
+        %  @param[in] dmp_type: Type on DMP (see @DMP_TYPE).
         %  @param[in] a_z: Parameter 'a_z' relating to the spring-damper system.
         %  @param[in] b_z: Parameter 'b_z' relating to the spring-damper system.
         %  @param[in] can_clock_ptr: Pointer to a DMP canonical system object.
@@ -89,16 +86,23 @@ classdef DMPo < matlab.mixin.Copyable
         end
       
 
+        %% Sets the initial orientation.
+        %  @param[in] Q0: Initial orientation (as unit quaternion).
         function setQ0(this, Q0)
             
             this.Q0 = Q0; 
             
         end
 
-        
+
+        %% Returns the 'y' state of the DMP based on the current orientation.
+        %  @param[in] Q: Current orientation (as unit quaternion).
         function y = getY(this, Q), y = DMPo.quat2q(Q, this.Q0); end
 
         
+        %% Returns the 'z' state of the DMP based on the current rotational velocity and orientation.
+        %  @param[in] rotVel: Current rotational velocity.
+        %  @param[in] Q: Current orientation (as unit quaternion).
         function z = getZ(this, rotVel, Q)
 
             Q1 = DMPo.quatTf(Q, this.Q0);
@@ -110,12 +114,12 @@ classdef DMPo < matlab.mixin.Copyable
         end
 
         
-        %% Calculates the derivatives of the DMP states. The derivatives can then be
-        %% retrieved with 'getDx', 'getdeo' and 'getddeo'.
+        %% Calculates the derivatives of the DMP states. 
+        %  The derivatives can then be retrieved with 'getXdot', 'getYdot' and 'getZdot'.
         %  @param[in] x: phase variable.
-        %  @param[in] Y: 'y' state of the DMP.
-        %  @param[in] Z: 'z' state of the DMP.
-        %  @param[in] Y0: Initial position.
+        %  @param[in] Y: 'y' state of the DMP: y=log(Q*Q0^{-1}).
+        %  @param[in] Z: 'z' state of the DMP (the scaled ydot state).
+        %  @param[in] G: 'g' goal/target of the DMP: y=log(Qg*Q0^{-1}).
         %  @param[in] Yc: Coupling term for the deonamical equation of the 'y' state.
         %  @param[in] Zc: Coupling term for the deonamical equation of the 'z' state.
         function update(this, x, Y, Z, G, Yc, Zc)
@@ -141,9 +145,13 @@ classdef DMPo < matlab.mixin.Copyable
         function dx = getXdot(this), dx=this.dx; end
         function dy = getYdot(this), dy=this.dY; end
         
+        %% Returns the second derivative of the DMP's 'y' state.
+        %  Call @update first!
+        %  @param[in] tau_dot: time derivative of time scaling (optional, default=0).
+        %  @param[in] yc_dot: time derivative of 'yc' coupling term (optional, default=0).
         function ddy = getYddot(this, tau_dot, yc_dot)
 
-            if (nargin < 3), tau_dot=0; end
+            if (nargin < 2), tau_dot=0; end
             if (nargin < 3), yc_dot=0; end
             ddy = (this.getZdot() - tau_dot*this.getYdot() + yc_dot)/this.getTau(); 
 
