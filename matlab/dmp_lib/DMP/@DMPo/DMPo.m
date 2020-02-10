@@ -12,7 +12,6 @@ classdef DMPo < matlab.mixin.Copyable
         %  @param[in] b_z: Parameter 'b_z' relating to the spring-damper system.
         %  @param[in] can_clock_ptr: Pointer to a DMP canonical system object.
         %  @param[in] shape_attr_gating_ptr: Pointer to a DMP gating function object.
-        %
         function this = DMPo(dmp_type, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gating_ptr)
 
             if (nargin < 5), can_clock_ptr = CanonicalClock(); end
@@ -94,25 +93,6 @@ classdef DMPo < matlab.mixin.Copyable
             
         end
 
-
-        %% Returns the 'y' state of the DMP based on the current orientation.
-        %  @param[in] Q: Current orientation (as unit quaternion).
-        function y = getY(this, Q), y = DMPo.quat2q(Q, this.Q0); end
-
-        
-        %% Returns the 'z' state of the DMP based on the current rotational velocity and orientation.
-        %  @param[in] rotVel: Current rotational velocity.
-        %  @param[in] Q: Current orientation (as unit quaternion).
-        function z = getZ(this, rotVel, Q)
-
-            Q1 = DMPo.quatTf(Q, this.Q0);
-            qdot = DMPo.rotVel2qdot(rotVel, Q1);
-            dy = qdot;
-
-            z = this.getTau()*dy; 
-
-        end
-
         
         %% Calculates the derivatives of the DMP states. 
         %  The derivatives can then be retrieved with 'getXdot', 'getYdot' and 'getZdot'.
@@ -142,23 +122,43 @@ classdef DMPo < matlab.mixin.Copyable
 
         end
         
-        function dx = getXdot(this), dx=this.dx; end
+        
+        %% Returns the time derivative of the DMP's phase variable.
+        %  Call @update first!
+        %  @return: time derivative of the phase variable.
+        function x_dot = getXdot(this), x_dot=this.dx; end
+        
+        
+        %% Returns the time derivative of the DMP's 'y' state.
+        %  Call @update first!
+        %  @return: time derivative of 'y' state.
         function dy = getYdot(this), dy=this.dY; end
+
+        
+        %% Returns the time derivative of the DMP's 'z' state.
+        %  Call @update first!
+        %  @return: time derivative of 'z' state.
+        function z_dot = getZdot(this), z_dot=this.dZ; end
+
         
         %% Returns the second derivative of the DMP's 'y' state.
         %  Call @update first!
         %  @param[in] tau_dot: time derivative of time scaling (optional, default=0).
         %  @param[in] yc_dot: time derivative of 'yc' coupling term (optional, default=0).
-        function ddy = getYddot(this, tau_dot, yc_dot)
+        %  @return: second time derivative of 'y' state.
+        function y_ddot = getYddot(this, tau_dot, yc_dot)
 
             if (nargin < 2), tau_dot=0; end
             if (nargin < 3), yc_dot=0; end
-            ddy = (this.getZdot() - tau_dot*this.getYdot() + yc_dot)/this.getTau(); 
+            y_ddot = (this.getZdot() - tau_dot*this.getYdot() + yc_dot)/this.getTau(); 
 
         end
         
-        function dz = getZdot(this), dz=this.dZ; end
-
+        
+        %% Returns the rotational velocity.
+        %  Call @update first!
+        %  @param[in] Q: the current orientation.
+        %  @return: the rotational velocity.
         function rotVel = getRotVel(this, Q)
 
             Q1 = DMPo.quatTf(Q, this.Q0);
@@ -167,6 +167,13 @@ classdef DMPo < matlab.mixin.Copyable
 
         end
         
+        
+        %% Returns the rotational acceleration.
+        %  Call @update first!
+        %  @param[in] Q: the current orientation.
+        %  @param[in] tau_dot: time derivative of time scaling (optional, default=0).
+        %  @param[in] yc_dot: time derivative of 'yc' coupling term (optional, default=0).
+        %  @return: the rotational acceleration.
         function rotAccel = getRotAccel(this, Q, tau_dot, yc_dot)
             
             if (nargin < 3), tau_dot=0; end
@@ -179,6 +186,17 @@ classdef DMPo < matlab.mixin.Copyable
 
         end
         
+        
+        %% Calculates the rotational acceleration based on the current input variables.
+        %  @param[in] x: phase variable.
+        %  @param[in] Q: the current orientation.
+        %  @param[in] rotVel: the rotational velocity.
+        %  @param[in] Qg: the target orientation.
+        %  @param[in] tau_dot: time derivative of time scaling (optional, default=0).
+        %  @param[in] yc: Coupling term fo 'y' state diff-equation (optional, default=0).
+        %  @param[in] zc: Coupling term fo 'z' state diff-equation (optional, default=0).
+        %  @param[in] yc_dot: time derivative of 'yc' coupling term (optional, default=0).
+        %  @return: the rotational acceleration.
         function rotAccel = calcRotAccel(this, x, Q, rotVel, Qg, tau_dot, yc, zc, yc_dot)
             
             if (nargin < 6), tau_dot = 0; end
@@ -211,29 +229,44 @@ classdef DMPo < matlab.mixin.Copyable
         end
 
         
+        %% Returns the 'y' state of the DMP based on the current orientation.
+        %  @param[in] Q: Current orientation (as unit quaternion).
+        function y = getY(this, Q), y = DMPo.quat2q(Q, this.Q0); end
+
+        
+        %% Returns the 'z' state of the DMP based on the current rotational velocity and orientation.
+        %  @param[in] rotVel: Current rotational velocity.
+        %  @param[in] Q: Current orientation (as unit quaternion).
+        function z = getZ(this, rotVel, Q)
+
+            Q1 = DMPo.quatTf(Q, this.Q0);
+            qdot = DMPo.rotVel2qdot(rotVel, Q1);
+            dy = qdot;
+
+            z = this.getTau()*dy; 
+
+        end
+
+        
         %% Returns the time scaling factor.
         %  @return: The time scaling factor.
-        %
         function tau = getTau(this), tau = this.can_clock_ptr.getTau(); end
         
         
         %% Sets the time scaling factor.
         %  @param[in] tau: The time scaling factor.
-        %
         function setTau(this, tau), this.can_clock_ptr.setTau(tau); end
         
         
         %% Returns the phase variable corresponding to the given time instant.
         %  @param[in] t: The time instant.
         %  @return: The phase variable for time 't'.
-        %
         function x = phase(this, t), x = this.can_clock_ptr.getPhase(t); end
         
         
         %% Returns the derivative of the phase variable.
         %  @param[in] x: The phase variable.
         %  @return: The derivative of the phase variable.
-        %
         function dx = phaseDot(this, x), dx = this.can_clock_ptr.getPhaseDot(x); end
 
         
@@ -241,43 +274,31 @@ classdef DMPo < matlab.mixin.Copyable
     
     methods (Static)
         
-        %% Given a quaternion, its rotational velocity and a target quaternion, returns
-        %% the derivative of the orientation error w.r.t the target quaternion.
-        %  @param[in] rotVel: The quaternion's rotational velocity.
-        %  @param[in] Q: The quaternion.
-        %  @param[in] Q0: The initial quaternion.
-        %  @return: The derivative of the orientation error.
-        %
+        %% Expresses a given quaternion w.r.t. the initial orientation. 
+        %  @param[in] Q: Orientation as unit quaternion.
+        %  @param[in] Q0: Initial quaternion.
+        %  @return: Q1 = Orientation w.r.t. Q0, i.e. Q1 = Q*Q0^{-1}.
         function Q1 = quatTf(Q, Q0), Q1 = quatProd(Q, quatInv(Q0)); end
 
         
-        %% Given a quaternion, its rotational velocity and a target quaternion, returns
-        %% the derivative of the orientation error w.r.t the target quaternion.
-        %  @param[in] rotVel: The quaternion's rotational velocity.
-        %  @param[in] Q: The quaternion.
-        %  @param[in] Qg: The target quaternion.
-        %  @return: The derivative of the orientation error.
-        %
+        %% Returns the log of a given orientation w.r.t. the initial orientation.
+        %  @param[in] Q: Orientation as unit quaternion.
+        %  @param[in] Q0: Initial quaternion.
+        %  @return: The logarithm of the Q w.r.t. Q0, i.e. q = log(Q*Q0^{-1}).
         function q = quat2q(Q, Q0), q = quatLog(DMPo.quatTf(Q,Q0)); end
         
         
-        %% Given a quaternion, its rotational velocity and a target quaternion, returns
-        %% the derivative of the orientation error w.r.t the target quaternion.
-        %  @param[in] rotVel: The quaternion's rotational velocity.
-        %  @param[in] Q: The quaternion.
-        %  @param[in] Qg: The target quaternion.
-        %  @return: The derivative of the orientation error.
-        %
+        %% Returns the quaternion Q given the initial orientation Q0 and the log of Q w.r.t. to Q0.
+        %  @param[in] q: Logarithm of orientation w.r.t. the initial orientation.
+        %  @param[in] Q0: Initial orientation.
+        %  @return: The orientation corresponding to log, i.e. Q = exp(q)*Q0
         function Q = q2quat(q, Q0), Q = quatProd( quatExp(q), Q0); end
         
-        
-        %% Given a quaternion, its rotational velocity and a target quaternion, returns
-        %% the derivative of the orientation error w.r.t the target quaternion.
-        %  @param[in] rotVel: The quaternion's rotational velocity.
-        %  @param[in] Q: The quaternion.
-        %  @param[in] Qg: The target quaternion.
-        %  @return: The derivative of the orientation error.
-        %
+
+        %% Returns derivative of log given the rotational velocity and orientation (expressed w.r.t. the initial orientation)
+        %  @param[in] rotVel: Rotational velocity.
+        %  @param[in] Q1: Orientation expressed w.r.t. the initial orientation.
+        %  @return: Derivative of log.
         function qdot = rotVel2qdot(rotVel, Q1)
             
             JqQ = DMPo.jacobqQ(Q1);
@@ -286,13 +307,6 @@ classdef DMPo < matlab.mixin.Copyable
         end
         
         
-        %% Given a quaternion, a target quaternion and the quaternion error velocity w.r.t the
-        %% target, returns the derivative of the orientation error w.r.t the target quaternion.
-        %  @param[in] deo: Quaternion error velocity.
-        %  @param[in] Q: The quaternion.
-        %  @param[in] Qg: The target quaternion.
-        %  @return: The rotational velocity of the quaternion.
-        %
         function rotVel = qdot2rotVel(qdot, Q1)
             
             JQq = DMPo.jacobQq(Q1);
@@ -301,15 +315,7 @@ classdef DMPo < matlab.mixin.Copyable
 
         end
         
-        
-        %% Given a quaternion, its rotational velocity and acceleration and a target quaternion,
-        %% returns the second derivative of the orientation error w.r.t the target quaternion.
-        %  @param[in] rotAccel: The quaternion's rotational acceleration.
-        %  @param[in] rotVel: The quaternion's rotational velocity.
-        %  @param[in] Q: The quaternion.
-        %  @param[in] Qg: The target quaternion.
-        %  @return: The second derivative of the orientation error.
-        %
+
         function qddot = rotAccel2qddot(rotAccel, rotVel, Q1)
             
             rotVelQ = [0; rotVel];
@@ -322,15 +328,7 @@ classdef DMPo < matlab.mixin.Copyable
 
         end
         
-        
-        %% Given a quaternion, its rotational velocity and acceleration and a target quaternion,
-        %% returns the second derivative of the orientation error w.r.t the target quaternion.
-        %  @param[in] rotAccel: The quaternion's rotational acceleration.
-        %  @param[in] rotVel: The quaternion's rotational velocity.
-        %  @param[in] Q: The quaternion.
-        %  @param[in] Qg: The target quaternion.
-        %  @return: The second derivative of the orientation error.
-        %
+
         function rotAccel = qddot2rotAccel(qddot, rotVel, Q1)
 
             qdot = DMPo.rotVel2qdot(rotVel, Q1);
@@ -344,10 +342,9 @@ classdef DMPo < matlab.mixin.Copyable
         end
         
         
-        %% Returns the Jacobian from the derivative of orientation error to the quaternion derivative.
-        %  @param[in] Q: The quaternion for which we want to calculate the Jacobian.
-        %  @return: Jacobian from derivative of orientation error to quaternion derivative.
-        %
+        %% Returns the Jacobian from the derivative of log to the derivative of Q.
+        %  @param[in] Q1: The orientation w.r.t. the initial orientation.
+        %  @return: Jacobian.
         function JQq = jacobQq(Q1)
 
             if (abs(Q1(1)-1) <= DMPo.zero_tol)
@@ -371,10 +368,9 @@ classdef DMPo < matlab.mixin.Copyable
         end
         
         
-        %% Returns the Jacobian from the quaternion derivative to the derivative of the orientation error.
-        %  @param[in] Q: The quaternion for which we want to calculate the Jacobian.
-        %  @return: Jacobian from quaternion derivative to derivative of orientation error.
-        %
+        %% Returns the Jacobian from the derivative of Q to the derivative of log.
+        %  @param[in] Q1: The orientation w.r.t. the initial orientation.
+        %  @return: Jacobian.
         function JqQ = jacobqQ(Q1)
             
             if (abs(Q1(1)-1) <= DMPo.zero_tol)
@@ -397,11 +393,9 @@ classdef DMPo < matlab.mixin.Copyable
         end
        
         
-        %% Returns the time derivative of the Jacobian from the derivative of orientation error to the quaternion derivative.
-        %  @param[in] Q: The quaternion for which we want to calculate the Jacobian.
-        %  @param[in] deo: The derivative of the orientation error.
-        %  @return: The derivative of the Jacobian from derivative of orientation error to quaternion derivative.
-        %
+        %% Returns the time derivative of the Jacobian from the derivative of log to the derivative of Q.
+        %  @param[in] Q1: The orientation w.r.t. the initial orientation.
+        %  @return: Jacobian time derivative.
         function JqQ_dot = jacobDotqQ(Q1, rotVel)
 
             qdot = DMPo.rotVel2qdot(rotVel, Q1);
@@ -428,11 +422,9 @@ classdef DMPo < matlab.mixin.Copyable
         end
         
         
-        %% Returns the time derivative of the Jacobian from the derivative of orientation error to the quaternion derivative.
-        %  @param[in] Q: The quaternion for which we want to calculate the Jacobian.
-        %  @param[in] deo: The derivative of the orientation error.
-        %  @return: The derivative of the Jacobian from derivative of orientation error to quaternion derivative.
-        %
+        %% Returns the time derivative of the Jacobian from the derivative of Q to the derivative of log.
+        %  @param[in] Q1: The orientation w.r.t. the initial orientation.
+        %  @return: Jacobian time derivative.
         function JQq_dot = jacobDotQq(Q1, rotVel)
             
             qdot = DMPo.rotVel2qdot(rotVel, Q1);
@@ -458,8 +450,7 @@ classdef DMPo < matlab.mixin.Copyable
             JQq_dot(2:4,:) = 0.25*dot(eta,qdot)*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(qdot'*I_eta) + (I_eta*qdot)*eta' );
 
         end
-        
-        
+          
     end
     
     
@@ -480,7 +471,7 @@ classdef DMPo < matlab.mixin.Copyable
        
     properties  (Access = protected)
         
-        Q0
+        Q0 % initial orientation
         
         dZ % second derivative of the orientation error
         dY % first derivative of the orientation error
