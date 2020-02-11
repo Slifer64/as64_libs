@@ -117,6 +117,146 @@ void simulateDMPpos(std::shared_ptr<dmp_::DMP_pos> &dmp_p, const arma::vec &P0, 
 }
 
 
+
+void simulateDMPo_in_log_space(std::shared_ptr<dmp_::DMPo> &dmp_o, const arma::vec &Q0, const arma::vec &Qg,
+                               double T, double dt, arma::rowvec &Time, arma::mat &Q_data, arma::mat &vRot_data, arma::mat &dvRot_data)
+{
+  double t_end = T;
+
+  double t = 0.0;
+  double x = 0.0;
+  double dx = 0.0;
+  arma::vec Q = Q0;
+  arma::vec Q_prev = Q;
+  arma::vec rotVel = arma::vec().zeros(3);
+  arma::vec rotAccel = arma::vec().zeros(3);
+  arma::vec q = dmp_::DMPo::quat2q(Q, Q0);
+  arma::vec qdot = arma::vec().zeros(3);
+  arma::vec dy = arma::vec().zeros(3);
+  arma::vec dz = arma::vec().zeros(3);
+
+  dmp_o->setQ0(Q0);
+  dmp_o->setTau(t_end);
+
+  arma::vec y = dmp_o->getY(Q);
+  arma::vec z = dmp_o->getZ(rotVel, Q);
+  arma::vec g = dmp_o->quat2q(Qg, Q0);
+
+  // simulate
+  while (true)
+  {
+    // data logging
+    Time = arma::join_horiz(Time, arma::vec({t}));
+    Q_data = arma::join_horiz(Q_data, Q);
+    vRot_data = arma::join_horiz(vRot_data, rotVel);
+    dvRot_data = arma::join_horiz(dvRot_data, rotAccel);
+
+    double tau_dot = 0;
+    arma::vec yc_dot = arma::vec().zeros(3);
+
+    // DMP simulation
+    arma::vec yc = arma::vec().zeros(3);
+    arma::vec zc = arma::vec().zeros(3);
+
+    dmp_o->update(x, y, z, g, yc, zc);
+
+    dy = dmp_o->getYdot();
+    dz = dmp_o->getZdot();
+    rotAccel = dmp_o->getRotAccel(Q, tau_dot, yc_dot);
+
+    // Update phase variable
+    dx = dmp_o->phaseDot(x);
+
+    // Stopping criteria
+    if (t>1.5*t_end)
+    {
+      std::cerr << "Time limit reached... Stopping simulation!\n";
+      break;
+    }
+
+    arma::vec eo = dmp_::quatLog(dmp_::quatProd(Qg, dmp_::quatInv(Q)));
+    if (t>=t_end && norm(eo)<0.02) break;
+
+    // Numerical integration
+    t = t + dt;
+    x = x + dx*dt;
+    y = y + dy*dt;
+    z = z + dz*dt;
+
+    q = y;
+    dy = z/dmp_o->getTau();
+    qdot = dy;
+
+    Q_prev = Q;
+    Q = dmp_::DMPo::q2quat(q, Q0);
+    if (arma::dot(Q_prev,Q)<0) Q = -Q;
+
+    arma::vec Q1 = dmp_::DMPo::quatTf(Q, Q0);
+    rotVel = dmp_::DMPo::qdot2rotVel(qdot, Q1);
+  }
+
+}
+
+
+void simulateDMPo_in_quat_space(std::shared_ptr<dmp_::DMPo> &dmp_o, const arma::vec &Q0, const arma::vec &Qg,
+                                 double T, double dt, arma::rowvec &Time, arma::mat &Q_data, arma::mat &vRot_data, arma::mat &dvRot_data)
+{
+  double t_end = T;
+  double tau = t_end;
+
+  double t = 0.0;
+  double x = 0.0;
+  double dx = 0.0;
+  arma::vec Q = Q0;
+  arma::vec rotVel = arma::vec().zeros(3);
+  arma::vec rotAccel = arma::vec().zeros(3);
+
+  double tau_dot = 0;
+
+  dmp_o->setQ0(Q0);
+  dmp_o->setTau(tau);
+
+  // simulate
+  while (true)
+  {
+    // data logging
+    Time = arma::join_horiz(Time, arma::vec({t}));
+    Q_data = arma::join_horiz(Q_data, Q);
+    vRot_data = arma::join_horiz(vRot_data, rotVel);
+    dvRot_data = arma::join_horiz(dvRot_data, rotAccel);
+
+    // DMP simulation
+    arma::vec yc = arma::vec().zeros(3);
+    arma::vec zc = arma::vec().zeros(3);
+    double tau_dot = 0;
+    arma::vec yc_dot = arma::vec().zeros(3);
+    rotAccel = dmp_o->calcRotAccel(x, Q, rotVel, Qg, tau_dot, yc, zc, yc_dot);
+
+    // Update phase variable
+    dx = dmp_o->phaseDot(x);
+
+    // Stopping criteria
+    if (t>1.5*t_end)
+    {
+      std::cerr << "Time limit reached... Stopping simulation!\n";
+      break;
+    }
+
+    arma::vec eo = dmp_::quatLog(dmp_::quatProd(Qg, dmp_::quatInv(Q)));
+    if (t>=t_end & arma::norm(eo)<0.02) break;
+
+    // Numerical integration
+    t = t + dt;
+    tau = tau + tau_dot*dt;
+    x = x + dx*dt;
+    Q = dmp_::quatProd( dmp_::quatExp(rotVel*dt), Q);
+    rotVel = rotVel + rotAccel*dt;
+
+    dmp_o->setTau(tau); // set tau, if it changes online
+  }
+}
+
+
 void simulateDMPeo_in_eo_space(std::shared_ptr<dmp_::DMP_eo> &dmp_o, const arma::vec &Q0, const arma::vec &Qg,
                                double T, double dt, arma::rowvec &Time, arma::mat &Q_data, arma::mat &vRot_data, arma::mat &dvRot_data)
 {
@@ -130,7 +270,6 @@ void simulateDMPeo_in_eo_space(std::shared_ptr<dmp_::DMP_eo> &dmp_o, const arma:
   arma::vec Q_prev = Q;
   arma::vec rotVel = arma::vec().zeros(3);
   arma::vec rotAccel = arma::vec().zeros(3);
-  // arma::vec rotAccel2 = arma::vec().zeros(3);
   arma::vec eo = dmp_::DMP_eo::quat2eo(Q0, Qg);
   arma::vec deo = arma::vec().zeros(3);
   arma::vec dy = arma::vec().zeros(3);

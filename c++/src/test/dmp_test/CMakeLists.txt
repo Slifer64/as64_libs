@@ -74,6 +74,21 @@ target_link_libraries(dmp_pos_test ${LINK_LIBS} )
 
 
 # ***********************************************
+# ************   Test DMPo  ******************
+# ***********************************************
+
+add_executable(dmpo_test
+		src/dmpo_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		)
+
+add_dependencies(dmpo_test
+		${${PROJECT_NAME}_EXPORTED_TARGETS}
+		${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(dmpo_test ${LINK_LIBS} )
+
+
+# ***********************************************
 # ************   Test DMP_eo  ******************
 # ***********************************************
 

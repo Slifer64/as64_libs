@@ -15,7 +15,7 @@ namespace as64_
 namespace dmp_
 {
 
-const long double DMPo::zero_tol = 1e-6;
+const long double DMPo::zero_tol = 1e-8;
 
 DMPo::DMPo(dmp_::TYPE dmp_type, const arma::uvec &N_kernels, const arma::vec &a_z, const arma::vec &b_z,
                std::shared_ptr<CanonicalClock> can_clock_ptr, std::shared_ptr<GatingFunction> shape_attr_gating_ptr)
@@ -69,8 +69,12 @@ void DMPo::train(dmp_::TrainMethod train_method, const arma::rowvec &Time, const
     arma::vec Q1 = DMPo::quatTf(Quat_data.col(j), Q0);
     q_data.col(j) = quatLog(Q1);
     qdot_data.col(j) = DMPo::rotVel2qdot(rotVel_data.col(j), Q1);
-    qddot_data.col(j) = DMPo::rotAccel2qddot(rotAccel_data.col(j), rotVel_data.col(j), Q1);
+//    qddot_data.col(j) = DMPo::rotAccel2qddot(rotAccel_data.col(j), rotVel_data.col(j), Q1);
   }
+
+  double Ts = Time(1) - Time(0);
+  for (int i=0;i<q_data.n_rows; i++)
+    qddot_data.row(i) = arma::join_horiz( arma::diff(qdot_data.row(i)), arma::vec({0}) ) / Ts;
 
   int n_dim = this->dmp.size();
   if (train_err)
@@ -84,6 +88,31 @@ void DMPo::train(dmp_::TrainMethod train_method, const arma::rowvec &Time, const
     for (int i=0; i<n_dim; i++)
       this->dmp[i]->train(train_method, Time, q_data.row(i), qdot_data.row(i), qddot_data.row(i));
   }
+
+//  arma::vec atan2_data(n_data);
+//  for (int j=0; j<n_data; j++)
+//  {
+//
+//  }
+
+  std::ofstream out("weights.bin", std::ios::out | std::ios::binary);
+  if (!out) throw std::runtime_error("Failed to create file...");
+  int n_ker = dmp[0]->N_kernels;
+  arma::mat w = arma::mat(3, n_ker);
+  for (int i=0; i<3; i++) w.row(i) = dmp[i]->w.t();
+  dmp_::write_mat(w, out, true);
+  dmp_::write_mat(q_data, out, true);
+  dmp_::write_mat(qdot_data, out, true);
+  dmp_::write_mat(qddot_data, out, true);
+  dmp_::write_mat(Quat_data, out, true);
+  out.close();
+
+
+//  std::ifstream in("weights2.bin", std::ios::in | std::ios::binary);
+//  if (!in) throw std::runtime_error("Failed to open file...");
+//  arma::mat w2;
+//  dmp_::read_mat(w2, in, true);
+//  for (int i=0; i<3; i++) dmp[i]->w = w2.row(i).t();
 
 }
 
@@ -140,9 +169,8 @@ arma::vec DMPo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotV
 
   arma::vec qg = DMPo::quat2q(Qg, this->Q0);
 
-  arma::vec Q1 = DMPo::quatTf(Q, Qg);
-  arma::vec q = DMPo::quat2q(Q, Qg);
-  arma::vec invQ1 = quatInv(Q1);
+  arma::vec Q1 = DMPo::quatTf(Q, this->Q0);
+  arma::vec q = DMPo::quat2q(Q, this->Q0);
 
   arma::mat JQq = DMPo::jacobQq(Q1);
   arma::mat JQq_dot = DMPo::jacobDotQq(Q1, rotVel);
@@ -151,9 +179,9 @@ arma::vec DMPo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotV
   for (int i=0; i<3; i++) fo(i) = this->dmp[i]->shapeAttractor(x, qg(i));
 
   arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
-  arma::vec qddot = (-a_z%b_z%q - tau*a_z%qdot + a_z%Yc + fo + tau*Yc_dot - tau*tau_dot*qdot + Zc) / std::pow(tau,2);
+  arma::vec qddot = (a_z%b_z%(qg - q) - tau*a_z%qdot + a_z%Yc + fo + tau*Yc_dot - tau*tau_dot*qdot + Zc) / std::pow(tau,2);
 
-  arma::vec rotAccel = 2*quatProd(JQq_dot*qdot + JQq*qddot, invQ1);
+  arma::vec rotAccel = 2*quatProd(JQq_dot*qdot + JQq*qddot, quatInv(Q1));
 
   return rotAccel.subvec(1,3);
 }
@@ -250,11 +278,10 @@ arma::vec DMPo::rotAccel2qddot(const arma::vec &rotAccel, const arma::vec &rotVe
 arma::vec DMPo::qddot2rotAccel(const arma::vec &qddot, const arma::vec &rotVel, const arma::vec &Q1)
 {
   arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
-  arma::vec invQ1 = quatInv(Q1);
   arma::mat J = DMPo::jacobQq(Q1);
   arma::mat Jdot = DMPo::jacobDotQq(Q1, rotVel);
 
-  arma::vec rotAccel = 2 * ( quatProd( Jdot*qdot+J*qddot, invQ1 ) );
+  arma::vec rotAccel = 2 * ( quatProd( Jdot*qdot+J*qddot, quatInv(Q1) ) );
   return rotAccel.subvec(1,3);
 }
 

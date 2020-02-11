@@ -29,7 +29,6 @@ y = dmp_o.getY(Q);
 z = dmp_o.getZ(rotVel, Q);
 g = dmp_o.quat2q(Qg, Q0);
 
-q_data = [];
 
 %% simulate
 while (true)
@@ -42,8 +41,6 @@ while (true)
     
     tau_dot = 0;
     yc_dot = 0;
-    
-    q_data = [q_data q];
 
     %% DMP simulation
     yc = zeros(3,1);

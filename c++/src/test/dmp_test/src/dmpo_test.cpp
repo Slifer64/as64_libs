@@ -8,7 +8,7 @@
 #include <exception>
 
 #include <io_lib/io_utils.h>
-#include <dmp_lib/DMP/DMP_eo.h>
+#include <dmp_lib/DMP/DMPo.h>
 #include <dmp_lib/GatingFunction/LinGatingFunction.h>
 #include <dmp_lib/GatingFunction/ExpGatingFunction.h>
 #include <dmp_lib/GatingFunction/SigmoidGatingFunction.h>
@@ -20,7 +20,7 @@ using namespace as64_;
 int main(int argc, char** argv)
 {
   // ===========  Initialize the ROS node  ===============
-  ros::init(argc, argv, "dmp_eo_test_node");
+  ros::init(argc, argv, "dmpo_test_node");
   ros::NodeHandle nh_("~");
 
   // ===========  Read params  ===============
@@ -36,9 +36,9 @@ int main(int argc, char** argv)
   arma::vec ks;
   double kt;
   std::string sim_fun;
-  typedef void (*sim_fun_ptr)(std::shared_ptr<dmp_::DMP_eo> &, const arma::vec &, const arma::vec &,
+  typedef void (*sim_fun_ptr)(std::shared_ptr<dmp_::DMPo> &, const arma::vec &, const arma::vec &,
                               double , double , arma::rowvec &, arma::mat &, arma::mat &, arma::mat &);
-  sim_fun_ptr simulateDMPeo;
+  sim_fun_ptr simulateDMPo;
 
   std::string dmp_type;
   dmp_::TYPE dmp_t;
@@ -72,9 +72,9 @@ int main(int argc, char** argv)
   ks = arma::vec(ks_vec);
   if (!nh_.getParam("kt", kt)) kt = 1.0;
 
-  if (!nh_.getParam("sim_fun", sim_fun)) sim_fun = "eo";
-  if (sim_fun.compare("eo")==0) simulateDMPeo = &simulateDMPeo_in_eo_space;
-  else if (sim_fun.compare("quat")==0) simulateDMPeo = &simulateDMPeo_in_quat_space;
+  if (!nh_.getParam("sim_fun", sim_fun)) sim_fun = "log";
+  if (sim_fun.compare("log")==0) simulateDMPo = &simulateDMPo_in_log_space;
+  else if (sim_fun.compare("quat")==0) simulateDMPo = &simulateDMPo_in_quat_space;
   else std::runtime_error("Unsupported simulation function: \"" + sim_fun + "\"...");
 
   std::string train_method_name;
@@ -111,8 +111,8 @@ int main(int argc, char** argv)
   else if (gating_type.compare("exp")==0) shape_attr_gat_ptr.reset(new dmp_::ExpGatingFunction(1.0, 0.02));
   else throw std::runtime_error("Unsupported gating type: \"" + gating_type + "\"...");
 
-  std::shared_ptr<dmp_::DMP_eo> dmp_o;
-  dmp_o.reset(new dmp_::DMP_eo(dmp_t, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr));
+  std::shared_ptr<dmp_::DMPo> dmp_o;
+  dmp_o.reset(new dmp_::DMPo(dmp_t, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr));
 
   arma::wall_clock timer;
   timer.tic();
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
   arma::vec Q0d = Qd_data.col(0);
   arma::vec Q0 = Q0d;
   arma::vec Qgd = Qd_data.col(i_end);
-  arma::vec Q_offset = dmp_::quatExp( ks % dmp_::quatLog(dmp_::quatProd(Qgd, dmp_::quatInv(Q0d) ) ) );
+  arma::vec Q_offset = dmp_::quatExp( ks % dmp_::quatLog( dmp_::quatProd(Qgd, dmp_::quatInv(Q0d)) ) );
   arma::vec Qg = dmp_::quatProd(Q_offset, Q0);
   double T = kt*Timed(i_end);
   double dt = Ts;
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
   arma::mat Q_data;
   arma::mat vRot_data;
   arma::mat dvRot_data;
-  simulateDMPeo(dmp_o, Q0, Qg, T, dt, Time, Q_data, vRot_data, dvRot_data);
+  simulateDMPo(dmp_o, Q0, Qg, T, dt, Time, Q_data, vRot_data, dvRot_data);
 
   std::cout << "Elapsed time: " << timer.toc() << " sec\n";
 

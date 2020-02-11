@@ -1,6 +1,6 @@
 addpath('utils/');
 
-filename = 'data/dmp_eo_sim_data.bin';
+filename = 'data/dmpo_sim_data.bin';
 %% Load sim data
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end
@@ -28,15 +28,15 @@ Q0 = Q_data(:,1);
 ks = quatLog( quatProd(Qg, quatInv(Q0)) ) ./ quatLog( quatProd(Qgd, quatInv(Q0d)) );
 
 zeros(3, size(Qd_data,2));
-Pqd_data = zeros(3, size(Qd_data,2));
-for j=1:size(Pqd_data,2)
-    Pqd_data(:,j) = quatLog( quatProd(Qgd, quatInv(Qd_data(:,j))) );
+qd_data = zeros(3, size(Qd_data,2));
+for j=1:size(qd_data,2)
+    qd_data(:,j) = quatLog( quatProd( Qd_data(:,j), quatInv(Q0d) ) );
 end
 
 Qg = Q_data(:,end);
-Pq_data = zeros(3, size(Q_data,2));
-for j=1:size(Pq_data,2)
-    Pq_data(:,j) = quatLog( quatProd(Qg, quatInv(Q_data(:,j))) );
+q_data = zeros(3, size(Q_data,2));
+for j=1:size(q_data,2)
+    q_data(:,j) = quatLog( quatProd( Q_data(:,j), quatInv(Q0) ) );
 end
 
 line_width = 2.5;
@@ -46,8 +46,8 @@ y_labels = {'$e_{q,x}$','$e_{q,y}$', '$e_{q,z}$'};
 for i=1:3
    subplot(3,1,i);
    hold on;
-   plot(Time, Pq_data(i,:), 'LineWidth', line_width);
-   plot(Timed, ks(i)*Pqd_data(i,:), 'LineWidth', line_width, 'LineStyle','--');
+   plot(Time, q_data(i,:), 'LineWidth', line_width);
+   plot(Timed, ks(i)*qd_data(i,:), 'LineWidth', line_width, 'LineStyle','--');
    ylabel(y_labels{i}, 'interpreter','latex', 'fontsize',20);
    axis tight;
    if (i==1), legend({'sim', 'ks*demo'}, 'interpreter','latex', 'fontsize',16, 'Position',[0.7 0.78 0.27 0.15]); end
@@ -58,8 +58,8 @@ end
 
 figure;
 hold on;
-plot3(Pq_data(1,:), Pq_data(2,:), Pq_data(3,:), 'LineWidth', line_width, 'LineStyle','-');
-plot3(ks(1)*Pqd_data(1,:), ks(2)*Pqd_data(2,:), ks(3)*Pqd_data(3,:), 'LineWidth', line_width, 'LineStyle','--');
+plot3(q_data(1,:), q_data(2,:), q_data(3,:), 'LineWidth', line_width, 'LineStyle','-');
+plot3(ks(1)*qd_data(1,:), ks(2)*qd_data(2,:), ks(3)*qd_data(3,:), 'LineWidth', line_width, 'LineStyle','--');
 plot3(qd_data(1,:), qd_data(2,:), qd_data(3,:), 'LineWidth', line_width, 'LineStyle','-.');
 legend({'$dmp_o$', '$k_s*demo$', '$demo$'}, 'interpreter','latex', 'fontsize',15);
 hold off;

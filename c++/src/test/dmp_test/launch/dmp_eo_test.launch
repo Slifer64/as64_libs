@@ -11,9 +11,9 @@
       # b_z: [5, 5, 5]
       N_kernels: [40, 40, 40]
       train_method: "LS" # {LWR, LS}
-      ks: 2.0
+      ks: [1.0, 1.0, 1.0]
       kt: 1.0
-      sim_fun: "quat" # {eo, quat}
+      sim_fun: "eo" # {eo, quat}
     </rosparam>
 
   </node>

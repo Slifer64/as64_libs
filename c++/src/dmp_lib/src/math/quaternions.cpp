@@ -1,4 +1,5 @@
 #include <dmp_lib/math/quaternions.h>
+#include <tgmath.h>
 
 namespace as64_
 {
@@ -137,13 +138,13 @@ Eigen::Vector3d quatLog(const Eigen::Vector4d &quat, double zero_tol)
   Eigen::Vector3d e = quat.segment(1,3);
   double n = quat(0);
 
-  Eigen::Vector3d omega;
-  double e_norm = e.norm();
+  Eigen::Vector3d q_log;
+  double norm_e = e.norm();
 
-  if (e_norm > zero_tol) omega = 2*std::acos(n)*e/e_norm;
-  else omega = Eigen::Vector3d::Zero();
+  if (norm_e > zero_tol) q_log = 2*atan2l(norm_e,n)*e/norm_e;
+  else q_log = Eigen::Vector3d::Zero();
 
-  return omega;
+  return q_log;
 }
 
 arma::vec quatLog(const arma::vec &quat, double zero_tol)
@@ -154,13 +155,13 @@ arma::vec quatLog(const arma::vec &quat, double zero_tol)
   if (n > 1) n = 1;
   if (n < -1) n = -1;
 
-  arma::vec omega(3);
-  double e_norm = arma::norm(e);
+  arma::vec q_log(3);
+  double norm_e = arma::norm(e);
 
-  if (e_norm > zero_tol) omega = 2*std::acos(n)*e/e_norm;
-  else omega = arma::vec().zeros(3);
+  if (norm_e > zero_tol) q_log = 2*atan2l(norm_e,n)*e/norm_e;
+  else q_log = arma::vec().zeros(3);
 
-  return omega;
+  return q_log;
 }
 
 
