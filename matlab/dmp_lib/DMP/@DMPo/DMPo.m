@@ -90,6 +90,7 @@ classdef DMPo < matlab.mixin.Copyable
         function setQ0(this, Q0)
             
             this.Q0 = Q0; 
+            % for i=1:length(this.dmp) this.dmp{i}.setY0(0);
             
         end
 

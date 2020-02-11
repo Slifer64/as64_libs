@@ -30,6 +30,7 @@ class DMP_
   friend class DMP_bio;
   friend class DMP_pos;
   friend class DMP_eo;
+  friend class DMPo;
 
 // ====================================================
 // ****************************************************

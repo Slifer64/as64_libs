@@ -119,16 +119,16 @@ arma::vec DMPo::getYddot(double tau_dot, const arma::vec &Yc_dot) const
 arma::vec DMPo::getRotVel(const arma::vec &Q) const
 {
   arma::vec Q1 = DMPo::quatTf(Q, this->Q0);
-  arma::vec deo = this->getYdot();
-  return DMPo::qdot2rotVel(deo, Q1);
+  arma::vec qdot = this->getYdot();
+  return DMPo::qdot2rotVel(qdot, Q1);
 }
 
 arma::vec DMPo::getRotAccel(const arma::vec &Q, double tau_dot, const arma::vec &Yc_dot) const
 {
   arma::vec Q1 = DMPo::quatTf(Q, this->Q0);
-  arma::vec ddeo = this->getYddot(tau_dot, Yc_dot);
+  arma::vec qddot = this->getYddot(tau_dot, Yc_dot);
   arma::vec rotVel = this->getRotVel(Q);
-  return DMPo::qddot2rotAccel(ddeo, rotVel, Q1);
+  return DMPo::qddot2rotAccel(qddot, rotVel, Q1);
 }
 
 arma::vec DMPo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotVel, const arma::vec &Qg,
@@ -144,22 +144,16 @@ arma::vec DMPo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotV
   arma::vec q = DMPo::quat2q(Q, Qg);
   arma::vec invQ1 = quatInv(Q1);
 
-  arma::vec rotVelQ = arma::join_vert(arma::vec({0}), rotVel);
-  arma::vec QeRotVel = quatProd(Q1,rotVelQ);
-
-  arma::mat JqQ = DMPo::jacobqQ(Q1);
   arma::mat JQq = DMPo::jacobQq(Q1);
   arma::mat JQq_dot = DMPo::jacobDotQq(Q1, rotVel);
 
   arma::vec fo(3);
   for (int i=0; i<3; i++) fo(i) = this->dmp[i]->shapeAttractor(x, qg(i));
 
-  arma::vec deo = DMPo::rotVel2qdot(rotVel, Q1);
-  arma::vec ddeo = (-a_z%b_z%q - tau*a_z%deo + a_z%Yc + fo + tau*Yc_dot - tau*tau_dot*deo + Zc) / std::pow(tau,2);
+  arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
+  arma::vec qddot = (-a_z%b_z%q - tau*a_z%qdot + a_z%Yc + fo + tau*Yc_dot - tau*tau_dot*qdot + Zc) / std::pow(tau,2);
 
-  arma::vec rotAccel1 = quatProd(invQ1, JQq_dot*JqQ*QeRotVel);
-  arma::vec rotAccel2 = 2*quatProd(invQ1, JQq*-ddeo);
-  arma::vec rotAccel = rotAccel1 + rotAccel2;
+  arma::vec rotAccel = 2*quatProd(JQq_dot*qdot + JQq*qddot, invQ1);
 
   return rotAccel.subvec(1,3);
 }
@@ -172,8 +166,8 @@ arma::vec DMPo::getY(const arma::vec &Q) const
 arma::vec DMPo::getZ(const arma::vec &rotVel, const arma::vec &Q) const
 {
   arma::vec Q1 = DMPo::quatTf(Q, this->Q0);
-  arma::vec deo = DMPo::rotVel2qdot(rotVel, Q1);
-  arma::vec dy = deo;
+  arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
+  arma::vec dy = qdot;
 
   return this->getTau()*dy;
 }
@@ -208,35 +202,35 @@ double DMPo::phaseDot(double x) const
 // ****************************************************
 // ====================================================
 
-arma::vec DMPo::quatTf(const arma::vec &Q, const arma::vec &Qg)
+arma::vec DMPo::quatTf(const arma::vec &Q, const arma::vec &Q0)
 {
-  return quatProd(Qg, quatInv(Q));
+  return quatProd(Q, quatInv(Q0));
 }
 
 
-arma::vec DMPo::quat2q(const arma::vec &Q, const arma::vec &Qg)
+arma::vec DMPo::quat2q(const arma::vec &Q, const arma::vec &Q0)
 {
-  return quatLog(DMPo::quatTf(Q,Qg));
+  return quatLog(DMPo::quatTf(Q,Q0));
 }
 
 
-arma::vec DMPo::q2quat(const arma::vec &q, const arma::vec &Qg)
+arma::vec DMPo::q2quat(const arma::vec &q, const arma::vec &Q0)
 {
-  return quatProd( quatInv(quatExp(q)), Qg);
+  return quatProd( quatExp(q), Q0);
 }
 
 
 arma::vec DMPo::rotVel2qdot(const arma::vec &rotVel, const arma::vec &Q1)
 {
   arma::mat JqQ = DMPo::jacobqQ(Q1);
-  return -0.5 * JqQ * quatProd(Q1, arma::join_vert(arma::vec({0}), rotVel));
+  return 0.5 * JqQ * quatProd(arma::join_vert(arma::vec({0}), rotVel), Q1);
 }
 
 
-arma::vec DMPo::qdot2rotVel(const arma::vec &deo, const arma::vec &Q1)
+arma::vec DMPo::qdot2rotVel(const arma::vec &qdot, const arma::vec &Q1)
 {
   arma::mat JQq = DMPo::jacobQq(Q1);
-  arma::vec rotVel = -2 * quatProd( quatInv(Q1), JQq*deo );
+  arma::vec rotVel = 2 * quatProd( JQq*qdot, quatInv(Q1) );
   return rotVel.subvec(1,3);
 }
 
@@ -247,20 +241,20 @@ arma::vec DMPo::rotAccel2qddot(const arma::vec &rotAccel, const arma::vec &rotVe
   arma::vec rotAccelQ = arma::join_vert(arma::vec({0}), rotAccel);
 
   arma::mat J = DMPo::jacobqQ(Q1);
-  arma::mat dJ = DMPo::jacobDotqQ(Q1, rotVel);
+  arma::mat Jdot = DMPo::jacobDotqQ(Q1, rotVel);
 
-  return -0.5 * (dJ * quatProd(Q1, rotVelQ) + J * quatProd( Q1, rotAccelQ-0.5*quatProd(rotVelQ,rotVelQ) ) );
+  return 0.5 * (Jdot * quatProd(rotVelQ, Q1) + J * quatProd( rotAccelQ+0.5*quatProd(rotVelQ,rotVelQ), Q1 ) );
 }
 
 
-arma::vec DMPo::qddot2rotAccel(const arma::vec &ddeo, const arma::vec &rotVel, const arma::vec &Q1)
+arma::vec DMPo::qddot2rotAccel(const arma::vec &qddot, const arma::vec &rotVel, const arma::vec &Q1)
 {
-  arma::vec deo = DMPo::rotVel2qdot(rotVel, Q1);
+  arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
   arma::vec invQ1 = quatInv(Q1);
   arma::mat J = DMPo::jacobQq(Q1);
-  arma::mat dJ = DMPo::jacobDotQq(Q1, rotVel);
+  arma::mat Jdot = DMPo::jacobDotQq(Q1, rotVel);
 
-  arma::vec rotAccel = - 2 * (quatProd(invQ1, dJ*deo) + quatProd(invQ1, J*ddeo));
+  arma::vec rotAccel = 2 * ( quatProd( Jdot*qdot+J*qddot, invQ1 ) );
   return rotAccel.subvec(1,3);
 }
 
@@ -318,15 +312,15 @@ arma::mat DMPo::jacobqQ(const arma::vec &Q1)
 
 arma::mat DMPo::jacobDotqQ(const arma::vec &Q1, const arma::vec &rotVel)
 {
-  arma::mat dJ_deo_dQ(3,4);
+  arma::mat JqQ_dot(3,4);
 
-  arma::vec deo = DMPo::rotVel2qdot(rotVel, Q1);
+  arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
 
   if (std::fabs(Q1(0)-1) <= DMPo::zero_tol)
   {
-    dJ_deo_dQ.col(0) = -deo/3;
-    dJ_deo_dQ.submat(0,1,2,3) = arma::mat().zeros(3,3);
-    return dJ_deo_dQ;
+    JqQ_dot.col(0) = -qdot/3;
+    JqQ_dot.submat(0,1,2,3) = arma::mat().zeros(3,3);
+    return JqQ_dot;
   }
 
   double w = Q1(0);
@@ -339,9 +333,9 @@ arma::mat DMPo::jacobDotqQ(const arma::vec &Q1, const arma::vec &rotVel)
   arma::mat Eta = eta*eta.t();
   double temp = (th*c_th-s_th)/std::pow(s_th,2);
 
-  dJ_deo_dQ.col(0) = ((-th/s_th - 2*c_th*temp/s_th)*Eta + temp*(arma::mat().eye(3,3)-Eta)/th)*deo;
-  dJ_deo_dQ.submat(0,1,2,3) = (-temp*arma::dot(eta,deo))*arma::mat().eye(3,3);
-  return dJ_deo_dQ;
+  JqQ_dot.col(0) = ((-th/s_th - 2*c_th*temp/s_th)*Eta + temp*(arma::mat().eye(3,3)-Eta)/th)*qdot;
+  JqQ_dot.submat(0,1,2,3) = (-temp*arma::dot(eta,qdot))*arma::mat().eye(3,3);
+  return JqQ_dot;
 }
 
 
@@ -349,11 +343,11 @@ arma::mat DMPo::jacobDotQq(const arma::vec &Q1, const arma::vec &rotVel)
 {
   arma::mat JQq_dot(4,3);
 
-  arma::vec deo = DMPo::rotVel2qdot(rotVel, Q1);
+  arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
 
   if (std::fabs(Q1(0)-1) <= DMPo::zero_tol)
   {
-    JQq_dot.row(0) = -deo.t()/4;
+    JQq_dot.row(0) = -qdot.t()/4;
     JQq_dot.submat(1,0,3,2) = arma::mat().zeros(3,3);
     return JQq_dot;
   }
@@ -369,8 +363,8 @@ arma::mat DMPo::jacobDotQq(const arma::vec &Q1, const arma::vec &rotVel)
   arma::mat I_eta = arma::mat().eye(3,3) - Eta;
   double temp = ((th*c_th-s_th)/std::pow(th,2));
 
-  JQq_dot.row(0) = -0.25 * deo.t() * (c_th*Eta + (s_th/th)*I_eta);
-  JQq_dot.submat(1,0,3,2) = (0.25*arma::dot(eta,deo))*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(deo.t()*I_eta) + (I_eta*deo)*eta.t() );
+  JQq_dot.row(0) = -0.25 * qdot.t() * (c_th*Eta + (s_th/th)*I_eta);
+  JQq_dot.submat(1,0,3,2) = (0.25*arma::dot(eta,qdot))*( temp*I_eta - s_th*Eta ) + 0.25*temp*( eta*(qdot.t()*I_eta) + (I_eta*qdot)*eta.t() );
 
   return JQq_dot;
 }
@@ -384,6 +378,7 @@ void DMPo::exportToFile(std::ostream &out) const
 
   dmp_::write_mat(Q0, out);
 }
+
 
 std::shared_ptr<DMPo> DMPo::importFromFile(std::istream &in)
 {
@@ -400,7 +395,7 @@ std::shared_ptr<DMPo> DMPo::importFromFile(std::istream &in)
     dmp_o->dmp[i]->shape_attr_gating_ptr = dmp_o->shape_attr_gating_ptr;
   }
 
-  arma::vec Q0, Qg;
+  arma::vec Q0;
   dmp_::read_mat(Q0, in);
 
   dmp_o->setQ0(Q0);
