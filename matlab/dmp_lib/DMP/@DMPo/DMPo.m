@@ -68,8 +68,15 @@ classdef DMPo < matlab.mixin.Copyable
                Q1 = DMPo.quatTf(Quat_data(:,j), Q0);
                q_data(:,j) = quatLog(Q1);
                qdot_data(:,j) = DMPo.rotVel2qdot(rotVel_data(:,j), Q1);
-               qddot_data(:,j) = DMPo.rotAccel2qddot(rotAccel_data(:,j), rotVel_data(:,j), Q1);
+               % qddot_data(:,j) = DMPo.rotAccel2qddot(rotAccel_data(:,j), rotVel_data(:,j), Q1);
             end
+            
+            Ts = Time(2) - Time(1);
+            for i=1:3
+                qddot_data(i,:) = [diff(qdot_data(i,:)) 0]/Ts;
+            end
+            
+            
 
             if (nargout > 0)
                 train_err = zeros(3,1);

@@ -11,7 +11,7 @@
       # b_z: [1.25, 1.25, 1.25]
       N_kernels: [40, 40, 40]
       train_method: "LS" # {LWR, LS}
-      ks: [1.0, 1.0, 1.0]
+      ks: [2.0, 1.5, 1.8]
       kt: 1.0
       sim_fun: "log" # {log, quat}
     </rosparam>

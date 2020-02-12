@@ -40,7 +40,7 @@ can_clock_ptr = CanonicalClock();
 shape_attr_gat_ptr = SigmoidGatingFunction(1.0, 0.5);
 % shape_attr_gat_ptr = LinGatingFunction(1.0, 0.02);
 N_kernels = [40; 40; 40];
-simulateDMPo = @simulateDMPo_in_log_space; % simulateDMPo_in_quat_space
+simulateDMPo = @simulateDMPo_in_log_space; % simulateDMPo_in_log/quat_space
 dmp_o = DMPo(DMP_TYPE.STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
 
 disp('DMPo training...')
@@ -49,61 +49,61 @@ offline_train_mse = dmp_o.train(train_method, Timed, Qd_data, vRotd_data, dvRotd
 offline_train_mse
 toc
 
-% read c++ DMP weights
-fid = fopen('/home/slifer/slifer/as64_libs/c++/devel/lib/dmp_test/weights.bin','r');
-w = read_mat(fid, true);
-q_data = read_mat(fid, true);
-qdot_data = read_mat(fid, true);
-qddot_data = read_mat(fid, true);
-Quat_data = read_mat(fid, true);
-fclose(fid);
-
-% read matlab DMP weights
-fid = fopen('weights.bin','r');
-w2 = read_mat(fid, true);
-q_data2 = read_mat(fid, true);
-qdot_data2 = read_mat(fid, true);
-qddot_data2 = read_mat(fid, true);
-Quat_data2 = read_mat(fid, true);
-fclose(fid);
-
-w_err = w - w2;
-q_err = q_data - q_data2;
-dq_err = qdot_data - qdot_data2;
-ddq_err = qddot_data - qddot_data2;
-Quat_err = Quat_data - Quat_data2;
-
-figure;
-bar(w_err);
-
-figure;
-for i=1:3
-    subplot(3,1,i);
-    plot(q_err(i,:), 'LineWidth',2, 'Color','red'); 
-end
-
-figure;
-for i=1:3
-    subplot(3,1,i);
-    plot(dq_err(i,:), 'LineWidth',2, 'Color','red'); 
-end
-
-figure;
-for i=1:3
-    subplot(3,1,i);
-    plot(ddq_err(i,:), 'LineWidth',2, 'Color','red'); 
-end
-
-figure;
-for i=1:4
-    subplot(4,1,i);
-    plot(Quat_err(i,:), 'LineWidth',2, 'Color','red'); 
-end
-
-
-fid = fopen('weights2.bin','w');
-write_mat(w2, fid, true);
-fclose(fid);
+% % read c++ DMP weights
+% fid = fopen('/home/slifer/slifer/as64_libs/c++/devel/lib/dmp_test/weights.bin','r');
+% w = read_mat(fid, true);
+% q_data = read_mat(fid, true);
+% qdot_data = read_mat(fid, true);
+% qddot_data = read_mat(fid, true);
+% Quat_data = read_mat(fid, true);
+% fclose(fid);
+% 
+% % read matlab DMP weights
+% fid = fopen('weights.bin','r');
+% w2 = read_mat(fid, true);
+% q_data2 = read_mat(fid, true);
+% qdot_data2 = read_mat(fid, true);
+% qddot_data2 = read_mat(fid, true);
+% Quat_data2 = read_mat(fid, true);
+% fclose(fid);
+% 
+% w_err = w - w2;
+% q_err = q_data - q_data2;
+% dq_err = qdot_data - qdot_data2;
+% ddq_err = qddot_data - qddot_data2;
+% Quat_err = Quat_data - Quat_data2;
+% 
+% figure;
+% bar(w_err);
+% 
+% figure;
+% for i=1:3
+%     subplot(3,1,i);
+%     plot(q_err(i,:), 'LineWidth',2, 'Color','red'); 
+% end
+% 
+% figure;
+% for i=1:3
+%     subplot(3,1,i);
+%     plot(dq_err(i,:), 'LineWidth',2, 'Color','red'); 
+% end
+% 
+% figure;
+% for i=1:3
+%     subplot(3,1,i);
+%     plot(ddq_err(i,:), 'LineWidth',2, 'Color','red'); 
+% end
+% 
+% figure;
+% for i=1:4
+%     subplot(4,1,i);
+%     plot(Quat_err(i,:), 'LineWidth',2, 'Color','red'); 
+% end
+% 
+% 
+% fid = fopen('weights2.bin','w');
+% write_mat(w2, fid, true);
+% fclose(fid);
 
 % return
 

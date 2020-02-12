@@ -164,6 +164,8 @@ public:
 
   static std::shared_ptr<DMPo> importFromFile(std::istream &in);
 
+  arma::mat getAcellPartDev_qg_tau(double t, const arma::vec &q, const arma::vec &qdot, const arma::vec &q0, double x, const arma::vec &qg, double tau) const;
+
 // ===========================================================
 // ***********************************************************
 // ************      Static Public Functions      ************
