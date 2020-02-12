@@ -49,19 +49,48 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-# ********************************************
-# ************   Train DMP  ******************
-# ********************************************
+# *****************************************************
+# ************   Train DMP position  ******************
+# *****************************************************
 
-add_executable(trainDMP
-		src/trainDMP.cpp ${INCLUDE_LIST} ${SRC_LIST}
+add_executable(trainDMP_pos
+		src/trainDMP_pos.cpp ${INCLUDE_LIST} ${SRC_LIST}
 		)
 
-add_dependencies(trainDMP
+add_dependencies(trainDMP_pos
 		${${PROJECT_NAME}_EXPORTED_TARGETS}
 		${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(trainDMP ${LINK_LIBS} )
+target_link_libraries(trainDMP_pos ${LINK_LIBS} )
+
+# ***********************************************
+# ************   Train DMP eo  ******************
+# ***********************************************
+
+add_executable(trainDMP_eo
+		src/trainDMP_eo.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		)
+
+add_dependencies(trainDMP_eo
+		${${PROJECT_NAME}_EXPORTED_TARGETS}
+		${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(trainDMP_eo ${LINK_LIBS} )
+
+
+# *********************************************
+# ************   Train DMPo  ******************
+# *********************************************
+
+add_executable(trainDMP_o
+		src/trainDMP_o.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		)
+
+add_dependencies(trainDMP_o
+		${${PROJECT_NAME}_EXPORTED_TARGETS}
+		${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(trainDMP_o ${LINK_LIBS} )
 
 
 # ******************************************
@@ -83,30 +112,44 @@ target_link_libraries(simDMP ${LINK_LIBS} )
 # ************   sim_DMP_Pos_EKF_disc  ******************
 # *******************************************************
 
-add_executable(sim_DMP_Pos_EKF_disc
-		src/sim_DMP_Pos_EKF_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
+add_executable(sim_DMPpEKFc_disc
+		src/sim_DMPpEKFc_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
 )
 
-add_dependencies(sim_DMP_Pos_EKF_disc
+add_dependencies(sim_DMPpEKFc_disc
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(sim_DMP_Pos_EKF_disc ${LINK_LIBS} )
+target_link_libraries(sim_DMPpEKFc_disc ${LINK_LIBS} )
 
 
 # **********************************************************
-# ************   sim_DMP_Orient_EKF_disc  ******************
+# ************   sim_DMPo_EKF_disc  ******************
 # **********************************************************
 
-add_executable(sim_DMP_Orient_EKF_disc
-		src/sim_DMP_Orient_EKF_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
+#add_executable(sim_DMPo_EKF_disc
+#		src/sim_DMPo_EKF_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
+#		)
+#
+#add_dependencies(sim_DMPo_EKF_disc
+#		${${PROJECT_NAME}_EXPORTED_TARGETS}
+#		${catkin_EXPORTED_TARGETS})
+#
+#target_link_libraries(sim_DMPo_EKF_disc ${LINK_LIBS} )
+
+# ******************************************************
+# ************   sim_DMP_eo_EKF_disc  ******************
+# ******************************************************
+
+add_executable(sim_DMPeoEKFc_disc
+		src/sim_DMPeoEKFc_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
 		)
 
-add_dependencies(sim_DMP_Orient_EKF_disc
+add_dependencies(sim_DMPeoEKFc_disc
 		${${PROJECT_NAME}_EXPORTED_TARGETS}
 		${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(sim_DMP_Orient_EKF_disc ${LINK_LIBS} )
+target_link_libraries(sim_DMPeoEKFc_disc ${LINK_LIBS} )
 
 
 # **********************************************************

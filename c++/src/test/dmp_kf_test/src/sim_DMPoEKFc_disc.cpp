@@ -133,7 +133,7 @@ int main(int argc, char** argv)
   arma::vec Q0d;
   arma::vec Qg0;
   double tau0;
-  loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, &Yg0, &P0d, &Qg0, &Q0d, &tau0);
+  loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, 0, &Yg0, &P0d, &Qg0, &Q0d, &tau0);
 
   std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_o->can_clock_ptr;
   can_clock_ptr->setTau(tau0);
@@ -267,7 +267,7 @@ int main(int argc, char** argv)
   std::cout << "Elapsed time: " << timer.toc() << " sec\n";
 
   // ===========  write results  ===============
-  std::string sim_data_file = path + "/matlab/data/orient_est_results.bin";
+  std::string sim_data_file = path + "/matlab/data/sim/sim_DMPoEKFc_results.bin";
   std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
   if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
   io_::write_mat(Time, out);

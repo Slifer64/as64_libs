@@ -34,7 +34,7 @@ int main(int argc, char** argv)
   arma::vec Q0d;
   arma::vec Qgd;
   double taud;
-  loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, &Pgd, &P0d, &Qgd, &Q0d, &taud);
+  loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, 0, &Pgd, &P0d, &Qgd, &Q0d, &taud);
 
 
   // ===========  DMP simulation  ===============

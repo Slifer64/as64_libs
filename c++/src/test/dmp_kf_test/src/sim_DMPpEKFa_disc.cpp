@@ -22,6 +22,61 @@
 
 using namespace as64_;
 
+double dt;
+
+arma::vec Y0_offset;
+arma::vec pg_offset;
+double time_offset;
+
+arma::mat Qn;
+arma::mat Rn;
+arma::mat Rn_hat;
+
+arma::mat P0;
+double a_p;
+
+arma::mat Mr;
+arma::mat Dr;
+arma::mat Kr;
+
+void loadParams()
+{
+  ros::NodeHandle nh_("~");
+
+  if (!nh_.getParam("dt",dt)) throw std::runtime_error("Failed to load param \"dt\"...");
+
+  std::vector<double> temp;
+  if (!nh_.getParam("Y0_offset",temp)) throw std::runtime_error("Failed to load param \"Y0_offset\"...");
+  Y0_offset = arma::vec(temp);
+
+  if (!nh_.getParam("pg_offset",temp)) throw std::runtime_error("Failed to load param \"pg_offset\"...");
+  pg_offset = arma::vec(temp);
+
+  if (!nh_.getParam("time_offset",time_offset)) throw std::runtime_error("Failed to load param \"time_offset\"...");
+
+  if (!nh_.getParam("Qn",temp)) throw std::runtime_error("Failed to load param \"Qn\"...");
+  Qn = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Rn",temp)) throw std::runtime_error("Failed to load param \"Rn\"...");
+  Rn = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Rn_hat",temp)) throw std::runtime_error("Failed to load param \"Rn_hat\"...");
+  Rn_hat = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("P0",temp)) throw std::runtime_error("Failed to load param \"P0\"...");
+  P0 = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("a_p",a_p)) throw std::runtime_error("Failed to load param \"a_p\"...");
+
+  if (!nh_.getParam("Mr",temp)) throw std::runtime_error("Failed to load param \"Mr\"...");
+  Mr = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Dr",temp)) throw std::runtime_error("Failed to load param \"Dr\"...");
+  Dr = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Kr",temp)) throw std::runtime_error("Failed to load param \"Kr\"...");
+  Kr = arma::diagmat(arma::vec(temp));
+}
 
 int main(int argc, char** argv)
 {
@@ -33,33 +88,22 @@ int main(int argc, char** argv)
 
   arma::arma_rng::set_seed(0);
 
-  double dt = 0.005;
-
-  arma::vec Y0_offset = arma::vec({0,0,0});
-  arma::vec pg_offset = arma::vec({0.8, -0.9, 0.7});
-  double time_offset = 5;
-
-  arma::mat Qn = 0.001*arma::mat().eye(10,10);
-  arma::mat Rn = std::pow(0.1,2)*arma::mat().eye(6,6);
-  arma::mat Rn_hat = arma::diagmat(arma::vec( {100, 100, 100, 100, 100, 100} ));
-
-  arma::mat P0 = arma::diagmat(arma::vec( {1,1,1,  1,1,1,  100,100,100,  1000} ));
-  double a_p = 1.002;
-
-  arma::mat Mr = 5*arma::mat().eye(3,3);
-  arma::mat Dr = 80*arma::mat().eye(3,3);
-  arma::mat Kr = 400*arma::mat().eye(3,3);
+  loadParams();
 
   // ===========  load DMP data  ===============
-  std::string dmp_data_file = path + "/matlab/data/dmp_data.bin";
+  std::string dmp_data_file = path + "/matlab/data/model/dmp_pos_data.bin";
+  std::ifstream in(dmp_data_file, std::ios::in | std::ios::binary);
+  if (!in) throw std::runtime_error("Failed to open file \"" + dmp_data_file + "\"...");
   std::shared_ptr<dmp_::DMP_pos> dmp_p;
-  std::shared_ptr<dmp_::DMP_eo> dmp_o;
+  arma::vec Pg0;
   arma::vec P0d;
-  arma::vec Yg0;
-  arma::vec Q0d;
-  arma::vec Qg0;
   double tau0;
-  loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, &Yg0, &P0d, &Qg0, &Q0d, &tau0);
+  dmp_p = dmp_::DMP_pos::importFromFile(in);
+  io_::read_mat(Pg0, in);
+  io_::read_mat(P0d, in);
+  io_::read_scalar(tau0, in);
+  in.close();
+  // ===========================================
 
   std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_p->can_clock_ptr;
   can_clock_ptr->setTau(tau0);
@@ -85,14 +129,14 @@ int main(int argc, char** argv)
   arma::mat F_data;
   arma::mat Sigma_theta_data;
 
-  arma::vec pg = Yg0 + pg_offset;
+  arma::vec pg = Pg0 + pg_offset;
 
   double t_end = tau0 + time_offset;
   double tau = t_end;
   can_clock_ptr->setTau(tau);
 
   double tau_hat = tau0;
-  arma::vec pg_hat = Yg0;
+  arma::vec pg_hat = Pg0;
   double x_hat = t/tau_hat;
   arma::vec p_hat = p;
   arma::vec p_dot_hat = p_dot;
@@ -204,7 +248,7 @@ int main(int argc, char** argv)
   std::cerr << "ekf_max_time = " << ekf_max_time << " ms\n";
 
   // ===========  write results  ===============
-  std::string sim_data_file = path + "/matlab/data/sim_DMPpEKFa_results.bin";
+  std::string sim_data_file = path + "/matlab/data/sim/sim_DMPpEKFa_results.bin";
   std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
   if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
   io_::write_mat(Time, out);

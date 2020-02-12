@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="dmp_kf_test" type="trainDMP_eo" name="trainDMP_eo" output="screen">
+
+
+  </node>
+
+</launch>

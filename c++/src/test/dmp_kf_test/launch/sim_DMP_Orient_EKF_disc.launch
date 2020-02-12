@@ -1,8 +1,0 @@
-<launch>
-
-  <node pkg="dmp_kf_test" type="sim_DMP_Orient_EKF_disc" name="sim_DMP_Orient_EKF_disc" output="screen">
-
-
-  </node>
-
-</launch>

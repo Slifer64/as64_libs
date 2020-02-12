@@ -63,13 +63,15 @@ void simulatePosOrientDMP(std::shared_ptr<dmp_::DMP_pos> &dmp_p,
 
 void saveDMPdata(const std::string &dmp_data_file,
                  const std::shared_ptr<dmp_::DMP_pos> &dmp_p,
-                 const std::shared_ptr<dmp_::DMP_eo> &dmp_o,
+                 const std::shared_ptr<dmp_::DMP_eo> &dmp_eo,
+                 const std::shared_ptr<dmp_::DMPo> &dmp_o,
                  const arma::vec &Yg0, const arma::vec &Y0,
                  const arma::vec &Qg0, const arma::vec &Q0, double tau0)
 {
   std::ofstream out(dmp_data_file, std::ios::out | std::ios::binary);
   if (!out) throw std::runtime_error("Failed to create file \"" + dmp_data_file + "\"...");
   dmp_p->exportToFile(out);
+  dmp_eo->exportToFile(out);
   dmp_o->exportToFile(out);
   io_::write_mat(Yg0, out);
   io_::write_mat(Y0, out);
@@ -81,7 +83,8 @@ void saveDMPdata(const std::string &dmp_data_file,
 
 void loadDMPdata(const std::string &dmp_data_file,
                  std::shared_ptr<dmp_::DMP_pos> *dmp_p,
-                 std::shared_ptr<dmp_::DMP_eo> *dmp_o,
+                 std::shared_ptr<dmp_::DMP_eo> *dmp_eo,
+                 std::shared_ptr<dmp_::DMPo> *dmp_o,
                  arma::vec *Yg0, arma::vec *Y0,
                  arma::vec *Qg0, arma::vec *Q0, double *tau0)
 {
@@ -95,7 +98,8 @@ void loadDMPdata(const std::string &dmp_data_file,
   double tau0_2;
 
   std::shared_ptr<dmp_::DMP_pos> dmp_p_2 = dmp_::DMP_pos::importFromFile(in);
-  std::shared_ptr<dmp_::DMP_eo> dmp_o_2 = dmp_::DMP_eo::importFromFile(in);
+  std::shared_ptr<dmp_::DMP_eo> dmp_eo_2 = dmp_::DMP_eo::importFromFile(in);
+  std::shared_ptr<dmp_::DMPo> dmp_o_2 = dmp_::DMPo::importFromFile(in);
   io_::read_mat(Yg0_2, in);
   io_::read_mat(Y0_2, in);
   io_::read_mat(Qg0_2, in);
@@ -104,6 +108,7 @@ void loadDMPdata(const std::string &dmp_data_file,
   in.close();
 
   if (dmp_p) *dmp_p = dmp_p_2;
+  if (dmp_eo) *dmp_eo = dmp_eo_2;
   if (dmp_o) *dmp_o = dmp_o_2;
   if (Yg0) *Yg0 = Yg0_2;
   if (Y0) *Y0 = Y0_2;

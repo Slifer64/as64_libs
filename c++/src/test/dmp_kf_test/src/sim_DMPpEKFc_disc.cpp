@@ -63,6 +63,90 @@ arma::vec pMsrFun(const arma::vec &theta, void *cookie)
   return Y_out;
 }
 
+arma::mat pStateTransFunJacob(const arma::vec &theta, void *cookie)
+{
+  int n_params = theta.size();
+  arma::mat J = arma::mat().eye(n_params, n_params);
+  return J;
+}
+
+arma::mat pMsrFunJacob(const arma::vec &theta, void *cookie)
+{
+  PosMsrCookie *ck = static_cast<PosMsrCookie *>(cookie);
+
+  int n_params = theta.size();
+  int i_end = n_params - 1;
+  arma::vec Yg_hat = theta.subvec(0,i_end-1);
+  double tau_hat = theta(i_end);
+  double x_hat = ck->t / tau_hat;
+
+  arma::mat J = ck->dmp_p->getAcellPartDev_g_tau(ck->t, ck->Y, ck->dY, ck->Y0, x_hat, Yg_hat, tau_hat);
+  return J;
+}
+
+double dt;
+arma::vec Y0_offset;
+arma::vec Yg_offset;
+double time_offset;
+arma::vec Yg_up_lim ;
+arma::vec Yg_low_lim;
+double tau_low_lim;
+double tau_up_lim;
+arma::mat process_noise;
+double msr_noise;
+double msr_noise_hat;
+arma::mat init_params_variance;
+double a_p;
+bool enable_constraints;
+arma::vec num_diff_step;
+bool ekf_use_num_diff;
+arma::mat M_r;
+
+void loadParams()
+{
+  ros::NodeHandle nh_("~");
+  if (!nh_.getParam("ekf_use_num_diff",ekf_use_num_diff)) ekf_use_num_diff = false;
+
+  if (!nh_.getParam("dt",dt)) throw std::runtime_error("Failed to load param \"dt\"...");
+
+  std::vector<double> temp;
+  if (!nh_.getParam("Y0_offset",temp)) throw std::runtime_error("Failed to load param \"Y0_offset\"...");
+  Y0_offset = arma::vec(temp);
+
+  if (!nh_.getParam("Yg_offset",temp)) throw std::runtime_error("Failed to load param \"Yg_offset\"...");
+  Yg_offset = arma::vec(temp);
+
+  if (!nh_.getParam("time_offset",time_offset)) throw std::runtime_error("Failed to load param \"time_offset\"...");
+
+  if (!nh_.getParam("Yg_up_lim",temp)) throw std::runtime_error("Failed to load param \"Yg_up_lim\"...");
+  Yg_up_lim = arma::vec(temp);
+
+  if (!nh_.getParam("Yg_low_lim",temp)) throw std::runtime_error("Failed to load param \"Yg_low_lim\"...");
+  Yg_low_lim = arma::vec(temp);
+
+  if (!nh_.getParam("tau_low_lim",tau_low_lim)) throw std::runtime_error("Failed to load param \"tau_low_lim\"...");
+  if (!nh_.getParam("tau_up_lim",tau_up_lim)) throw std::runtime_error("Failed to load param \"tau_up_lim\"...");
+
+  if (!nh_.getParam("process_noise",temp)) throw std::runtime_error("Failed to load param \"process_noise\"...");
+  process_noise = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("msr_noise",msr_noise)) throw std::runtime_error("Failed to load param \"msr_noise\"...");
+
+  if (!nh_.getParam("msr_noise_hat",msr_noise_hat)) throw std::runtime_error("Failed to load param \"msr_noise_hat\"...");
+
+  if (!nh_.getParam("init_params_variance",temp)) throw std::runtime_error("Failed to load param \"init_params_variance\"...");
+  init_params_variance = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("a_p",a_p)) throw std::runtime_error("Failed to load param \"a_p\"...");
+
+  if (!nh_.getParam("enable_constraints",enable_constraints)) throw std::runtime_error("Failed to load param \"enable_constraints\"...");
+
+  if (!nh_.getParam("ekf_num_diff_step",temp)) throw std::runtime_error("Failed to load param \"num_diff_step\"...");
+  num_diff_step = arma::vec(temp);
+
+  if (!nh_.getParam("M_r",temp)) throw std::runtime_error("Failed to load param \"M_r\"...");
+  M_r = arma::diagmat(arma::vec(temp));
+}
 
 int main(int argc, char** argv)
 {
@@ -72,26 +156,7 @@ int main(int argc, char** argv)
 
   std::string path = ros::package::getPath("dmp_kf_test");
 
-  double dt = 0.005;
-
-  arma::vec Y0_offset = {0.0, 0.0, 0.0};
-
-  arma::vec Yg_offset = {0.75, -0.09, 0.64};
-  double time_offset = 6;
-
-  arma::vec Yg_up_lim = 0.8*arma::vec({1.0, 1.0, 1.0,});
-  arma::vec Yg_low_lim = -Yg_up_lim;
-  double tau_low_lim = 1.0;
-  double tau_up_lim = 30.0; // Inf;
-
-  arma::mat process_noise = arma::diagmat(arma::vec({0.02, 0.02, 0.02, 0.05})); // Q
-  double msr_noise = std::pow(0.2,2);
-  double msr_noise_hat = 1000;
-
-
-  arma::mat init_params_variance = arma::diagmat( 1e5*arma::vec({1, 1, 1, 1}) ); // P
-  double a_pc = 0.99; // forgetting factor in fading memory KF
-  double a_p = 1.002;
+  loadParams();
 
   arma::vec theta_low_lim = arma::join_vert(Yg_low_lim, arma::vec({tau_low_lim}) );
   arma::vec theta_up_lim = arma::join_vert(Yg_up_lim, arma::vec({tau_up_lim}) );
@@ -99,22 +164,22 @@ int main(int argc, char** argv)
   int N_params = theta_low_lim.size();
   arma::mat A_c = arma::join_vert(-arma::mat().eye(N_params, N_params), arma::mat().eye(N_params, N_params));
   arma::vec b_c = arma::join_vert(-theta_low_lim, theta_up_lim);
-  bool enable_constraints = true;
-
-  arma::vec num_diff_step = {0.001, 0.001, 0.001, 0.01};
-
-  arma::mat M_r = 5*arma::mat().eye(3,3);
 
   // ===========  load DMP data  ===============
-  std::string dmp_data_file = path + "/matlab/data/dmp_data.bin";
+  std::string dmp_data_file = path + "/matlab/data/model/dmp_pos_data.bin";
+  std::ifstream in(dmp_data_file, std::ios::in | std::ios::binary);
+  if (!in) throw std::runtime_error("Failed to open file \"" + dmp_data_file + "\"...");
   std::shared_ptr<dmp_::DMP_pos> dmp_p;
-  std::shared_ptr<dmp_::DMP_eo> dmp_o;
   arma::vec P0d;
   arma::vec Yg0;
-  arma::vec Q0d;
-  arma::vec Qgd;
   double tau0;
-  loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, &Yg0, &P0d, &Qgd, &Q0d, &tau0);
+  dmp_p = dmp_::DMP_pos::importFromFile(in);
+  io_::read_mat(Yg0, in);
+  io_::read_mat(P0d, in);
+  io_::read_scalar(tau0, in);
+  in.close();
+
+  // ========================================
 
   int Dim = Yg0.size();
   std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_p->can_clock_ptr;
@@ -176,8 +241,11 @@ int main(int argc, char** argv)
   ekf.setParamsConstraints(A_c, b_c);
   ekf.setPartDerivStep(num_diff_step);
 
-  // ekf.setStateTransFunJacob(@pStateTransFunJacob);
-  // ekf.setMsrFunJacob(@pMsrFunJacob);
+  if (!ekf_use_num_diff)
+  {
+    ekf.setStateTransFunJacob(&pStateTransFunJacob);
+    ekf.setMsrFunJacob(&pMsrFunJacob);
+  }
 
   dmp_p->setY0(Y0);
 
@@ -205,7 +273,6 @@ int main(int argc, char** argv)
     dmp_p->setTau(tau);
 
     ddY = dmp_p->calcYddot(x, Y, dY, Yg) + Sigma_vn*arma::vec().randn(N_out);
-
 
     F_ext = M_r * (ddY - ddY_hat);
 
@@ -249,7 +316,7 @@ int main(int argc, char** argv)
   std::cout << "Elapsed time: " << timer.toc() << " sec\n";
 
   // ===========  write results  ===============
-  std::string sim_data_file = path + "/matlab/data/pos_est_results.bin";
+  std::string sim_data_file = path + "/matlab/data/sim/sim_DMPpEKFc_results.bin";
   std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
   if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
   io_::write_mat(Time, out);

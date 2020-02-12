@@ -2,6 +2,25 @@
 
   <node pkg="dmp_kf_test" type="sim_DMPoEKFa_disc" name="sim_DMPoEKFa_disc" output="screen">
 
+    <rosparam>
+      dt: 0.005
+
+      Q0_offset: [0, 0, 0]
+      Qg_offset: [0.8, -0.7, 0.55]
+      time_offset: 5
+
+      Qn: [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001]
+      Rn: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+      Rn_hat: [0.1, 0.1, 0.1, 0.01, 0.01, 0.01]
+
+      P0: [0.1,0.1,0.1,  0.1,0.1,0.1,  1,1,1,  10]
+      a_p: 1.002
+
+      Mr: [1, 1, 1]
+      Dr: [5, 5, 5]
+      Kr: [10, 10, 10]
+    </rosparam>
+
   </node>
 
 </launch>

@@ -2,6 +2,25 @@
 
   <node pkg="dmp_kf_test" type="sim_DMPpEKFa_disc" name="sim_DMPpEKFa_disc" output="screen">
 
+    <rosparam>
+      dt: 0.005
+
+      Y0_offset: [0, 0, 0]
+      pg_offset: [0.8, -0.9, 0.7]
+      time_offset: 5
+
+      Qn: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+      Rn: [0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
+      Rn_hat: [100, 100, 100, 100, 100, 100]
+
+      P0: [1,1,1,  1,1,1,  100,100,100,  1000]
+      a_p: 1.002
+
+      Mr: [5, 5, 5]
+      Dr: [80, 80, 80]
+      Kr: [400, 400, 400]
+    </rosparam>
+
   </node>
 
 </launch>

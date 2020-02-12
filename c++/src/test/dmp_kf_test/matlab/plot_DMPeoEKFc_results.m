@@ -1,10 +1,10 @@
 
-path = strrep(mfilename('fullpath'), 'plot_orient_est_results','');
+path = strrep(mfilename('fullpath'), 'plot_DMPeoEKFc_results','');
 addpath([path 'utils/']);
 
 addpath([path '/utils/']);
 
-filename = [path '/data/orient_est_results.bin'];
+filename = [path '/data/sim/sim_DMPeoEKFc_results.bin'];
 %% Load sim data
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end

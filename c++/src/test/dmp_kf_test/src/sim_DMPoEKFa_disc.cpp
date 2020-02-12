@@ -19,6 +19,61 @@
 
 using namespace as64_;
 
+double dt;
+
+arma::vec Q0_offset;
+arma::vec Qg_offset;
+double time_offset;
+
+arma::mat Qn;
+arma::mat Rn;
+arma::mat Rn_hat;
+
+arma::mat P0;
+double a_p;
+
+arma::mat Mr;
+arma::mat Dr;
+arma::mat Kr;
+
+void loadParams()
+{
+  ros::NodeHandle nh_("~");
+
+  if (!nh_.getParam("dt",dt)) throw std::runtime_error("Failed to load param \"dt\"...");
+
+  std::vector<double> temp;
+  if (!nh_.getParam("Q0_offset",temp)) throw std::runtime_error("Failed to load param \"Q0_offset\"...");
+  Q0_offset = arma::vec(temp);
+
+  if (!nh_.getParam("Qg_offset",temp)) throw std::runtime_error("Failed to load param \"Qg_offset\"...");
+  Qg_offset = arma::vec(temp);
+
+  if (!nh_.getParam("time_offset",time_offset)) throw std::runtime_error("Failed to load param \"time_offset\"...");
+
+  if (!nh_.getParam("Qn",temp)) throw std::runtime_error("Failed to load param \"Qn\"...");
+  Qn = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Rn",temp)) throw std::runtime_error("Failed to load param \"Rn\"...");
+  Rn = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Rn_hat",temp)) throw std::runtime_error("Failed to load param \"Rn_hat\"...");
+  Rn_hat = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("P0",temp)) throw std::runtime_error("Failed to load param \"P0\"...");
+  P0 = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("a_p",a_p)) throw std::runtime_error("Failed to load param \"a_p\"...");
+
+  if (!nh_.getParam("Mr",temp)) throw std::runtime_error("Failed to load param \"Mr\"...");
+  Mr = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Dr",temp)) throw std::runtime_error("Failed to load param \"Dr\"...");
+  Dr = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("Kr",temp)) throw std::runtime_error("Failed to load param \"Kr\"...");
+  Kr = arma::diagmat(arma::vec(temp));
+}
 
 int main(int argc, char** argv)
 {
@@ -30,33 +85,22 @@ int main(int argc, char** argv)
 
   arma::arma_rng::set_seed(0);
 
-  double dt = 0.005;
-
-  arma::vec Q0_offset = math_::quatExp(arma::vec({0,0,0}));
-  arma::vec Qg_offset = math_::quatExp(arma::vec({0.8, -0.7, 0.55}));
-  double time_offset = 5;
-
-  arma::mat Qn = 0.0001*arma::mat().eye(10,10);
-  arma::mat Rn = std::pow(0.01,2)*arma::mat().eye(6,6);
-  arma::mat Rn_hat = arma::diagmat(arma::vec( {0.1, 0.1, 0.1, 0.01, 0.01, 0.01} ));
-
-  arma::mat P0 = arma::diagmat(arma::vec( {0.1,0.1,0.1,  0.1,0.1,0.1,  1,1,1,  10} ));
-  double a_p = 1.002;
-
-  arma::mat Mr = 1*arma::mat().eye(3,3);
-  arma::mat Dr = 5*arma::mat().eye(3,3);
-  arma::mat Kr = 10*arma::mat().eye(3,3);
+  loadParams();
 
   // ===========  load DMP data  ===============
-  std::string dmp_data_file = path + "/matlab/data/dmp_data.bin";
-  std::shared_ptr<dmp_::DMP_pos> dmp_p;
+  std::string dmp_data_file = path + "/matlab/data/model/dmp_eo_data.bin";
+  std::ifstream in(dmp_data_file, std::ios::in | std::ios::binary);
+  if (!in) throw std::runtime_error("Failed to open file \"" + dmp_data_file + "\"...");
   std::shared_ptr<dmp_::DMP_eo> dmp_o;
-  arma::vec P0d;
-  arma::vec Yg0;
-  arma::vec Q0d;
   arma::vec Qg0;
+  arma::vec Q0d;
   double tau0;
-  loadDMPdata(dmp_data_file, &dmp_p, &dmp_o, &Yg0, &P0d, &Qg0, &Q0d, &tau0);
+  dmp_o = dmp_::DMP_eo::importFromFile(in);
+  io_::read_mat(Qg0, in);
+  io_::read_mat(Q0d, in);
+  io_::read_scalar(tau0, in);
+  in.close();
+  // ===========================================
 
   std::shared_ptr<dmp_::CanonicalClock> can_clock_ptr = dmp_o->can_clock_ptr;
   can_clock_ptr->setTau(tau0);
@@ -67,7 +111,8 @@ int main(int argc, char** argv)
   double t = 0.0;
   double x = 0.0;
   double dx = 0.0;
-  arma::vec Q0 = math_::quatProd(Q0_offset, Q0d);
+
+  arma::vec Q0 = math_::quatProd(math_::quatExp(Q0_offset), Q0d);
   arma::vec Q = Q0;
   arma::vec vRot = arma::vec().zeros(Dim);
   arma::vec dvRot = arma::vec().zeros(Dim);
@@ -82,7 +127,7 @@ int main(int argc, char** argv)
   arma::mat F_data;
   arma::mat Sigma_theta_data;
 
-  arma::vec Qg = math_::quatProd(Qg_offset, Qg0);
+  arma::vec Qg = math_::quatProd(math_::quatExp(Qg_offset), Qg0);
 
   double t_end = tau0 + time_offset;
   double tau = t_end;
@@ -206,7 +251,7 @@ int main(int argc, char** argv)
   std::cerr << "ekf_max_time = " << ekf_max_time << " ms\n";
 
   // ===========  write results  ===============
-  std::string sim_data_file = path + "/matlab/data/sim_DMPoEKFa_results.bin";
+  std::string sim_data_file = path + "/matlab/data/sim/sim_DMPoEKFa_results.bin";
   std::ofstream out(sim_data_file, std::ios::out | std::ios::binary);
   if (!out) throw std::runtime_error("Failed to create file \"" + sim_data_file + "\"...");
   io_::write_mat(Time, out);

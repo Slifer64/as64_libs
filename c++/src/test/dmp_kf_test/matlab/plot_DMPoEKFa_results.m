@@ -4,7 +4,7 @@ addpath([path 'utils/']);
 
 addpath([path '/utils/']);
 
-filename = [path '/data/sim_DMPoEKFa_results.bin'];
+filename = [path '/data/sim/sim_DMPoEKFa_results.bin'];
 %% Load sim data
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end

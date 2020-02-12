@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="dmp_kf_test" type="trainDMP_pos" name="trainDMP_pos" output="screen">
+
+
+  </node>
+
+</launch>

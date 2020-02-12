@@ -3,7 +3,7 @@ path = strrep(mfilename('fullpath'), 'plot_train_results','');
 addpath([path '/utils/']);
 
 %% Load train data
-filename = [path '/data/train_data.bin'];
+filename = [path '/data/train/train_data.bin'];
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end
 
@@ -18,7 +18,7 @@ dvRotd_data = read_mat(in, true);
 fclose(in);
 
 %% Load sim data
-filename = [path '/data/sim_data.bin'];
+filename = [path '/data/sim/sim_data.bin'];
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end
 
