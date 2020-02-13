@@ -124,7 +124,24 @@ public:
   arma::vec calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotVel, const arma::vec &Qg,
       double tau_dot=0, const arma::vec &Yc=arma::vec().zeros(3), const arma::vec &Zc=arma::vec().zeros(3), const arma::vec &Yc_dot=arma::vec().zeros(3)) const;
 
-  /** \brief Returns the 'y' state of the DMP based on the current orientation.
+
+  /** \brief Calculates the second derivative of DMP's state 'y'.
+   *  @param[in] x: phase variable.
+   *  @param[in] Y: 'y' state.
+   *  @param[in] dY: derivative of 'y' state.
+   *  @param[in] Yg: target.
+   *  @param[in] tau_dot: time derivative of time scaling (optional, default=0).
+   *  @param[in] Yc: Coupling term fo 'y' state diff-equation (optional, default=0).
+   *  @param[in] Zc: Coupling term fo 'z' state diff-equation (optional, default=0).
+   *  @param[in] Yc_dot: time derivative of 'yc' coupling term (optional, default=0).
+   *  @return: the second derivative of DMP's state 'y'.
+   */
+  arma::vec calcYddot(double x, const arma::vec &Y, const arma::vec &dY, const arma::vec &Yg,
+                      double tau_dot=0, const arma::vec &Yc=arma::vec().zeros(3),
+                      const arma::vec &Zc=arma::vec().zeros(3), const arma::vec &Yc_dot=arma::vec().zeros(3));
+
+
+    /** \brief Returns the 'y' state of the DMP based on the current orientation.
    *  @param[in] Q: Current orientation (as unit quaternion).
    */
   arma::vec getY(const arma::vec &Q) const;
@@ -206,43 +223,43 @@ public:
 
 
   /** \brief TODO doc.*/
-  static arma::vec qdot2rotVel(const arma::vec &deo, const arma::vec &Qe);
+  static arma::vec qdot2rotVel(const arma::vec &q_dot, const arma::vec &Q1);
 
 
   /** \brief TODO doc.*/
-  static arma::vec rotAccel2qddot(const arma::vec &rotAccel, const arma::vec &rotVel, const arma::vec &Qe);
+  static arma::vec rotAccel2qddot(const arma::vec &rotAccel, const arma::vec &rotVel, const arma::vec &Q1);
 
 
   /** \brief TODO doc.*/
-  static arma::vec qddot2rotAccel(const arma::vec &ddeo, const arma::vec &rotVel, const arma::vec &Qe);
+  static arma::vec qddot2rotAccel(const arma::vec &q_ddot, const arma::vec &rotVel, const arma::vec &Q1);
 
 
   /** \brief Returns the Jacobian from the derivative of log to the derivative of Q.
    *  @param[in] Q1: The orientation w.r.t. the initial orientation.
    *  @return: Jacobian.
    */
-  static arma::mat jacobQq(const arma::vec &Qe);
+  static arma::mat jacobQq(const arma::vec &Q1);
 
 
   /** \brief Returns the Jacobian from the derivative of Q to the derivative of log.
    *  @param[in] Q1: The orientation w.r.t. the initial orientation.
    *  @return: Jacobian.
    */
-  static arma::mat jacobqQ(const arma::vec &Qe);
+  static arma::mat jacobqQ(const arma::vec &Q1);
 
 
   /** \brief Returns the time derivative of the Jacobian from the derivative of log to the derivative of Q.
    *  @param[in] Q1: The orientation w.r.t. the initial orientation.
    *  @return: Jacobian time derivative.
    */
-  static arma::mat jacobDotqQ(const arma::vec &Qe, const arma::vec &rotVel);
+  static arma::mat jacobDotqQ(const arma::vec &Q1, const arma::vec &rotVel);
 
 
   /** \brief Returns the time derivative of the Jacobian from the derivative of Q to the derivative of log.
    *  @param[in] Q1: The orientation w.r.t. the initial orientation.
    *  @return: Jacobian time derivative.
    */
-  static arma::mat jacobDotQq(const arma::vec &Qe, const arma::vec &rotVel);
+  static arma::mat jacobDotQq(const arma::vec &Q1, const arma::vec &rotVel);
 
 // =======================================================
 // *******************************************************

@@ -189,6 +189,18 @@ arma::vec DMPo::calcRotAccel(double x, const arma::vec &Q, const arma::vec &rotV
   return rotAccel.subvec(1,3);
 }
 
+arma::vec DMPo::calcYddot(double x, const arma::vec &Y, const arma::vec &dY, const arma::vec &Yg,
+                             double tau_dot, const arma::vec &Yc, const arma::vec &Zc, const arma::vec &Yc_dot)
+{
+  int n_dim = this->dmp.size();
+  arma::vec ddY(n_dim);
+  for (int i=0; i<n_dim; i++)
+    ddY(i) = this->dmp[i]->calcYddot(x, Y(i), dY(i), Yg(i), tau_dot, Yc(i), Zc(i), Yc_dot(i));
+
+  return ddY;
+}
+
+
 arma::vec DMPo::getY(const arma::vec &Q) const
 {
   return DMPo::quat2q(Q, this->Q0);

@@ -127,15 +127,16 @@ target_link_libraries(sim_DMPpEKFc_disc ${LINK_LIBS} )
 # ************   sim_DMPo_EKF_disc  ******************
 # **********************************************************
 
-#add_executable(sim_DMPo_EKF_disc
-#		src/sim_DMPo_EKF_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
-#		)
-#
-#add_dependencies(sim_DMPo_EKF_disc
-#		${${PROJECT_NAME}_EXPORTED_TARGETS}
-#		${catkin_EXPORTED_TARGETS})
-#
-#target_link_libraries(sim_DMPo_EKF_disc ${LINK_LIBS} )
+add_executable(sim_DMPoEKFc_disc
+		src/sim_DMPoEKFc_disc.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		)
+
+add_dependencies(sim_DMPoEKFc_disc
+		${${PROJECT_NAME}_EXPORTED_TARGETS}
+		${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(sim_DMPoEKFc_disc ${LINK_LIBS} )
+
 
 # ******************************************************
 # ************   sim_DMP_eo_EKF_disc  ******************

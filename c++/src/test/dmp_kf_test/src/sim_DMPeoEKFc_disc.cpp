@@ -34,21 +34,13 @@ struct OrientMsrCookie
   double t;
   arma::vec Q;
   arma::vec vRot;
-  arma::vec Q0;
-  arma::vec Qg;
-  double tau;
 
-  OrientMsrCookie(std::shared_ptr<dmp_::DMP_eo> dmp_o, double t,
-               const arma::vec &Q, const arma::vec &vRot, const arma::vec &Q0,
-               const arma::vec &Qg, double tau)
+  OrientMsrCookie(std::shared_ptr<dmp_::DMP_eo> dmp_o, double t, const arma::vec &Q, const arma::vec &vRot)
   {
     this->dmp_o = dmp_o;
     this->t = t;
     this->Q = Q;
     this->vRot = vRot;
-    this->Q0 = Q0;
-    this->Qg = Qg;
-    this->tau = tau;
   }
 };
 
@@ -80,9 +72,10 @@ arma::vec oMsrFun(const arma::vec &theta, void *cookie)
   double tau_hat = theta(3);
   double x_hat = ck->t / tau_hat;
 
+  double tau0 = ck->dmp_o->getTau();
   ck->dmp_o->setTau(tau_hat);
   arma::vec Y_out = ck->dmp_o->calcRotAccel(x_hat, Q, ck->vRot, Qg_hat);
-  ck->dmp_o->setTau(ck->tau);
+  ck->dmp_o->setTau(tau0); // restore previous tau
 
   return Y_out;
 }
@@ -269,7 +262,7 @@ int main(int argc, char** argv)
     dx = can_clock_ptr->getPhaseDot(x);
 
     // Stopping criteria
-    double err_o = arma::norm(Qg-Q)/arma::norm(Qg);
+    double err_o = arma::norm( math_::quatLog( math_::quatProd(Qg,math_::quatInv(Q)) ) );
     if (err_o <= 0.5e-2 & t>=t_end) break;
 
     if (t>=t_end)
@@ -279,7 +272,7 @@ int main(int argc, char** argv)
     }
 
     // ========  KF measurement update  ========
-    OrientMsrCookie msr_cookie(dmp_o, t, Q, vRot, Q0, Qg, tau);
+    OrientMsrCookie msr_cookie(dmp_o, t, Q, vRot);
     ekf.correct(Y_out, static_cast<void *>(&msr_cookie));
 
     // ========  KF time update  ========

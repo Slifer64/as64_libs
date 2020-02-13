@@ -1,35 +1,30 @@
 <launch>
 
-  <node pkg="dmp_kf_test" type="sim_DMP_o_EKF_disc" name="sim_DMP_o_EKF_disc" output="screen">
+  <node pkg="dmp_kf_test" type="sim_DMPoEKFc_disc" name="sim_DMPoEKFc_disc" output="screen">
 
     <rosparam>
-      dt: 0.005  # numerical integration time step
+      dt: 0.005 # numerical integration time step
 
-      Y0_offset: [0.0, 0.0, 0.0] # initial position offset
+      q0_offset: [0, 0, 0] # initial orientation offset, as quatLog
+      qg_offset: [0.8, -0.7, 0.55] # target orientation offset, as quatLog
+      time_offset: -2.5 # time scaling offset
 
-      Yg_offset: [0.75, -0.09, 0.64] # target position offset
-      time_offset: 6 # time scaling offset
-
-      Yg_up_lim: [0.8, 0.8, 0.8] # upper limit for position estimate
-      Yg_low_lim: [-0.8, -0.8, -0.8] # lower limit for position estimate
       tau_low_lim: 1.0 # upper limit for tau estimate
       tau_up_lim: 30.0 # lower limit for tau estimate
 
       process_noise: [0.02, 0.02, 0.02, 0.05] # process noise covariance
-      msr_noise: 0.04 # measurement noise covariance for corrupting measurements in sim
-      msr_noise_hat: 1000 # measurement noise covariance used in EKF
+      msr_noise: 0.0025 # measurement noise covariance for corrupting measurements in sim
+      msr_noise_hat: 10 # measurement noise covariance used in EKF
 
       init_params_variance: [1, 1, 1, 1] # P0
       a_p: 1.002 # forgetting factor in fading memory discrete EKF
 
+      num_diff_step: [0.001, 0.001, 0.001, 0.01] # num-diff step used in EKF for computing Jacobians
+      ekf_use_num_diff: true # use numerical diff to calc Jacobians in EKF
       enable_constraints: true
-      ekf_use_num_diff: false # use numerical diff to calc Jacobians in EKF
-      ekf_num_diff_step: [0.001, 0.001, 0.001, 0.01] # num-diff step used in EKF for computing Jacobians
 
-      M_r: [5, 5, 5] # reference model inertia
+      M_r: [1, 1, 1] # reference model inertia
     </rosparam>
-
-
 
   </node>
 
