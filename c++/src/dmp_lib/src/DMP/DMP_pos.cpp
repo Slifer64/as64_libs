@@ -110,6 +110,14 @@ void DMP_pos::setY0(const arma::vec &Y0)
 }
 
 
+arma::vec DMP_pos::getY0() const
+{
+  arma::vec Y0(dmp.size());
+  for (int i=0; i<Y0.size(); i++) Y0(i) = this->dmp[i]->getY0();
+  return Y0;
+}
+
+
 void DMP_pos::setTau(double tau)
 {
   this->can_clock_ptr->setTau(tau);

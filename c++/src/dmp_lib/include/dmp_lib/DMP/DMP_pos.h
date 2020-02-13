@@ -103,6 +103,10 @@ public:
    */
   void setY0(const arma::vec &Y0);
 
+  /** \brief Returns the DMP's initial position.
+   *  @return the initial position.
+   */
+  arma::vec getY0() const;
 
   /** \brief Sets the time scale of the DMP.
    *  @param[in] tau The time duration for the DMP.

@@ -126,6 +126,11 @@ void DMP_::setY0(double y0)
   this->y0 = y0;
 }
 
+double DMP_::getY0() const
+{
+  return this->y0;
+}
+
 
 void DMP_::setTau(double tau)
 {

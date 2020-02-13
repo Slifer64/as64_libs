@@ -109,6 +109,11 @@ public:
    */
   void setY0(double y0);
 
+  /** \brief Returns the DMP's initial position.
+   *  @return the initial position.
+   */
+  double getY0() const;
+
 
   /** \brief Sets the time scale of the DMP.
    *  @param[in] tau The time duration for the DMP.
