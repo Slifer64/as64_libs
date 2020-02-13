@@ -87,6 +87,61 @@ arma::vec oMsrFun(const arma::vec &theta, void *cookie)
   return Y_out;
 }
 
+double dt;
+arma::vec q0_offset;
+arma::vec qg_offset;
+double time_offset;
+double tau_low_lim;
+double tau_up_lim;
+arma::mat process_noise;
+double msr_noise;
+double msr_noise_hat;
+arma::mat init_params_variance;
+double a_p;
+arma::vec num_diff_step;
+bool enable_constraints;
+arma::mat M_r;
+
+
+void loadParams()
+{
+  ros::NodeHandle nh_("~");
+
+  if (!nh_.getParam("dt",dt)) throw std::runtime_error("Failed to load param \"dt\"...");
+
+  std::vector<double> temp;
+  if (!nh_.getParam("q0_offset",temp)) throw std::runtime_error("Failed to load param \"q0_offset\"...");
+  q0_offset = arma::vec(temp);
+
+  if (!nh_.getParam("qg_offset",temp)) throw std::runtime_error("Failed to load param \"qg_offset\"...");
+  qg_offset = arma::vec(temp);
+
+  if (!nh_.getParam("time_offset",time_offset)) throw std::runtime_error("Failed to load param \"time_offset\"...");
+
+  if (!nh_.getParam("tau_low_lim",tau_low_lim)) throw std::runtime_error("Failed to load param \"tau_low_lim\"...");
+  if (!nh_.getParam("tau_up_lim",tau_up_lim)) throw std::runtime_error("Failed to load param \"tau_up_lim\"...");
+
+  if (!nh_.getParam("process_noise",temp)) throw std::runtime_error("Failed to load param \"process_noise\"...");
+  process_noise = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("msr_noise",msr_noise)) throw std::runtime_error("Failed to load param \"msr_noise\"...");
+
+  if (!nh_.getParam("msr_noise_hat",msr_noise_hat)) throw std::runtime_error("Failed to load param \"msr_noise_hat\"...");
+
+  if (!nh_.getParam("init_params_variance",temp)) throw std::runtime_error("Failed to load param \"init_params_variance\"...");
+  init_params_variance = arma::diagmat(arma::vec(temp));
+
+  if (!nh_.getParam("a_p",a_p)) throw std::runtime_error("Failed to load param \"a_p\"...");
+
+  if (!nh_.getParam("enable_constraints",enable_constraints)) throw std::runtime_error("Failed to load param \"enable_constraints\"...");
+
+  if (!nh_.getParam("num_diff_step",temp)) throw std::runtime_error("Failed to load param \"num_diff_step\"...");
+  num_diff_step = arma::vec(temp);
+
+  if (!nh_.getParam("M_r",temp)) throw std::runtime_error("Failed to load param \"M_r\"...");
+  M_r = arma::diagmat(arma::vec(temp));
+}
+
 
 int main(int argc, char** argv)
 {
@@ -96,33 +151,11 @@ int main(int argc, char** argv)
 
   std::string path = ros::package::getPath("dmp_kf_test");
 
-  double dt = 0.005;
-
-  arma::vec Q0_offset = {1.0, 0.0, 0.0, 0.0};
-
-  arma::vec Qg_offset = {0.9244, 0.1744, 0.2720, 0.2028};
-  double time_offset = -2.5;
-
-  double tau_low_lim = 1.0;
-  double tau_up_lim = 30.0; // Inf;
-
-  arma::mat process_noise = arma::diagmat(arma::vec({0.02, 0.02, 0.02, 0.05})); // Q
-  double msr_noise = std::pow(0.05,2);
-  double msr_noise_hat = 10;
-
-
-  arma::mat init_params_variance = arma::diagmat( arma::vec({1, 1, 1, 1}) ); // P
-  double a_pc = 0.99; // forgetting factor in fading memory KF
-  double a_p = 1.002;
+  loadParams();
 
   int N_params = 4;
   arma::mat A_c = arma::join_vert(arma::rowvec({0,0,0,-1}), arma::rowvec({0,0,0,1}));
   arma::vec b_c = arma::vec({-tau_low_lim, tau_up_lim});
-  bool enable_constraints = true;
-
-  arma::vec num_diff_step = {0.001, 0.001, 0.001, 0.01};
-
-  arma::mat M_r = 1*arma::mat().eye(3,3);
 
   // ===========  load DMP data  ===============
   std::string dmp_data_file = path + "/matlab/data/model/dmp_eo_data.bin";
@@ -148,7 +181,7 @@ int main(int argc, char** argv)
   double t = 0.0;
   double x = 0.0;
   double dx = 0.0;
-  arma::vec Q0 = math_::quatProd(Q0_offset, Q0d);
+  arma::vec Q0 = math_::quatProd(math_::quatExp(q0_offset), Q0d);
   arma::vec Q = Q0;
   arma::vec vRot = arma::vec().zeros(Dim);
   arma::vec dvRot = arma::vec().zeros(Dim);
@@ -164,7 +197,7 @@ int main(int argc, char** argv)
   arma::mat F_data;
   arma::mat Sigma_theta_data;
 
-  arma::vec Qg = math_::quatProd(Qg_offset, Qg0);
+  arma::vec Qg = math_::quatProd(math_::quatExp(qg_offset), Qg0);
 
   double t_end = tau0 + time_offset;
   double tau = t_end;

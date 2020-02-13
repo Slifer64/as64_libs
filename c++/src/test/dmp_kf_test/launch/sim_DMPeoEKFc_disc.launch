@@ -2,6 +2,28 @@
 
   <node pkg="dmp_kf_test" type="sim_DMPeoEKFc_disc" name="sim_DMPeoEKFc_disc" output="screen">
 
+    <rosparam>
+      dt: 0.005
+
+      q0_offset: [0, 0, 0]
+      qg_offset: [0.8, -0.7, 0.55]
+      time_offset: -2.5
+
+      tau_low_lim: 1.0
+      tau_up_lim: 30.0
+
+      process_noise: [0.02, 0.02, 0.02, 0.05]
+      msr_noise: 0.0025
+      msr_noise_hat: 10
+
+      init_params_variance: [1, 1, 1, 1]
+      a_p: 1.002
+
+      num_diff_step: [0.001, 0.001, 0.001, 0.01]
+      enable_constraints: true
+
+      M_r: [1, 1, 1]
+    </rosparam>
 
   </node>
 
