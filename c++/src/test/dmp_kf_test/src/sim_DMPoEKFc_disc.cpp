@@ -174,8 +174,6 @@ int main(int argc, char** argv)
   arma::vec Q1 = dmp_::DMPo::quatTf(Q, Q0);
   arma::vec q = math_::quatLog(Q1);
   arma::vec q_dot = arma::vec().zeros(3);
-  arma::mat Mr2 = arma::mat().zeros(4,4);
-  Mr2.submat(1,1,3,3) = M_r;
 
   arma::rowvec Time;
   arma::mat Q_data;
@@ -253,13 +251,20 @@ int main(int argc, char** argv)
     // DMP simulation
     dmp_o->setTau(tau_hat);
     arma::vec q_ddot_hat = dmp_o->calcYddot(x_hat, q, q_dot, qg_hat);
+    // arma::vec dvRot_hat = dmp_o->calcRotAccel(x_hat, Q, vRot, Qg_hat);
     dmp_o->setTau(tau);
 
-    arma::vec q_ddot = dmp_o->calcYddot(x_hat, q, q_dot, qg) + Sigma_vn*arma::vec().randn(N_out);
+    arma::vec q_ddot = dmp_o->calcYddot(x, q, q_dot, qg) + Sigma_vn*arma::vec().randn(N_out);
+    // arma::vec q_ddot = dmp_o->calcYddot(x, q, q_dot, qg);
+    // arma::vec dvRot = dmp_o->calcRotAccel(x, Q, vRot, Qg);
 
     arma::mat JQq = dmp_::DMPo::jacobQq(Q1);
-    F_ext = math_::quatProd( 2*Mr2*JQq*(q_ddot - q_ddot_hat), math_::quatInv(Q1) );
-    F_ext = F_ext.subvec(1,3);
+    F_ext = math_::quatProd( 2*JQq*(q_ddot - q_ddot_hat), math_::quatInv(Q1) );
+    F_ext = M_r*F_ext.subvec(1,3);
+
+    // arma::vec Fext2 = M_r*(dvRot-dvRot_hat);
+    // double Fext_err = arma::norm(F_ext - Fext2);
+    // if (Fext_err > 1e-6) std::cerr << "Fext_err = " << Fext_err << "\n";
 
     Y_out = q_ddot;
     // Y_out_hat = q_ddot_hat;

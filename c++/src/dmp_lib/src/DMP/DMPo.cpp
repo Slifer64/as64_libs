@@ -15,7 +15,7 @@ namespace as64_
 namespace dmp_
 {
 
-const long double DMPo::zero_tol = 1e-8;
+const long double DMPo::zero_tol = 1e-6;
 
 DMPo::DMPo(dmp_::TYPE dmp_type, const arma::uvec &N_kernels, const arma::vec &a_z, const arma::vec &b_z,
                std::shared_ptr<CanonicalClock> can_clock_ptr, std::shared_ptr<GatingFunction> shape_attr_gating_ptr)
