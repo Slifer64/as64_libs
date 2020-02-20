@@ -1,6 +1,6 @@
 function J_dQ_deo = jacobDquatDeo(Qe)
             
-    if (abs(Qe(1)-1) <= DMP_eo.zero_tol)
+    if ( (1-abs(Qe(1))) <= DMP_eo.zero_tol)
         J_dQ_deo = [zeros(1, 3); eye(3,3)];
         return;
     end

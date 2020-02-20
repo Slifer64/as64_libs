@@ -173,6 +173,21 @@ classdef DMPo < matlab.mixin.Copyable
         end
         
         
+        function y_ddot = calcYddot(this, x, y, y_dot, yg, tau_dot, yc, zc, yc_dot)
+
+            if (nargin < 6), tau_dot = 0; end
+            if (nargin < 7), yc = zeros(3,1); end
+            if (nargin < 8), zc = zeros(3,1); end
+            if (nargin < 9), yc_dot = zeros(3,1); end
+            
+            n_dim = length(this.dmp);
+            y_ddot = zeros(n_dim,1);
+            for i=1:n_dim
+                y_ddot(i) = this.dmp{i}.calcYddot(x, y(i), y_dot(i), yg(i), tau_dot, yc(i), zc(i), yc_dot(i));
+            end
+
+        end
+
         %% Returns the rotational velocity.
         %  Call @update first!
         %  @param[in] Q: the current orientation.
@@ -288,6 +303,19 @@ classdef DMPo < matlab.mixin.Copyable
         function dx = phaseDot(this, x), dx = this.can_clock_ptr.getPhaseDot(x); end
 
         
+        function J = getAcellPartDev_qg_tau(this, t, Y, dY, Y0, x, Yg, tau)
+            
+            n_dim = length(this.dmp);
+            J = zeros(n_dim, n_dim+1);
+            
+            for i=1:n_dim
+                C = this.dmp{i}.getAcellPartDev_g_tau(t, Y(i), dY(i), Y0(i), x, Yg(i), tau);
+                J(i,i) = C(1);
+                J(i,end) = C(2);
+            end
+            
+        end
+        
     end
     
     methods (Static)
@@ -365,7 +393,7 @@ classdef DMPo < matlab.mixin.Copyable
         %  @return: Jacobian.
         function JQq = jacobQq(Q1)
 
-            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+            if ( (1-abs(Q1(1))) <= DMPo.zero_tol)
                 JQq = [zeros(1, 3); eye(3,3)];
                 return;
             end
@@ -391,7 +419,7 @@ classdef DMPo < matlab.mixin.Copyable
         %  @return: Jacobian.
         function JqQ = jacobqQ(Q1)
             
-            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+            if ( (1-abs(Q1(1))) <= DMPo.zero_tol)
                 JqQ = [zeros(3,1) eye(3,3)];
                 return;
             end
@@ -418,7 +446,7 @@ classdef DMPo < matlab.mixin.Copyable
 
             qdot = DMPo.rotVel2qdot(rotVel, Q1);
 
-            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+            if ( (1-abs(Q1(1))) <= DMPo.zero_tol)
                 JqQ_dot = [-qdot/3 zeros(3,3)];
                 return;
             end
@@ -447,7 +475,7 @@ classdef DMPo < matlab.mixin.Copyable
             
             qdot = DMPo.rotVel2qdot(rotVel, Q1);
 
-            if (abs(Q1(1)-1) <= DMPo.zero_tol)
+            if ( (1-abs(Q1(1))) <= DMPo.zero_tol)
                 JQq_dot = [-qdot'/4; zeros(3,3)];
                 return;
             end

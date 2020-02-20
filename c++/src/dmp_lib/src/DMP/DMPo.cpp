@@ -305,7 +305,7 @@ arma::mat DMPo::jacobQq(const arma::vec &Q1)
 {
   arma::mat JQq(4,3);
 
-  if (std::fabs(Q1(0)-1) <= DMPo::zero_tol)
+  if ( (1-std::fabs(Q1(0))) <= DMPo::zero_tol)
   {
     JQq.row(0) = arma::rowvec().zeros(3);
     JQq.submat(1,0,3,2) = arma::mat().eye(3,3);
@@ -331,7 +331,7 @@ arma::mat DMPo::jacobqQ(const arma::vec &Q1)
 {
   arma::mat JqQ(3,4);
 
-  if (std::fabs(Q1(0)-1) <= DMPo::zero_tol)
+  if ( (1-std::fabs(Q1(0))) <= DMPo::zero_tol)
   {
     JqQ.col(0) = arma::vec().zeros(3);
     JqQ.submat(0,1,2,3) = arma::mat().eye(3,3);
@@ -358,7 +358,7 @@ arma::mat DMPo::jacobDotqQ(const arma::vec &Q1, const arma::vec &rotVel)
 
   arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
 
-  if (std::fabs(Q1(0)-1) <= DMPo::zero_tol)
+  if ( (1-std::fabs(Q1(0))) <= DMPo::zero_tol)
   {
     JqQ_dot.col(0) = -qdot/3;
     JqQ_dot.submat(0,1,2,3) = arma::mat().zeros(3,3);
@@ -387,7 +387,7 @@ arma::mat DMPo::jacobDotQq(const arma::vec &Q1, const arma::vec &rotVel)
 
   arma::vec qdot = DMPo::rotVel2qdot(rotVel, Q1);
 
-  if (std::fabs(Q1(0)-1) <= DMPo::zero_tol)
+  if ( (1-std::fabs(Q1(0))) <= DMPo::zero_tol)
   {
     JQq_dot.row(0) = -qdot.t()/4;
     JQq_dot.submat(1,0,3,2) = arma::mat().zeros(3,3);

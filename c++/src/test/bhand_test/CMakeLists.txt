@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(bhand_test)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-narrowing -Wno-write-strings")
 
 add_definitions(-DLINUX)
 

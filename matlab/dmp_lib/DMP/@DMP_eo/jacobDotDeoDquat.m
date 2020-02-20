@@ -2,7 +2,7 @@ function dJ_deo_dQ = jacobDotDeoDquat(Qe, rotVel)
 
     deo = DMP_eo.rotVel2deo(rotVel, Qe);
 
-    if (abs(Qe(1)-1) <= DMP_eo.zero_tol)
+    if ( (1-abs(Qe(1))) <= DMP_eo.zero_tol)
         dJ_deo_dQ = [-deo/3 zeros(3,3)];
         return;
     end

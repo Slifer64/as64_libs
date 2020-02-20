@@ -280,7 +280,7 @@ arma::mat DMP_eo::jacobDquatDeo(const arma::vec &Qe)
 {
   arma::mat J_dQ_deo(4,3);
 
-  if (std::fabs(Qe(0)-1) <= DMP_eo::zero_tol)
+  if ( (1-std::fabs(Qe(0))) <= DMP_eo::zero_tol)
   {
     J_dQ_deo.row(0) = arma::rowvec().zeros(3);
     J_dQ_deo.submat(1,0,3,2) = arma::mat().eye(3,3);
@@ -306,7 +306,7 @@ arma::mat DMP_eo::jacobDeoDquat(const arma::vec &Qe)
 {
   arma::mat J_deo_dQ(3,4);
 
-  if (std::fabs(Qe(0)-1) <= DMP_eo::zero_tol)
+  if ( (1-std::fabs(Qe(0))) <= DMP_eo::zero_tol)
   {
     J_deo_dQ.col(0) = arma::vec().zeros(3);
     J_deo_dQ.submat(0,1,2,3) = arma::mat().eye(3,3);
@@ -333,7 +333,7 @@ arma::mat DMP_eo::jacobDotDeoDquat(const arma::vec &Qe, const arma::vec &rotVel)
 
   arma::vec deo = DMP_eo::rotVel2deo(rotVel, Qe);
 
-  if (std::fabs(Qe(0)-1) <= DMP_eo::zero_tol)
+  if ( (1-std::fabs(Qe(0))) <= DMP_eo::zero_tol)
   {
     dJ_deo_dQ.col(0) = -deo/3;
     dJ_deo_dQ.submat(0,1,2,3) = arma::mat().zeros(3,3);
@@ -362,7 +362,7 @@ arma::mat DMP_eo::jacobDotDquatDeo(const arma::vec &Qe, const arma::vec &rotVel)
 
   arma::vec deo = DMP_eo::rotVel2deo(rotVel, Qe);
 
-  if (std::fabs(Qe(0)-1) <= DMP_eo::zero_tol)
+  if ( (1-std::fabs(Qe(0))) <= DMP_eo::zero_tol)
   {
     dJ_dQ_deo.row(0) = -deo.t()/4;
     dJ_dQ_deo.submat(1,0,3,2) = arma::mat().zeros(3,3);

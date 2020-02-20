@@ -34,7 +34,8 @@ shape_attr_gat_ptr = SigmoidGatingFunction(1.0, 0.5);
 % shape_attr_gat_ptr = LinGatingFunction(1.0, 0.01);
 N_kernels = [40; 40; 40];
 dmp_p = DMP_pos(DMP_TYPE.STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
-dmp_o = DMP_eo(DMP_TYPE.STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
+dmp_eo = DMP_eo(DMP_TYPE.STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
+dmp_o = DMPo(DMP_TYPE.STD, N_kernels, a_z, b_z, can_clock_ptr, shape_attr_gat_ptr);
 
 disp('DMP pos training...')
 tic
@@ -42,7 +43,13 @@ offline_train_mse = dmp_p.train(train_method, Timed, Pd_data, dPd_data, ddPd_dat
 offline_train_mse
 toc
 
-disp('DMP orient training...')
+disp('DMP eo training...')
+tic
+offline_train_mse = dmp_eo.train(train_method, Timed, Qd_data, vRotd_data, dvRotd_data);
+offline_train_mse
+toc
+
+disp('DMPo training...')
 tic
 offline_train_mse = dmp_o.train(train_method, Timed, Qd_data, vRotd_data, dvRotd_data);
 offline_train_mse
@@ -65,7 +72,7 @@ Qg = quatProd(quatExp(e0), Q0); %quatExp(1.0*quatLog(Qd_data(:,end)));
 
 T = 1.0*Timed(end);
 dt = Ts;
-[Time, P_data, dP_data, ddP_data, Q_data, vRot_data, dvRot_data] = simulatePosOrientDMP(dmp_p, dmp_o, P0, Q0, Pg, Qg, T, dt);
+[Time, P_data, dP_data, ddP_data, Q_data, vRot_data, dvRot_data] = simulatePosOrientDMP(dmp_p, dmp_eo, P0, Q0, Pg, Qg, T, dt);
 toc
 
 % Data.Time = Time;
@@ -80,10 +87,10 @@ toc
 
 Yg0 = Pd_data(:,end);
 Y0 = Pd_data(:,1);
-Qg0 = Qd_data(:,end);
-Q0 = Qd_data(:,1);
+Qgd = Qd_data(:,end);
+Q0d = Qd_data(:,1);
 tau0 = Timed(end);
-save([path 'data/dmp_data.mat'],'dmp_p','dmp_o', 'Yg0', 'Y0', 'Qg0', 'Q0', 'tau0');
+save([path 'data/dmp_data.mat'],'dmp_p', 'dmp_o', 'dmp_eo', 'Yg0', 'Y0', 'Qgd', 'Q0d', 'tau0');
 
 %% Plot results
 

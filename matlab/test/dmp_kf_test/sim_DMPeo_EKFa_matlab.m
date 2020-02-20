@@ -1,4 +1,4 @@
-function sim_DMPo_EKFa_matlab()
+function sim_DMPeo_EKFa_matlab()
 
 %% ==============================================================
 

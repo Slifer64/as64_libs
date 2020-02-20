@@ -8,11 +8,12 @@ set_matlab_utils_path();
 
 %% ###################################################################
 
-path = strrep(mfilename('fullpath'), 'sim_DMPo_EKFc_disc','');
+path = strrep(mfilename('fullpath'), 'sim_DMPeo_EKFc_disc','');
 
-load([path 'data/dmp_data.mat'],'dmp_o', 'Qgd', 'Q0d', 'tau0');
+load([path 'data/dmp_data.mat'],'dmp_eo', 'Qgd', 'Q0d', 'tau0');
 
-dmp_o.setTau(tau0);
+dmp_eo.setTau(tau0);
+
 
 %% ###################################################################
 
@@ -50,7 +51,8 @@ b_c = [-theta_low_lim; theta_up_lim];
 
 %% ###################################################################
 
-can_clock_ptr = dmp_o.can_clock_ptr;
+
+can_clock_ptr = dmp_eo.can_clock_ptr;
 can_clock_ptr.setTau(tau0);
 
 % DMP simulation
@@ -64,10 +66,6 @@ Q = Q0;
 vRot = zeros(Dim,1);
 dvRot = zeros(Dim,1);
 F_ext = zeros(Dim,1);
-Q1 = DMPo.quatTf(Q, Q0);
-q = quatLog(Q1);
-q_dot = zeros(3,1);
-Fq = zeros(3,1);
 
 Time = [];
 Q_data = [];
@@ -79,28 +77,24 @@ tau_data = [];
 F_data = [];
 Sigma_theta_data = [];
 
-Kg_data = [];
-Kg = zeros(12,1);
-
 Qg = quatProd(quatExp(qg_offset), Qgd);
-qg = DMPo.quat2q(Qg, Q0);
 
 t_end = tau0 + time_offset;
 tau = t_end;
 can_clock_ptr.setTau(tau);
 
 tau_hat = tau0;
-Qg_hat = Q0; % Qg0;
-qg_hat = DMPo.quat2q(Qg_hat, Q0);
+Qg_hat = Q0;
+eo_hat = DMP_eo.quat2eo(Q, Qg_hat);
 x_hat = t/tau_hat;
 
 N_out = 3;
 Y_out_hat = zeros(N_out,1);
 Y_out = zeros(N_out,1);
 
-theta = [qg_hat; tau_hat];
+theta = [eo_hat; tau_hat];
 
-P_theta = eye(N_params, N_params); % init_params_variance;
+P_theta = diag(init_params_variance); % init_params_variance;
 Rn_hat = eye(N_out,N_out) * msr_noise_hat;
 Qn = diag(process_noise); % process_noise;
 
@@ -120,13 +114,11 @@ ekf.setFadingMemoryCoeff(a_p);
 ekf.enableParamsContraints(enable_constraints);
 ekf.setParamsConstraints(A_c, b_c);
 ekf.setPartDerivStep(num_diff_step);
-ekf.setStateTransFunJacob(@oStateTransFunJacob);
-if (ekf_analytic_Jacob), ekf.setMsrFunJacob(@oMsrFunJacob); end
 
-dmp_o.setQ0(Q0);
+dmp_eo.setQ0(Q0);
 
-disp('DMP-EKF (discrete) Orient simulation...\n')
-tic
+disp('DMP-EKF (discrete) eo simulation...');
+tic;
 while (true)
 
     % data logging
@@ -142,33 +134,17 @@ while (true)
     F_data = [F_data, F_ext];
     Sigma_theta_data = [Sigma_theta_data, sqrt(diag(P_theta))];
 
-    Kg_data = [Kg_data, Kg];
-
     % DMP simulation
-    dmp_o.setTau(tau_hat);
-    q_ddot_hat = dmp_o.calcYddot(x_hat, q, q_dot, qg_hat);
-    % dvRot_hat = dmp_o.calcRotAccel(x_hat, Q, vRot, Qg_hat);
-    dmp_o.setTau(tau);
+    dmp_eo.setTau(tau_hat);
+    dvRot_hat = dmp_eo.calcRotAccel(x_hat, Q, vRot, Qg_hat);
+    dmp_eo.setTau(tau);
 
-    F_noise = Sigma_vn*randn(N_out,1);
-    Q1 = DMPo.quatTf(Q, Q0);
-    F_noise = 0.5*DMPo.jacobqQ(Q1)*quatProd([0; F_noise], Q1);
-    
-    q_ddot = dmp_o.calcYddot(x, q, q_dot, qg) + F_noise;
-    % q_ddot = dmp_o.calcYddot(x, q, q_dot, qg);
-    % dvRot = dmp_o.calcRotAccel(x, Q, vRot, Qg);
+    dvRot = dmp_eo.calcRotAccel(x, Q, vRot, Qg) + Sigma_vn*randn(N_out,1);
 
-    Fq = (q_ddot - q_ddot_hat);
-    JQq = DMPo.jacobQq(Q1);
-    F_ext = quatProd( 2*JQq*(q_ddot - q_ddot_hat), quatInv(Q1) );
-    F_ext = M_r.*F_ext(2:4);
+    F_ext = M_r .* (dvRot - dvRot_hat);
 
-    % Fext2 = M_r*(dvRot-dvRot_hat);
-    % Fext_err = norm(F_ext - Fext2);
-    % if (Fext_err > 1e-6), Fext_err end
-
-    Y_out = q_ddot;
-    % Y_out_hat = q_ddot_hat;
+    Y_out = dvRot;
+    % Y_out_hat = dvRot_hat;
 
     % Update phase variable
     dx = can_clock_ptr.getPhaseDot(x);
@@ -183,30 +159,24 @@ while (true)
     end
 
     % ========  KF measurement update  ========
-    msr_cookie = getOrientMsrCookie(dmp_o, t, q, q_dot);
+    msr_cookie = getOrientMsrCookie(dmp_eo, t, Q, vRot);
     ekf.correct(Y_out, msr_cookie);
 
     % ========  KF time update  ========
-    ekf.predict();
+    state_trans_cookie = getOrientStateTransCookie(vRot, dt);
+    ekf.predict(state_trans_cookie);
 
     theta = ekf.theta;
     P_theta = ekf.P;
-    
-    Kg = ekf.K(:);
 
     % Numerical integration
     t = t + dt;
     x = x + dx*dt;
-    q = q + q_dot*dt;
-    q_dot = q_dot + q_ddot*dt;
+    Q = quatProd( quatExp(vRot*dt), Q );
+    vRot = vRot + dvRot*dt;
 
-    Q = DMPo.q2quat(q, Q0);
-    Q1 = DMPo.quatTf(Q, Q0);
-    vRot = DMPo.qdot2rotVel(q_dot, Q1);
-    dvRot = DMPo.qddot2rotAccel(q_ddot, vRot, Q1);
-
-    qg_hat = theta(1:3);
-    Qg_hat = DMPo.q2quat(qg_hat, Q0);
+    eo_hat = theta(1:3);
+    Qg_hat = quatProd( quatExp(eo_hat), Q);
     tau_hat = theta(4);
     x_hat = t/tau_hat;
 end
@@ -217,62 +187,54 @@ fprintf('Elapsed time: %.2f sec\n', toc);
 qg_data = zeros(3,size(Qg_data,2));
 q_data = zeros(3,size(Qg_data,2));
 for j=1:size(qg_data,2)
-   qg_data(:,j) = quatLog( quatDiff(Qg_data(:,j), Q0) );
-   q_data(:,j) = quatLog( quatDiff(Q_data(:,j), Q0) );
+   qg_data(:,j) = quatLog( quatDiff(Qg, Qg_data(:,j)) );
+   q_data(:,j) = quatLog( quatDiff(Qg, Q_data(:,j)) );
 end
-qg = quatLog( quatDiff(Qg, Q0) );
+qg = quatLog( quatDiff(Qg, Qg) );
 plot_DMP_EKFc_results(Time, qg_data, tau_data, Sigma_theta_data, q_data, vRot_data, qg, F_data, 'orient');
 
-% figure;
-% plot(Kg_data');
 
 %% ======================================================================
 %% ======================================================================
 
-function ck = getOrientMsrCookie(dmp, t, Y, dY)
 
-    ck = struct('dmp',dmp, 't',t, 'Y',Y, 'dY',dY);
+function ck = getOrientStateTransCookie(vRot, Ts)
 
+    ck = struct('vRot',vRot, 'Ts',Ts);
+    
 end
 
+function ck = getOrientMsrCookie(dmp, t, Q, vRot)
+
+    ck = struct('dmp',dmp, 't',t, 'Q',Q, 'vRot',vRot);
+    
+end
 
 function theta_next = oStateTransFun(theta, ck)
 
-    if (nargin < 2), ck = []; end
-    theta_next = theta;
-    
+  theta_next = zeros(size(theta));
+  
+  eo = theta(1:3);
+  Qe = quatExp(eo);
+  rotVel = ck.vRot;
+  deo = DMP_eo.rotVel2deo(rotVel, Qe);
+
+  theta_next(1:3) = eo + deo*ck.Ts;
+  theta_next(4) = theta(4);
+
 end
-  
-  
+
 function Y_out = oMsrFun(theta, ck)
 
-    Yg_hat = theta(1:3);
-    tau_hat = theta(4);
-    x_hat = ck.t/tau_hat;
-    tau0 = ck.dmp.getTau();
-    ck.dmp.setTau(tau_hat);
-    Y_out = ck.dmp.calcYddot(x_hat, ck.Y, ck.dY, Yg_hat);
-    ck.dmp.setTau(tau0); % restore previous value of tau
+  Q = ck.Q;
+  eo_hat = theta(1:3);
+  Qg_hat = quatProd( quatExp(eo_hat), Q);
+  tau_hat = theta(4);
+  x_hat = ck.t / tau_hat;
+
+  tau0 = ck.dmp.getTau();
+  ck.dmp.setTau(tau_hat);
+  Y_out = ck.dmp.calcRotAccel(x_hat, Q, ck.vRot, Qg_hat);
+  ck.dmp.setTau(tau0); % restore previous tau
 
 end
-
-
-function J = oStateTransFunJacob(theta, ck)
-
-    if (nargin < 2), ck = []; end
-    n_params = length(theta);
-    J = eye(n_params, n_params);
-
-end
-
-
-function J = oMsrFunJacob(theta, ck)
-
-    Yg_hat = theta(1:end-1);
-    tau_hat = theta(end);
-    x_hat = ck.t / tau_hat;
-    Y0 = zeros(size(Yg_hat));
-    J = ck.dmp.getAcellPartDev_qg_tau(ck.t, ck.Y, ck.dY, Y0, x_hat, Yg_hat, tau_hat);
-    
-end
-

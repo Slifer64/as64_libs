@@ -77,10 +77,10 @@ arma::vec qg_offset;
 double time_offset;
 double tau_low_lim;
 double tau_up_lim;
-arma::mat process_noise;
+arma::vec process_noise;
 double msr_noise;
 double msr_noise_hat;
-arma::mat init_params_variance;
+arma::vec init_params_variance;
 double a_p;
 arma::vec num_diff_step;
 bool ekf_use_num_diff;
@@ -106,14 +106,14 @@ void loadParams()
   if (!nh_.getParam("tau_up_lim",tau_up_lim)) throw std::runtime_error("Failed to load param \"tau_up_lim\"...");
 
   if (!nh_.getParam("process_noise",temp)) throw std::runtime_error("Failed to load param \"process_noise\"...");
-  process_noise = arma::diagmat(arma::vec(temp));
+  process_noise = arma::vec(temp);
 
   if (!nh_.getParam("msr_noise",msr_noise)) throw std::runtime_error("Failed to load param \"msr_noise\"...");
 
   if (!nh_.getParam("msr_noise_hat",msr_noise_hat)) throw std::runtime_error("Failed to load param \"msr_noise_hat\"...");
 
   if (!nh_.getParam("init_params_variance",temp)) throw std::runtime_error("Failed to load param \"init_params_variance\"...");
-  init_params_variance = arma::diagmat(arma::vec(temp));
+  init_params_variance = arma::vec(temp);
 
   if (!nh_.getParam("a_p",a_p)) throw std::runtime_error("Failed to load param \"a_p\"...");
 
@@ -203,9 +203,9 @@ int main(int argc, char** argv)
 
   arma::vec theta = arma::join_vert(qg_hat, arma::vec({tau_hat}));
 
-  arma::mat P_theta = arma::mat().eye(N_params, N_params) % init_params_variance;
+  arma::mat P_theta = arma::diagmat(init_params_variance);
   arma::mat Rn_hat = arma::mat().eye(N_out,N_out) * msr_noise_hat;
-  arma::mat Qn = arma::mat().eye(N_params,N_params) % process_noise;
+  arma::mat Qn = arma::diagmat(process_noise);
 
   arma::arma_rng::set_seed(0);
   arma::mat Rn = arma::mat().eye(N_out,N_out) * msr_noise;
