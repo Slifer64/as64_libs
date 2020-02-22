@@ -1,0 +1,19 @@
+<launch>
+
+  <node pkg="sigproc_test" type="movingAverageFilter_test" name="movingAverageFilter_test" output="screen" cwd="node">
+    <rosparam>
+      # signal params
+      T: 6 # signal time duration
+      dt: 0.005 # time step
+      omega: 1 # signal frequency
+      A: 0.5 # signal amplitude
+      noise_std: 0.02 # noise std
+
+      # moving average filter params
+      n_samples: 20 # filter window
+      init_value: 0 # initial value
+      a: 0 # forgetting factor
+    </rosparam>
+  </node>
+
+</launch>
