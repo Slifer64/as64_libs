@@ -61,6 +61,15 @@ classdef SigmoidGatingFunction < GatingFunction
           u = -this.a_u * t * h * (1-h);
 
       end
+      
+      
+      %% Sets the sigmoid's steepness.
+      %  @param[in] a_u: steepness.
+      function setSteepness(this, a_u)
+          
+          this.a_u = a_u;
+          
+      end
 
    end
    

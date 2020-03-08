@@ -21,7 +21,7 @@ N_kernels = 50;
 %  + smoother updated trajectory
 %  - the locally updated region is larger, so the overall trajectory changes more 
 kernels_std_scaling = 2; % good compromise between smoothness and locallity of update
-gmp = GMP(N_kernels, 20, 5, CanonicalClock(), kernels_std_scaling);
+gmp = GMP(N_kernels, 30, 100, kernels_std_scaling);
 tic
 x = Timed/Timed(end);
 offline_train_mse = gmp.train(GMP_TRAIN.LS, x, Pd_data);
@@ -43,8 +43,8 @@ Pg = spat_s*(Pgd-P0d) + P0;
 T = Timed(end)/temp_s;
 Time = Timed/temp_s;
 x = Time / T;
+x_dot = 1/T;
 
-gmp.setTau(T);
 gmp.setGoal(Pg);
 
 N = length(x);
@@ -55,24 +55,24 @@ ddP_data = zeros(1,N);
 
 t1 = 1.5 / temp_s;
 p1 = 0.4;
-s1 = struct('t',t1, 'x',t1/T, 'p',spat_s*(p1-p0)+p0, 'p_dot',[], 'p_ddot',[]);
+s1 = struct('t',t1, 'x',t1/T, 'x_dot',x_dot, 'p',spat_s*(p1-p0)+p0, 'p_dot',[], 'p_ddot',[]);
 gmp = updateGMP(gmp, s1);
 
 
 t2 = 3 / temp_s;
 p2_dot = 0.1;
-s2 = struct('t',t2, 'x',t2/T, 'p',[], 'p_dot',spat_s*p2_dot, 'p_ddot',[]);
+s2 = struct('t',t2, 'x',t2/T, 'x_dot',x_dot, 'p',[], 'p_dot',spat_s*p2_dot, 'p_ddot',[]);
 gmp = updateGMP(gmp, s2);
 
 t3 = 4.25 / temp_s;
 p3_ddot = 0.3;
-s3 = struct('t',t3, 'x',t3/T, 'p',[], 'p_dot',[], 'p_ddot',spat_s*p3_ddot);
+s3 = struct('t',t3, 'x',t3/T, 'x_dot',x_dot, 'p',[], 'p_dot',[], 'p_ddot',spat_s*p3_ddot);
 gmp = updateGMP(gmp, s3);
 
 t4 = 5.5 / temp_s;
 p4 = 0.35;
 p4_ddot = 0.2;
-s4 = struct('t',t4, 'x',t4/T, 'p',spat_s*(p4-p0)+p0, 'p_dot',[], 'p_ddot',spat_s*p4_ddot);
+s4 = struct('t',t4, 'x',t4/T, 'x_dot',x_dot, 'p',spat_s*(p4-p0)+p0, 'p_dot',[], 'p_ddot',spat_s*p4_ddot);
 gmp = updateGMP(gmp, s4);
 
 t5 = 7 / temp_s;
@@ -85,14 +85,14 @@ t6 = 8.2 / temp_s;
 p6 = 0.4;
 p6_dot = 0.5;
 p6_ddot = 0.0;
-s6 = struct('t',t6, 'x',t6/T, 'p',spat_s*(p6-p0)+p0, 'p_dot',spat_s*p6_dot, 'p_ddot',spat_s*p6_ddot);
+s6 = struct('t',t6, 'x',t6/T, 'x_dot',1/T, 'p',spat_s*(p6-p0)+p0, 'p_dot',spat_s*p6_dot, 'p_ddot',spat_s*p6_ddot);
 gmp = updateGMP(gmp, s6);
 
 %% simulate
 for i=1:N
     P_data(i) = gmp.getYd(x(i));
-    dP_data(i) = gmp.getYdDot(x(i));
-    ddP_data(i) = gmp.getYdDDot(x(i));
+    dP_data(i) = gmp.getYdDot(x(i), x_dot);
+    ddP_data(i) = gmp.getYdDDot(x(i), x_dot, 0);
 end
 
 
@@ -140,20 +140,22 @@ function gmp = updateGMP(gmp, s)
 
     if (isempty(s)), return; end
 
+    sx = [s.x; s.x_dot];
+    
     if (~isempty(s.p) && isempty(s.p_dot) && isempty(s.p_ddot))
-        gmp.updateWeights([s.x], [s.p], [GMP_UPDATE_TYPE.POS]);
+        gmp.updateWeights([sx], [s.p], [GMP_UPDATE_TYPE.POS]);
     elseif (isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
-        gmp.updateWeights([s.x], [s.p_dot], [GMP_UPDATE_TYPE.VEL]);
+        gmp.updateWeights([sx], [s.p_dot], [GMP_UPDATE_TYPE.VEL]);
     elseif (isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([s.x], [s.p_ddot], [GMP_UPDATE_TYPE.ACCEL]);
+        gmp.updateWeights([sx], [s.p_ddot], [GMP_UPDATE_TYPE.ACCEL]);
     elseif (~isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
-        gmp.updateWeights([s.x; s.x], [s.p; s.p_dot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL]);
+        gmp.updateWeights([sx, sx], [s.p; s.p_dot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL]);
     elseif (~isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([s.x; s.x], [s.p; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.ACCEL]);
+        gmp.updateWeights([sx, sx], [s.p; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.ACCEL]);
     elseif (isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([s.x; s.x], [s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
+        gmp.updateWeights([sx, sx], [s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
     elseif (~isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([s.x; s.x; s.x], [s.p; s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
+        gmp.updateWeights([sx, sx, sx], [s.p; s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
     end
         
 end

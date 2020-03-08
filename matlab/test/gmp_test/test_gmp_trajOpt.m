@@ -20,7 +20,7 @@ a_z = 20;
 b_z = a_z/4;
 N_kernels = 50;
 kernels_std_scaling = 2;
-gmp = GMP(N_kernels, a_z, b_z, CanonicalClock(), kernels_std_scaling);
+gmp = GMP(N_kernels, a_z, a_z*b_z, kernels_std_scaling);
 
 gmp.train(DMP_TRAIN.LS, Timed, Pd_data);
 
@@ -50,9 +50,8 @@ accel_constr = [accel_constr; upperBoundConstr(ti, 0.4); lowerBoundConstr(ti, -0
 % tic
 gmp.setY0(y0);
 gmp.setGoal(g);
-gmp.setTau(tau);
 opt_set = GMPOptSet(true, true, true, 1, 0.5, 0.1);
-gmp.constrOpt(pos_constr, vel_constr, accel_constr, opt_set);
+gmp.constrOpt(tau, pos_constr, vel_constr, accel_constr, opt_set);
 gmp.setOptTraj(true);
 % toc
 
@@ -86,9 +85,10 @@ while (true)
     ddP_data = [ddP_data p_ddot];
     
     x = t/tau;
+    x_dot = 1/tau;
     p = gmp.getYdOpt(x);
-    p_dot = gmp.getYdDotOpt(x);
-    p_ddot = gmp.getYdDDotOpt(x);
+    p_dot = gmp.getYdDotOpt(x, x_dot);
+    p_ddot = gmp.getYdDDotOpt(x, x_dot, 0);
     
 %     x = t/tau;
 %     p_ddot = gmp.calcYddot(x, p, p_dot, g);

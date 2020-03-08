@@ -27,9 +27,9 @@ classdef GMPConstr < matlab.mixin.Copyable
     
     properties (Access = public)
      
-        t % parameter 'a_z' relating to the spring-damper system
-        value % parameter 'b_z' relating to the spring-damper system
-        type % 
+        t % time instant of constraint
+        value % value of constraint
+        type % type of constraint {'=', '>', '<'}.
         
     end
     

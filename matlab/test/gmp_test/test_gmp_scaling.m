@@ -20,7 +20,7 @@ Ts = Timed(2)-Timed(1);
 %% initialize and train GMP
 N_kernels = 50;
 kernels_std_scaling = 2;
-gmp = GMP(N_kernels, 20, 5, CanonicalClock(), kernels_std_scaling);
+gmp = GMP(N_kernels, 30, 100, kernels_std_scaling);
 tic
 offline_train_mse = gmp.train(GMP_TRAIN.LS, Timed, Pd_data);
 offline_train_mse
@@ -136,18 +136,18 @@ function [Time, P_data, dP_data, ddP_data] = getScaledTrajectory(gmp, Time0, tem
     tau = Time0(end) / temp_s;
     Time = Time0 / temp_s;
     x = Time / tau;
+    x_dot = 1/tau;
     N = length(x);
     P_data = zeros(1,N);
     dP_data = zeros(1,N);
     ddP_data = zeros(1,N);
-    
-    gmp.setTau(tau);
+
     gmp.setGoal(Pg);
     
     for i=1:N
         P_data(i) = gmp.getYd(x(i));
-        dP_data(i) = gmp.getYdDot(x(i));
-        ddP_data(i) = gmp.getYdDDot(x(i));
+        dP_data(i) = gmp.getYdDot(x(i), x_dot);
+        ddP_data(i) = gmp.getYdDDot(x(i), x_dot, 0);
     end
 
 end
