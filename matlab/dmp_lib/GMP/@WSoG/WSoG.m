@@ -648,18 +648,6 @@ classdef WSoG < matlab.mixin.Copyable
 
         %% ============================================================
         
-        function f0_d = getStartDemoValue(this)
-            
-            f0_d = this.f0_d;
-            
-        end
-        
-        function fg_d = getFinalDemoValue(this)
-            
-            fg_d = this.fg_d;
-            
-        end
-        
         function f0 = getStartValue(this)
             
             f0 = this.f0;
@@ -741,22 +729,6 @@ classdef WSoG < matlab.mixin.Copyable
             this.w = quadprog(H,f, A,b, Aeq,beq);
             toc
             
-%             sim_data = zeros(1, N);
-%             for i=1:N
-%                 phi = this.regressVecDDot(x(i), 1/tau, 0);
-%                 sim_data(i) = dot(phi, this.w);
-%             end
-%             
-%             Time = x*tau;
-%             figure;
-%             hold on;
-%             plot(Time, ref_data, 'LineWidth',2, 'LineStyle','-','Color','blue');
-%             plot(Time, sim_data, 'LineWidth',2, 'LineStyle',':','Color','magenta');
-%             legend({'demo','sim'}, 'interpreter','latex', 'fontsize',15);
-%             axis tight;
-%             hold off;
-            
-
         end
         
         %% =============================================================

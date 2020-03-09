@@ -13,7 +13,7 @@ classdef GMP < matlab.mixin.Copyable
         %  @param[in] kernels_std_scaling: Scaling for std of kernels (optional, default=2).
         function this = GMP(N_kernels, D, K, kernels_std_scaling)
                 
-            if (nargin < 5), kernels_std_scaling = 2.0; end
+            if (nargin < 4), kernels_std_scaling = 2.0; end
             
             this.D = D;
             this.K = K;
@@ -88,7 +88,8 @@ classdef GMP < matlab.mixin.Copyable
             
         
         %% Updates the weights so that the generated trajectory passes from the given points.
-        %  @param[in] s: Matrix of phase variable states.
+        %  @param[in] s: Matrix of phase variable states, i.e. s = [x;x_dot; x_ddot].
+        %                If s = [x; x_dot], x_ddot is assumed to be 0.
         %  @param[in] z: Vector with the desired value for each timestamp.
         %  @param[in] type: Vector with the type of each point (GMP_UPDATE_TYPE).
         %  @param[in] z_var: Vector with the variance of each point (optional, default = 1e-3).
@@ -142,21 +143,21 @@ classdef GMP < matlab.mixin.Copyable
             if (nargin < 5), y_c=0; end
             if (nargin < 6), z_c=0; end
             
-            this.dz = ( this.goalAttractor(y, z) + this.shapeAttractor(s) + z_c);
-            this.dy = z + y_c;
+            this.z_dot = ( this.goalAttractor(y, z) + this.shapeAttractor(s) + z_c);
+            this.y_dot = z + y_c;
 
         end
 
         
-        function dy = getYdot(this), dy=this.dy; end
-        function dz = getZdot(this), dz=this.dz; end
+        function y_dot = getYdot(this), y_dot = this.y_dot; end
+        function z_dot = getZdot(this), z_dot = this.z_dot; end
         
         
         %% Returns the DMP's acceleration.
-        function ddy = getYddot(this, yc_dot)
+        function y_ddot = getYddot(this, yc_dot)
             
             if (nargin < 2), yc_dot = 0; end
-            ddy = this.getZdot() + yc_dot;
+            y_ddot = this.getZdot() + yc_dot;
 
         end
         
@@ -197,27 +198,6 @@ classdef GMP < matlab.mixin.Copyable
         end
 
         
-        %% Returns the goal attractor of the this.
-        %  @param[in] y: \a y state of the this.
-        %  @param[in] z: \a z state of the this.
-        %  @param[in] g: Goal position.
-        %  @param[out] goal_attr: The goal attractor of the this.
-        function goal_attr = goalAttractor(this, y, z)
-
-            goal_attr = this.K*(this.g-y)- this.D*z;
-
-        end
-        
-        
-        %% Returns the shape attractor
-        function shape_attr = shapeAttractor(this, s)
-            
-            x = s(1);
-            shape_attr = this.shapeAttrGating(x) * this.forcingTerm(s);
-            
-        end
-        
-        
         %% Creates a deep copy of this object
         function cp_obj = deepCopy(this)
             
@@ -245,7 +225,7 @@ classdef GMP < matlab.mixin.Copyable
         
         function p_ref_ddot = getYdDDotOpt(this, x, x_dot, x_ddot)
             
-            if (nargin < 4), x_ddot = s(3); end
+            if (nargin < 4), x_ddot = 0; end
             
             p_ref_ddot = this.wsog_opt.outputDDot(x, x_dot, x_ddot);
             
@@ -268,7 +248,7 @@ classdef GMP < matlab.mixin.Copyable
         
         function p_ref_ddot = getYdDDot(this, x, x_dot, x_ddot)
             
-            if (nargin < 4), x_ddot = s(3); end
+            if (nargin < 4), x_ddot = 0; end
             
             p_ref_ddot = this.wsog_.outputDDot(x, x_dot, x_ddot);
             
@@ -288,14 +268,28 @@ classdef GMP < matlab.mixin.Copyable
     end
     
     methods (Access = protected)
+                
         
-        %% Returns the shape attractor gating factor.
-        %  @param[in] x: The phase variable.
-        function sAttrGat = shapeAttrGating(this, x)
+        %% Returns the goal attractor of the this.
+        %  @param[in] y: \a y state of the this.
+        %  @param[in] z: \a z state of the this.
+        %  @param[in] g: Goal position.
+        %  @param[out] goal_attr: The goal attractor of the this.
+        function goal_attr = goalAttractor(this, y, z)
 
+            goal_attr = this.K*(this.g-y)- this.D*z;
+
+        end
+        
+        
+        %% Returns the shape attractor
+        function shape_attr = shapeAttractor(this, s)
+            
+            x = s(1);
             sAttrGat = this.shape_attr_gating_ptr.getOutput(x);
-            sAttrGat(sAttrGat<0) = 0.0;
-
+            if (sAttrGat<0), sAttrGat = 0.0; end
+            shape_attr = sAttrGat * this.forcingTerm(s);
+            
         end
         
         
@@ -336,8 +330,8 @@ classdef GMP < matlab.mixin.Copyable
     properties (Access = protected)
         
         %% output state
-        dy % position derivative
-        dz % scaled velocity derivative
+        y_dot % position derivative
+        z_dot % scaled velocity derivative
         
         g % target/goal
 
