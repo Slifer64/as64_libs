@@ -1,0 +1,27 @@
+<launch>
+
+  <node pkg="gmp_test" type="test_WSoG_cond" name="test_WSoG_cond_node" output="screen" cwd="node">
+
+    <rosparam>
+      train_data_file: "wsog_train_data.bin"
+      sim_data_file: "wsog_update_sim_data.bin"
+      N_kernels: 50
+      kernels_std_scaling: 2
+      train_method: "LS" # {LWR, LS}
+      ks: 2
+      kt: 0.5
+
+      # update points
+      N_points: 6
+      s1: " t: 1.5 , p: 0.4 "
+      s2: " t: 3 , p_dot: 0.1 "
+      s3: " t: 4.25 , p_ddot: 0.3 "
+      s4: " t: 5.5 , p: 0.35 , p_ddot: 0.2 "
+      s5: " t: 7 , p_dot: 0.1 , p_ddot: 0.0 "
+      s6: " t: 8.2 , p: 0.4 , p_dot: 0.5 , p_ddot: 0.0 "
+
+    </rosparam>
+
+  </node>
+
+</launch>

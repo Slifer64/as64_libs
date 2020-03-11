@@ -134,11 +134,11 @@ classdef WSoG < matlab.mixin.Copyable
             
         end
         
-        function updateAccel(this, x, dx, a, sigma_a)
+        function updateAccel(this, x, dx, ddx, a, sigma_a)
             
-            if (nargin < 5), sigma_a = this.sigma_eps; end
+            if (nargin < 6), sigma_a = this.sigma_eps; end
             
-            H = this.regressVecDDot(x, dx, 0)';
+            H = this.regressVecDDot(x, dx, ddx)';
             a_hat = H*this.w;
             e = a - a_hat;
             this.updateWeights(H, e, sigma_a);
@@ -158,37 +158,37 @@ classdef WSoG < matlab.mixin.Copyable
             
         end
         
-        function updatePosAccel(this, x, dx, p, a, sigma_pa)
+        function updatePosAccel(this, x, dx, ddx, p, a, sigma_pa)
             
-            if (nargin < 6), sigma_pa = this.sigma_eps*ones(2,1); end
+            if (nargin < 7), sigma_pa = this.sigma_eps*ones(2,1); end
             
             H = [this.regressVec(x)'; this.regressVecDDot(x, dx, 0)'];
             p_hat = this.output(x);
-            a_hat = this.outputDDot(x, dx, 0);
+            a_hat = this.outputDDot(x, dx, ddx);
             pa_hat = [p_hat; a_hat];
             e = [p; a] - pa_hat;
             this.updateWeights(H, e, diag(sigma_pa));
             
         end
         
-        function updateVelAccel(this, x, dx, v, a, sigma_va)
+        function updateVelAccel(this, x, dx, ddx, v, a, sigma_va)
             
-            if (nargin < 6), sigma_va = this.sigma_eps*ones(2,1); end
+            if (nargin < 7), sigma_va = this.sigma_eps*ones(2,1); end
             
-            H = [this.regressVecDot(x, dx)'; this.regressVecDDot(x, dx, 0)'];
+            H = [this.regressVecDot(x, dx)'; this.regressVecDDot(x, dx, ddx)'];
             va_hat = H*this.w;
             e = [v; a] - va_hat;
             this.updateWeights(H, e, diag(sigma_va));
             
         end
         
-        function updatePosVelAccel(this, x, dx, p, v, a, sigma_pva)
+        function updatePosVelAccel(this, x, dx, ddx, p, v, a, sigma_pva)
             
-            if (nargin < 7), sigma_pva = this.sigma_eps*ones(3,1); end
+            if (nargin < 8), sigma_pva = this.sigma_eps*ones(3,1); end
             
             Hp = this.regressVec(x)';
             Hv = this.regressVecDot(x, dx)';
-            Ha = this.regressVecDDot(x, dx, 0)';
+            Ha = this.regressVecDDot(x, dx, ddx)';
             H = [Hp; Hv; Ha];
             
             p_hat = this.output(x);
@@ -228,7 +228,7 @@ classdef WSoG < matlab.mixin.Copyable
 
             if (train_method == GMP_TRAIN.LWR), this.w = LWR(Psi, s, Fd, this.zero_tol);
             elseif (train_method == GMP_TRAIN.LS), this.w = leastSquares(Psi, s, Fd, this.zero_tol);
-            else, error('[WSoG::train]: Unsopported training method...');
+            else, error('[WSoG::train]: Unsupported training method...');
             end
 
             if (nargout > 0)
