@@ -43,16 +43,31 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-# *******************************************
-# ************   Test gmp  ******************
-# *******************************************
+# ***************************************************
+# ************   Test WSoG update  ******************
+# ***************************************************
 
-add_executable(test_WSoG_cond
+add_executable(test_WSoG_update
   src/test_WSoG_update.cpp ${INCLUDE_LIST} ${SRC_LIST}
 )
 
-add_dependencies(test_WSoG_cond
+add_dependencies(test_WSoG_update
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(test_WSoG_cond ${LINK_LIBS} )
+target_link_libraries(test_WSoG_update ${LINK_LIBS} )
+
+# **************************************************
+# ************   Test GMP update  ******************
+# **************************************************
+
+add_executable(test_GMP_update
+  src/test_GMP_update.cpp ${INCLUDE_LIST} ${SRC_LIST}
+)
+
+add_dependencies(test_GMP_update
+${${PROJECT_NAME}_EXPORTED_TARGETS}
+${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(test_GMP_update ${LINK_LIBS} )
+

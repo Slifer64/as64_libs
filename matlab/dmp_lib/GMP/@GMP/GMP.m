@@ -205,6 +205,9 @@ classdef GMP < matlab.mixin.Copyable
             cp_obj = this.copy();
             % Make a deep copy of the pointers
             cp_obj.shape_attr_gating_ptr = this.shape_attr_gating_ptr.copy();
+            cp_obj.wsog = this.wsog.deepCopy();
+            cp_obj.wsog_ = cp_obj.wsog;
+            if (~isempty(this.wsog_opt)), cp_obj.wsog_opt = this.wsog_opt.deepCopy(); end
 
         end
           
@@ -273,7 +276,6 @@ classdef GMP < matlab.mixin.Copyable
         %% Returns the goal attractor of the this.
         %  @param[in] y: \a y state of the this.
         %  @param[in] z: \a z state of the this.
-        %  @param[in] g: Goal position.
         %  @param[out] goal_attr: The goal attractor of the this.
         function goal_attr = goalAttractor(this, y, z)
 

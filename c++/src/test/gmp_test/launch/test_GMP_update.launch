@@ -1,11 +1,13 @@
 <launch>
 
-  <node pkg="gmp_test" type="test_WSoG_update" name="test_WSoG_update_node" output="screen" cwd="node">
+  <node pkg="gmp_test" type="test_GMP_update" name="test_GMP_update_node" output="screen" cwd="node">
 
     <rosparam>
-      train_data_file: "wsog_train_data.bin"
-      sim_data_file: "wsog_update_sim_data.bin"
+      train_data_file: "gmp_train_data.bin"
+      sim_data_file: "gmp_update_sim_data.bin"
       N_kernels: 50
+      D: 30
+      K: 100
       kernels_std_scaling: 2
       train_method: "LS" # {LWR, LS}
       ks: 2

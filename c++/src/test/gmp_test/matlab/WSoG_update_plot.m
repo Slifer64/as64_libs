@@ -1,6 +1,10 @@
+function WSoG_update_plot(filename)
+
 addpath('utils/');
 
-filename = 'data/wsog_update_sim_data.bin';
+if (nargin < 1), filename = 'data/wsog_update_sim_data.bin'; end
+
+
 %% Load sim data
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end
@@ -57,6 +61,7 @@ hold off;
 
 for i=1:length(s), plotUpdatePoint(s{i}, [ax1 ax2 ax3]); end
 
+end
 
 %% ==================================================================
 %% ==================================================================

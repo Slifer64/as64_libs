@@ -20,10 +20,10 @@ include_directories(
 
 add_library(${PROJECT_NAME}
 
-#  src/GatingFunction/GatingFunction.cpp
-#  src/GatingFunction/LinGatingFunction.cpp
-#  src/GatingFunction/ExpGatingFunction.cpp
-#  src/GatingFunction/SigmoidGatingFunction.cpp
+  src/GatingFunction/GatingFunction.cpp
+  src/GatingFunction/LinGatingFunction.cpp
+  src/GatingFunction/ExpGatingFunction.cpp
+  src/GatingFunction/SigmoidGatingFunction.cpp
 
   src/trainMethods/LeastSquares.cpp
   src/trainMethods/LWR.cpp
@@ -32,6 +32,7 @@ add_library(${PROJECT_NAME}
   src/io/io.cpp
 
   src/WSoG/WSoG.cpp
+  src/GMP/GMP.cpp
 )
 
 add_dependencies(${PROJECT_NAME}

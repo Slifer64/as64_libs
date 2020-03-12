@@ -34,10 +34,16 @@ public:
 
   void exportToFile(std::ostream &out) const;
 
+  void setSteepness(double a);
+
 private:
-  double u0; ///< initial value of the gating function
+  double u_end; ///< final value of the gating function (at x=1)
+  double u0; ///< initial value of the gating function (at x=0)
   double a_u; ///< the rate of evolution of the gating function
   double c; ///< center of the exponential in the sigmoid
+
+  void calcCenter();
+
 }; // class SigmoidGatingFunction
 
 } // namespace gmp_

@@ -17,7 +17,8 @@ void SigmoidGatingFunction::init(double u0, double u_end)
 {
   this->a_u = 700.0;
   this->u0 = u0;
-  this->c = 1.0 - (1.0/this->a_u)*std::log((this->u0-u_end)/u_end);
+  this->u_end = u_end;
+  this->calcCenter();
 }
 
 double SigmoidGatingFunction::getOutput(double x) const
@@ -59,6 +60,18 @@ void SigmoidGatingFunction::exportToFile(std::ostream &out) const
   gmp_::write_scalar((int)GatingType::SIGMOID, out);
   out.write((const char *)(dynamic_cast<const SigmoidGatingFunction *>(this)), sizeof(SigmoidGatingFunction));
 }
+
+void SigmoidGatingFunction::setSteepness(double a)
+{
+  this->a_u = a;
+  this->calcCenter();
+}
+
+void SigmoidGatingFunction::calcCenter()
+{
+  this->c = 1.0 - (1.0/this->a_u)*std::log((this->u0-u_end)/u_end);
+}
+
 
 } // namespace gmp_
 

@@ -21,9 +21,10 @@ classdef SigmoidGatingFunction < GatingFunction
           
           this@GatingFunction();
 
-          this.a_u = 700.0;
           this.u0 = u0;
-          this.c = 1.0 - (1.0/this.a_u)*log((this.u0-u_end)/u_end);
+          this.u_end = u_end;
+          this.setSteepness(700);
+          this.calcCenter();
 
       end
 
@@ -68,14 +69,27 @@ classdef SigmoidGatingFunction < GatingFunction
       function setSteepness(this, a_u)
           
           this.a_u = a_u;
+          this.calcCenter();
           
       end
 
    end
    
-   properties (Access = private)
+   methods (Access = protected)
+        
+       function calcCenter(this)
+
+          this.c = 1.0 - (1.0/this.a_u)*log((this.u0-this.u_end)/this.u_end);
+          
+       end
+          
        
-       u0 % initial value of the gating function
+   end
+   
+   properties (Access = private)
+        
+       u_end % final value of the gating function (at x=1)
+       u0 % initial value of the gating function (at x=0)
        a_u % the rate of evolution of the gating function
        c % center of the exponential in the sigmoid
        
