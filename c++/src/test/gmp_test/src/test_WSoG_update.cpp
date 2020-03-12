@@ -12,6 +12,8 @@
 #include <gmp_lib/WSoG/WSoG.h>
 // #include <gmp_test/utils.h>
 
+#define TEST_WSoG_UPDATE_DEBUG_
+
 using namespace as64_;
 
 struct Point
@@ -85,6 +87,10 @@ std::vector<Point> points;
 
 int main(int argc, char** argv)
 {
+  #ifdef TEST_WSoG_UPDATE_DEBUG_
+  try{
+  #endif
+
   // ===========  Initialize the ROS node  ===============
   ros::init(argc, argv, "test_WSoG_cond_node");
 
@@ -174,11 +180,19 @@ int main(int argc, char** argv)
   ros::shutdown();
 
   return 0;
+
+  #ifdef TEST_WSoG_UPDATE_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[main]: ") + e.what()); }
+  #endif
 }
 
 
 void updateWSoG(std::shared_ptr<gmp_::WSoG> wsog, const Point &s)
 {
+  #ifdef TEST_WSoG_UPDATE_DEBUG_
+  try{
+  #endif
+
   if (s.update_pos & !s.update_vel& !s.update_accel)
     wsog->updatePos(s.x, s.p);
   else if (!s.update_pos & s.update_vel& !s.update_accel)
@@ -194,10 +208,18 @@ void updateWSoG(std::shared_ptr<gmp_::WSoG> wsog, const Point &s)
   else if (s.update_pos & s.update_vel& s.update_accel)
     wsog->updatePosVelAccel(s.x, s.x_dot, s.x_ddot, s.p, s.p_dot, s.p_ddot);
 
+  #ifdef TEST_WSoG_UPDATE_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[updateWSoG]: ") + e.what()); }
+  #endif
+
 }
 
 void loadParams()
 {
+  #ifdef TEST_WSoG_UPDATE_DEBUG_
+  try{
+  #endif
+
   ros::NodeHandle nh_("~");
 
   // ===========  Read params  ===============
@@ -253,5 +275,9 @@ void loadParams()
     if ( (it = mp.find("p_dot")) != mp.end()) points[k].setVel(it->second);
     if ( (it = mp.find("p_ddot")) != mp.end()) points[k].setAccel(it->second);
   }
+
+  #ifdef TEST_WSoG_UPDATE_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[loadParams]: ") + e.what()); }
+  #endif
 }
 

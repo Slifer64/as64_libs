@@ -90,9 +90,9 @@ classdef GMP < matlab.mixin.Copyable
         %% Updates the weights so that the generated trajectory passes from the given points.
         %  @param[in] s: Matrix of phase variable states, i.e. s = [x;x_dot; x_ddot].
         %                If s = [x; x_dot], x_ddot is assumed to be 0.
-        %  @param[in] z: Vector with the desired value for each timestamp.
-        %  @param[in] type: Vector with the type of each point (GMP_UPDATE_TYPE).
-        %  @param[in] z_var: Vector with the variance of each point (optional, default = 1e-3).
+        %  @param[in] z: Row vector with the desired value for each timestamp.
+        %  @param[in] type: Row vector with the type of each point (GMP_UPDATE_TYPE).
+        %  @param[in] z_var: Row vector with the variance of each point (optional, default = 1e-3).
         function updateWeights(this, s, z, type, z_var)
             
             if (nargin < 5), z_var = 1e-3; end
@@ -110,7 +110,7 @@ classdef GMP < matlab.mixin.Copyable
             k = this.wsog_.numOfKernels();
             
             H = zeros(n, k);
-            z_hat = zeros(n,1);
+            z_hat = zeros(1,n);
             
             for i=1:n
                 if (type(i) == GMP_UPDATE_TYPE.POS)
@@ -126,7 +126,7 @@ classdef GMP < matlab.mixin.Copyable
                 H(i,:) = Hi;
             end
             
-            e = z - z_hat;
+            e = (z - z_hat)';
             this.wsog_.updateWeights(H, e, diag(z_var));
             
         end

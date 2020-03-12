@@ -14,6 +14,8 @@
 
 using namespace as64_;
 
+#define TEST_GMP_UPDATE_DEBUG_
+
 struct Point
 {
   double t;
@@ -87,6 +89,10 @@ std::vector<Point> points;
 
 int main(int argc, char** argv)
 {
+  #ifdef TEST_GMP_UPDATE_DEBUG_
+  try{
+  #endif
+
   // ===========  Initialize the ROS node  ===============
   ros::init(argc, argv, "test_GMP_cond_node");
 
@@ -177,10 +183,18 @@ int main(int argc, char** argv)
   ros::shutdown();
 
   return 0;
+
+  #ifdef TEST_GMP_UPDATE_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[main]: ") + e.what()); }
+  #endif
 }
 
 void updateGMP(std::shared_ptr<gmp_::GMP> gmp, const Point &point)
 {
+  #ifdef TEST_GMP_UPDATE_DEBUG_
+  try{
+  #endif
+
   std::vector<gmp_::UPDATE_TYPE> type;
   arma::rowvec z;
   std::vector<gmp_::Phase> s;
@@ -210,10 +224,18 @@ void updateGMP(std::shared_ptr<gmp_::GMP> gmp, const Point &point)
 
   gmp->updateWeights(s, z, type);
 
+  #ifdef TEST_GMP_UPDATE_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[updateGMP]: ") + e.what()); }
+  #endif
+
 }
 
 void loadParams()
 {
+  #ifdef TEST_GMP_UPDATE_DEBUG_
+  try{
+  #endif
+
   ros::NodeHandle nh_("~");
 
   // ===========  Read params  ===============
@@ -271,5 +293,9 @@ void loadParams()
     if ( (it = mp.find("p_dot")) != mp.end()) points[k].setVel(it->second);
     if ( (it = mp.find("p_ddot")) != mp.end()) points[k].setAccel(it->second);
   }
+
+  #ifdef TEST_GMP_UPDATE_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[loadParams]: ") + e.what()); }
+  #endif
 }
 

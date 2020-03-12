@@ -34,16 +34,17 @@ p0 = gmp.getYd(0);
 pd0 = Pd_data(1);
 
 %% update
-temp_s = 0.5;
-spat_s = 2;
+kt = 0.5;
+ks = 2;
 Pgd = Pd_data(end);
 P0d = Pd_data(1);
 P0 = P0d;
-Pg = spat_s*(Pgd-P0d) + P0;
-T = Timed(end)/temp_s;
-Time = Timed/temp_s;
+Pg = ks*(Pgd-P0d) + P0;
+T = Timed(end)/kt;
+Time = Timed/kt;
 x = Time / T;
 x_dot = 1/T;
+x_ddot = 0;
 
 gmp.setGoal(Pg);
 
@@ -53,55 +54,60 @@ dP_data = zeros(1,N);
 ddP_data = zeros(1,N);
 
 
-t1 = 1.5 / temp_s;
+points = getPoint([], [], [], [], [], [], []); 
+
+t1 = 1.5 / kt;
 p1 = 0.4;
-s1 = struct('t',t1, 'x',t1/T, 'x_dot',x_dot, 'p',spat_s*(p1-p0)+p0, 'p_dot',[], 'p_ddot',[]);
-gmp = updateGMP(gmp, s1);
+points(1) = getPoint(t1, t1/T, x_dot, x_ddot, ks*(p1-p0)+p0, [], []);
 
-
-t2 = 3 / temp_s;
+t2 = 3 / kt;
 p2_dot = 0.1;
-s2 = struct('t',t2, 'x',t2/T, 'x_dot',x_dot, 'p',[], 'p_dot',spat_s*p2_dot, 'p_ddot',[]);
-gmp = updateGMP(gmp, s2);
+points(2) = getPoint(t2, t2/T, x_dot, x_ddot, [], ks*p2_dot, []);
 
-t3 = 4.25 / temp_s;
+t3 = 4.25 / kt;
 p3_ddot = 0.3;
-s3 = struct('t',t3, 'x',t3/T, 'x_dot',x_dot, 'p',[], 'p_dot',[], 'p_ddot',spat_s*p3_ddot);
-gmp = updateGMP(gmp, s3);
+points(3) = getPoint(t3, t3/T, x_dot, x_ddot, [], [], ks*p3_ddot);
 
-t4 = 5.5 / temp_s;
+t4 = 5.5 / kt;
 p4 = 0.35;
 p4_ddot = 0.2;
-s4 = struct('t',t4, 'x',t4/T, 'x_dot',x_dot, 'p',spat_s*(p4-p0)+p0, 'p_dot',[], 'p_ddot',spat_s*p4_ddot);
-gmp = updateGMP(gmp, s4);
+points(4) = getPoint(t4, t4/T, x_dot, x_ddot, ks*(p4-p0)+p0, [], ks*p4_ddot);
 
-t5 = 7 / temp_s;
+t5 = 7 / kt;
 p5_dot = 0.1;
 p5_ddot = 0.0;
-s5 = struct('t',t5, 'x',t5/T, 'x_dot',1/T, 'p',[], 'p_dot',spat_s*p5_dot, 'p_ddot',spat_s*p5_ddot);
-gmp = updateGMP(gmp, s5);
+points(5) = getPoint(t5, t5/T, x_dot, x_ddot, [], ks*p5_dot, ks*p5_ddot);
 
-t6 = 8.2 / temp_s;
+t6 = 8.2 / kt;
 p6 = 0.4;
 p6_dot = 0.5;
 p6_ddot = 0.0;
-s6 = struct('t',t6, 'x',t6/T, 'x_dot',1/T, 'p',spat_s*(p6-p0)+p0, 'p_dot',spat_s*p6_dot, 'p_ddot',spat_s*p6_ddot);
-gmp = updateGMP(gmp, s6);
+points(6) = getPoint(t6, t6/T, x_dot, x_ddot, ks*(p6-p0)+p0, ks*p6_dot, ks*p6_ddot);
+
+
+for i=1:length(points), gmp = updateGMP(gmp, points(i)); end
 
 %% simulate
 for i=1:N
     P_data(i) = gmp.getYd(x(i));
     dP_data(i) = gmp.getYdDot(x(i), x_dot);
-    ddP_data(i) = gmp.getYdDDot(x(i), x_dot, 0);
+    ddP_data(i) = gmp.getYdDDot(x(i), x_dot, x_ddot);
 end
 
+
+%% obtain scaled demo data
+Timed = Timed / kt;
+Pd_data = ks*(Pd_data-P0d) + P0;
+dPd_data = ks*kt*dPd_data;
+ddPd_data = ks*kt^2*ddPd_data;
+  
 
 %% Plot results
 fig = figure;
 ax1 = subplot(3,1,1);
 hold on;
 plot(Time, P_data, 'LineWidth',2.0 , 'Color','blue');
-plot(Timed/temp_s, spat_s*(Pd_data-pd0)+pd0, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
+plot(Timed, Pd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('pos [$m$]', 'interpreter','latex', 'fontsize',15);
 legend({'sim','demo'}, 'interpreter','latex', 'fontsize',15);
 
@@ -111,7 +117,7 @@ hold off;
 ax2 = subplot(3,1,2);
 hold on;
 plot(Time, dP_data, 'LineWidth',2.0, 'Color','blue');
-plot(Timed/temp_s, spat_s*dPd_data*temp_s, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
+plot(Timed, dPd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('vel [$m/s$]', 'interpreter','latex', 'fontsize',15);
 
 axis tight;
@@ -120,46 +126,54 @@ hold off;
 ax3 = subplot(3,1,3);
 hold on;
 plot(Time, ddP_data, 'LineWidth',2.0, 'Color','blue');
-plot(Timed/temp_s, spat_s*ddPd_data*temp_s^2, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
+plot(Timed, ddPd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('accel [$m/s^2$]', 'interpreter','latex', 'fontsize',15);
 axis tight;
 hold off;
 
-plotUpdatePoint(s1, [ax1 ax2 ax3]);
-plotUpdatePoint(s2, [ax1 ax2 ax3]);
-plotUpdatePoint(s3, [ax1 ax2 ax3]);
-plotUpdatePoint(s4, [ax1 ax2 ax3]);
-plotUpdatePoint(s5, [ax1 ax2 ax3]);
-plotUpdatePoint(s6, [ax1 ax2 ax3]);
 
+for i=1:length(points), plotUpdatePoint(points(i), [ax1 ax2 ax3]); end
 
 %% ==================================================================
 %% ==================================================================
 
-function gmp = updateGMP(gmp, s)
-
-    if (isempty(s)), return; end
-
-    sx = [s.x; s.x_dot];
+function point = getPoint(t, x, x_dot, x_ddot, p, p_dot, p_ddot)
     
-    if (~isempty(s.p) && isempty(s.p_dot) && isempty(s.p_ddot))
-        gmp.updateWeights([sx], [s.p], [GMP_UPDATE_TYPE.POS]);
-    elseif (isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
-        gmp.updateWeights([sx], [s.p_dot], [GMP_UPDATE_TYPE.VEL]);
-    elseif (isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([sx], [s.p_ddot], [GMP_UPDATE_TYPE.ACCEL]);
-    elseif (~isempty(s.p) && ~isempty(s.p_dot) && isempty(s.p_ddot))
-        gmp.updateWeights([sx, sx], [s.p; s.p_dot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL]);
-    elseif (~isempty(s.p) && isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([sx, sx], [s.p; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.ACCEL]);
-    elseif (isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([sx, sx], [s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
-    elseif (~isempty(s.p) && ~isempty(s.p_dot) && ~isempty(s.p_ddot))
-        gmp.updateWeights([sx, sx, sx], [s.p; s.p_dot; s.p_ddot], [GMP_UPDATE_TYPE.POS; GMP_UPDATE_TYPE.VEL; GMP_UPDATE_TYPE.ACCEL]);
-    end
-        
+    point = struct('t',t, 'x',x, 'x_dot',x_dot, 'x_ddot',x_ddot, 'p',p, 'p_dot',p_dot, 'p_ddot',p_ddot);
+
 end
 
+function gmp = updateGMP(gmp, point)
+
+    if (isempty(point)), return; end
+
+    si = [point.x; point.x_dot; point.x_ddot];
+    
+    s = [];
+    type = [];
+    z = [];
+    
+    if (~isempty(point.p))
+        s = [s si];
+        z = [z point.p];
+        type = [type GMP_UPDATE_TYPE.POS];
+    end
+    
+    if (~isempty(point.p_dot))
+        s = [s si];
+        z = [z point.p_dot];
+        type = [type GMP_UPDATE_TYPE.VEL];
+    end
+    
+    if (~isempty(point.p_ddot))
+        s = [s si];
+        z = [z point.p_ddot];
+        type = [type GMP_UPDATE_TYPE.ACCEL];
+    end
+    
+    gmp.updateWeights(s, z, type);
+        
+end
 
 function plotUpdatePoint(s, ax)
 
@@ -187,3 +201,4 @@ function plotUpdatePoint(s, ax)
     end
 
 end
+

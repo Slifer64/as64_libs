@@ -1,6 +1,9 @@
 #ifndef AS64_gmp_lib_UTILS_H
 #define AS64_gmp_lib_UTILS_H
 
+//#define GMP_DEBUG_
+//#define WSoG_DEBUG_
+
 namespace as64_
 {
 
