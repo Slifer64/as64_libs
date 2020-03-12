@@ -1,3 +1,6 @@
+#ifndef AS64_GMP_H_
+#define AS64_GMP_H_
+
 // GMP class
 // Generalized movement primitive.
 //
@@ -146,3 +149,5 @@ protected:
 } // namespace gmp_
 
 } // namespace as64_
+
+#endif // AS64_GMP_H_

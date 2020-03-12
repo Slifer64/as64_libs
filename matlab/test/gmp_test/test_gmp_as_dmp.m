@@ -30,22 +30,22 @@ toc
 disp('GMP simulation...');
 tic
 
-spat_s = 1.5; % spatial scale
-temp_s = 1.3; % temporal scale
+ks = 1.5; % spatial scale
+kt = 1.3; % temporal scale
 P0 = Pd_data(1);
 Pgd = Pd_data(end);
-Pg = P0 + spat_s*(Pgd - P0);
-T = Timed(end) / temp_s;
+Pg = P0 + ks*(Pgd - P0);
+T = Timed(end) / kt;
 dt = Ts;
 [Time, P_data, dP_data, ddP_data] = simulateGMP(gmp, P0, Pg, T, dt);
 toc
 
 
 %% Reference trajectory (scaled)
-Timed = Timed / temp_s;
-Pd_data = spat_s*( Pd_data-P0 ) + P0;
-dPd_data = spat_s*dPd_data*temp_s;
-ddPd_data = spat_s*ddPd_data*temp_s^2;
+Timed = Timed / kt;
+Pd_data = ks*( Pd_data-P0 ) + P0;
+dPd_data = ks*dPd_data*kt;
+ddPd_data = ks*ddPd_data*kt^2;
 
 %% Plot results
 figure;
@@ -54,7 +54,7 @@ hold on;
 plot(Time, P_data, 'LineWidth',2.0 , 'Color','blue');
 plot(Timed, Pd_data, 'LineWidth',2.0, 'LineStyle',':', 'Color','magenta');
 ylabel('pos [$m$]', 'interpreter','latex', 'fontsize',15);
-title(['temporal scale: $' num2str(temp_s) '$     ,     spatial scale: $' num2str(spat_s) '$'], 'interpreter','latex', 'fontsize',18);
+title(['temporal scale: $' num2str(kt) '$     ,     spatial scale: $' num2str(ks) '$'], 'interpreter','latex', 'fontsize',18);
 legend({'sim','demo'}, 'interpreter','latex', 'fontsize',15);
 
 axis tight;

@@ -20,7 +20,7 @@ catkin_package(
 )
 
 set(SRC_LIST
-
+    src/utils.cpp
 )
 
 set(LINK_LIBS
@@ -71,3 +71,16 @@ ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(test_GMP_update ${LINK_LIBS} )
 
+# **************************************************
+# ************   Test GMP as DMP  ******************
+# **************************************************
+
+add_executable(test_gmp_as_dmp
+  src/test_gmp_as_dmp.cpp ${INCLUDE_LIST} ${SRC_LIST}
+)
+
+add_dependencies(test_gmp_as_dmp
+${${PROJECT_NAME}_EXPORTED_TARGETS}
+${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(test_gmp_as_dmp ${LINK_LIBS} )

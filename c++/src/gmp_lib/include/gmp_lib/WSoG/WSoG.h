@@ -1,3 +1,6 @@
+#ifndef AS64_WSoG_H_
+#define AS64_WSoG_H_
+
 // WSoG class
 //  Weighted sum of Guassians.
 //
@@ -154,3 +157,5 @@ private:
 } // namespace gmp_
 
 } // namespace as64_
+
+#endif // AS64_WSoG_H_

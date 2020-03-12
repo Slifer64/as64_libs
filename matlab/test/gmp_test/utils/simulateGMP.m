@@ -15,12 +15,12 @@ function [Time, Y_data, dY_data, ddY_data] = simulateGMP(gmp, y0, g, T, dt)
 %% set initial values
 if (~iscell(gmp)), gmp = {gmp}; end
 Dim = length(gmp);
-ddy = zeros(Dim,1);
-dy = zeros(Dim,1);
 y = y0;
-t = 0.0;
-dz = zeros(Dim,1);
+dy = zeros(Dim,1);
+ddy = zeros(Dim,1);
 z = zeros(Dim,1);
+dz = zeros(Dim,1);
+t = 0.0;
 
 t_end = T;
 tau = t_end;
@@ -63,7 +63,7 @@ while (true)
     end
 
     %% Update phase variable
-    dx = 1/tau;
+    x_dot = 1/tau;
 
     %% Stopping criteria
     if (t>=1.1*t_end) % && norm(y-g)<5e-3 && norm(dy)<5e-3)
@@ -73,11 +73,11 @@ while (true)
     %% Numerical integration
     iters = iters + 1;
     t = t + dt;
-    x = x + dx*dt;
+    x = x + x_dot*dt;
     y = y + dy*dt;
     z = z + dz*dt;
 
-    s = [x; dx];
+    s = [x; x_dot];
     
 end
 

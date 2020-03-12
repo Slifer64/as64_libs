@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 
   arma::wall_clock timer;
   timer.tic();
-  std::cout << "WSoG training...\n";
+  std::cout << "GMP training...\n";
   double offline_train_mse;
   int i_end = Timed.size()-1;
   arma::rowvec x = Timed/Timed(i_end);
