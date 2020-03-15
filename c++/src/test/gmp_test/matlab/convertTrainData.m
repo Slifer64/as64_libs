@@ -6,9 +6,9 @@ clear;
 
 addpath('utils/');
 
-convert_gmp_data();
+% convert_gmp_data();
 convert_gmp_pos_data();
-convert_gmp_eo_data();
+% convert_gmp_eo_data();
 
 end
 

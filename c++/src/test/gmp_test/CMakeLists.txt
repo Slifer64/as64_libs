@@ -84,3 +84,17 @@ ${${PROJECT_NAME}_EXPORTED_TARGETS}
 ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(test_gmp_as_dmp ${LINK_LIBS} )
+
+# **************************************************
+# ************   Test n-DoF GMP   ******************
+# **************************************************
+
+add_executable(test_nDoF_gmp
+        src/test_nDoF_gmp.cpp ${INCLUDE_LIST} ${SRC_LIST}
+        )
+
+add_dependencies(test_nDoF_gmp
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(test_nDoF_gmp ${LINK_LIBS} )

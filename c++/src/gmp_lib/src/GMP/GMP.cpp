@@ -140,7 +140,7 @@ double GMP::getYddot(double yc_dot) const
 }
 
 
-double GMP::calcYddot(const gmp_::Phase &s, double y, double y_dot, double yc, double zc, double yc_dot)
+double GMP::calcYddot(const gmp_::Phase &s, double y, double y_dot, double yc, double zc, double yc_dot) const
 {
   #ifdef GMP_DEBUG_
   try{

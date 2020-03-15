@@ -1,0 +1,19 @@
+<launch>
+
+  <node pkg="gmp_test" type="test_nDoF_gmp" name="test_nDoF_gmp_node" output="screen" cwd="node">
+
+    <rosparam>
+      train_data_file: "gmp_nDoF_train_data.bin"
+      sim_data_file: "gmp_nDoF_sim_data.bin"
+      N_kernels: 50
+      D: 30
+      K: 100
+      kernels_std_scaling: 2
+      train_method: "LS" # {LWR, LS}
+      ks: 1.5
+      kt: 1.3
+    </rosparam>
+
+  </node>
+
+</launch>

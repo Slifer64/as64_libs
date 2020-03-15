@@ -21,7 +21,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
             if (length(K) == 1), K = ones(n,1)*K(1); end
             
             this.gmp = cell(n,1);
-            for i=1:n, this.gmp{i} = GMP(N_kernels(1), D(1), K(1), kernels_std_scaling); end
+            for i=1:n, this.gmp{i} = GMP(N_kernels(i), D(i), K(i), kernels_std_scaling); end
             
             this.setY0(zeros(n,1));
             this.setGoal(ones(n,1));
@@ -50,7 +50,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
                 train_error = zeros(n,1);
                 for i=1:n, train_error(i) = this.gmp{i}.train(train_method, Time, yd_data(i,:)); end
             else
-                for i=1:n, this.gmp.train(train_method, x, yd_data(i,:)); end
+                for i=1:n, this.gmp{i}.train(train_method, Time, yd_data(i,:)); end
             end
             
         end
@@ -201,8 +201,6 @@ classdef GMP_nDoF < matlab.mixin.Copyable
             n = this.length();
             p_ref_ddot = zeros(n,1);
             for i=1:n, p_ref_ddot(i) = this.gmp{i}.getYdDDot(x, x_dot, x_ddot); end
-            
-            p_ref_ddot = this.wsog_.outputDDot(x, x_dot, x_ddot);
             
         end
         

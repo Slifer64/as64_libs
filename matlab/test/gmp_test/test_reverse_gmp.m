@@ -17,12 +17,12 @@ ddPd_data = Data.Accel(1,:);
 Ts = Timed(2)-Timed(1);
 
 %% initialize and train GMP
-a_z = 20;
-b_z = a_z/4;
+D = 30;
+K = 100;
 train_method = GMP_TRAIN.LS;
 N_kernels = 50;
 kernels_std_scaling = 2;
-gmp = GMP(N_kernels, a_z, a_z*b_z, kernels_std_scaling);
+gmp = GMP(N_kernels, D, K, kernels_std_scaling);
 tic
 offline_train_mse = gmp.train(train_method, Timed, Pd_data);
 offline_train_mse

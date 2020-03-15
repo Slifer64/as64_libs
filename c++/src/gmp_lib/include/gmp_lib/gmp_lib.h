@@ -8,4 +8,4 @@
 
 #include <gmp_lib/WSoG/WSoG.h>
 #include <gmp_lib/GMP/GMP.h>
-
+#include <gmp_lib/GMP/GMP_nDoF.h>

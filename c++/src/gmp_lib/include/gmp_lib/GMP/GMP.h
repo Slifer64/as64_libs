@@ -18,8 +18,6 @@ namespace gmp_
 class GMP
 {
 
-public:
-
 // ===================================
 // =======  Public Functions  ========
 // ===================================
@@ -76,7 +74,7 @@ public:
 
 
   // Calculates the DMP's acceleration.
-  double calcYddot(const gmp_::Phase &s, double y, double y_dot, double yc=0, double zc=0, double yc_dot=0);
+  double calcYddot(const gmp_::Phase &s, double y, double y_dot, double yc=0, double zc=0, double yc_dot=0) const;
 
 
   // Returns the number of kernels.
