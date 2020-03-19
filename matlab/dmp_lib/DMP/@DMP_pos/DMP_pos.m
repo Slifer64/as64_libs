@@ -109,7 +109,7 @@ classdef DMP_pos < matlab.mixin.Copyable
             
             Yddot = zeros(3,1);
             for i=1:3
-                Yddot(i) = (this.dmp{i}.getZdot() + Yc_dot - tau_dot*this.dmp{i}.getYdot()) / this.dmp{i}.getTau(); 
+                Yddot(i) = (this.dmp{i}.getZdot() + Yc_dot(i) - tau_dot*this.dmp{i}.getYdot()) / this.dmp{i}.getTau(); 
             end
             
         end

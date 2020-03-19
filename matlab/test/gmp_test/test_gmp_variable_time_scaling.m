@@ -150,10 +150,6 @@ dPd_data = spat_s*dPd_data*temp_s;
 ddPd_data = spat_s*ddPd_data*temp_s^2;
 
 
-for i=1:3
-    [dist, ix] = fb_dtw(P_data(i,:), Pd_data(i,:));
-end
-
 Time2 = cell(3,1);
 P_data2 = cell(3,1);
 Pd_data2 = cell(3,1);
@@ -305,7 +301,7 @@ else
     ax = axes('Parent',figure());
     hold(ax,'on');
     plot3(Pd_data(1,:), Pd_data(2,:), Pd_data(3,:), 'LineWidth',2, 'LineStyle','-', 'Color','blue', 'Parent',ax);
-    plot3(P_data(1,end), P_data(2,end), P_data(3,end), 'LineWidth',4, 'LineStyle','-', 'Marker','o', 'MarkerSize',10, 'Color','red', 'Parent',ax);
+    plot3(Pg(1), Pg(2), Pg(3), 'LineWidth',4, 'LineStyle','-', 'Marker','o', 'MarkerSize',10, 'Color','red', 'Parent',ax);
     plot3(P_data(1,:), P_data(2,:), P_data(3,:), 'LineWidth',2, 'LineStyle',':', 'Color','magenta', 'Parent',ax);
     hold(ax,'off');
 
