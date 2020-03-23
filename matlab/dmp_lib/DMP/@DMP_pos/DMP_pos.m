@@ -39,6 +39,10 @@ classdef DMP_pos < matlab.mixin.Copyable
                 end
             end
 
+            this.dZ = zeros(3,1);
+            this.dY = zeros(3,1);
+            this.dx = 0;
+        
         end
         
         

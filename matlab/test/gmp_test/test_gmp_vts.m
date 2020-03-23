@@ -2,7 +2,7 @@
 %  Loads a reference trajecory.
 %  Trains a GMP based on the reference trajectory.
 %  Plots and compares the results.
-function test_gmp_variable_time_scaling()
+function test_gmp_vts()
 
 set_matlab_utils_path();
 
@@ -95,7 +95,7 @@ while (true)
     fdist_x = disturbance_function(t, t_end, 10); 
     fdist_y = disturbance_function(t, t_end, -8);
     fdist_z = disturbance_function(t, t_end, -9);
-    z_c = [fdist_x; fdist_y; fdist_z];
+    z_c = 0*[fdist_x; fdist_y; fdist_z];
     gmp.update(s, y, z, y_c, z_c);
     y_dot = gmp.getYdot();
     z_dot = gmp.getZdot();
@@ -117,9 +117,6 @@ while (true)
     fv = a_v*fv_prev + (1-a_v)*fv;
     fv_prev = fv;
     x_ddot = 50*(xd_dot - x_dot) + fv;
-    % xd_ddot = 50*(xd_dot - x_dot) + fv;
-    % x_3dot = 20*(xd_ddot - x_ddot);
-    % x_3dot = 200*(xd_ddot - x_ddot);
 
     %% Stopping criteria
     if (x>=1.1) % && norm(y-g)<5e-3 && norm(dy)<5e-3)
@@ -131,12 +128,10 @@ while (true)
     t = t + dt;
     x = x + x_dot*dt;
     x_dot = x_dot + x_ddot*dt;
-    %x_ddot = x_ddot + x_3dot*dt;
     y = y + y_dot*dt;
     z = z + z_dot*dt;
 
     s = [x; x_dot; x_ddot];
-%     s = [x; x_dot; 0*x_ddot];
     
 end
 
@@ -150,47 +145,31 @@ dPd_data = spat_s*dPd_data*temp_s;
 ddPd_data = spat_s*ddPd_data*temp_s^2;
 
 
-Time2 = cell(3,1);
-P_data2 = cell(3,1);
-Pd_data2 = cell(3,1);
-dist = zeros(3,1);
-n_w = 0;
-for i=1:3
-    [dist(i), ix] = fb_dtw(P_data(i,:), Pd_data(i,:));
-    Pd_data2{i} = Pd_data(i,ix);
-    P_data2{i} = P_data(i,:);
-    n_w = length(ix);
-    Time2{i} = (0:(n_w-1))*Ts;
-    dist(i) = dist(i) / n_w;
-end
-dist
-
-
 % Time2 = cell(3,1);
 % P_data2 = cell(3,1);
 % Pd_data2 = cell(3,1);
 % dist = zeros(3,1);
 % n_w = 0;
 % for i=1:3
-%     [dist(i), ix, iy] = dtw(Pd_data(i,:), P_data(i,:));
+%     [dist(i), ix] = fb_dtw(P_data(i,:), Pd_data(i,:));
 %     Pd_data2{i} = Pd_data(i,ix);
-%     P_data2{i} = P_data(i,iy);
+%     P_data2{i} = P_data(i,:);
 %     n_w = length(ix);
 %     Time2{i} = (0:(n_w-1))*Ts;
 %     dist(i) = dist(i) / n_w;
 % end
 % dist
-
-figure;
-for i=1:3
-subplot(3,2, (i-1)*2+1);
-hold on;
-plot(Time2{i}, Pd_data2{i}, 'LineWidth',2, 'Color','blue', 'LineStyle','-');
-plot(Time2{i}, P_data2{i}, 'LineWidth',2, 'Color','magenta', 'LineStyle',':');
-hold off;
-subplot(3,2, (i-1)*2+2);
-plot(Time2{i}, P_data2{i}-Pd_data2{i}, 'LineWidth',2, 'Color','red');
-end
+% 
+% figure;
+% for i=1:3
+% subplot(3,2, (i-1)*2+1);
+% hold on;
+% plot(Time2{i}, Pd_data2{i}, 'LineWidth',2, 'Color','blue', 'LineStyle','-');
+% plot(Time2{i}, P_data2{i}, 'LineWidth',2, 'Color','magenta', 'LineStyle',':');
+% hold off;
+% subplot(3,2, (i-1)*2+2);
+% plot(Time2{i}, P_data2{i}-Pd_data2{i}, 'LineWidth',2, 'Color','red');
+% end
 
 
 %% Plot results
@@ -225,7 +204,7 @@ end
 % end
 
 
-plot_animated = true;
+plot_animated = false;
 if (plot_animated)
     
     figure;
@@ -300,7 +279,7 @@ else
     
     ax = axes('Parent',figure());
     hold(ax,'on');
-    plot3(Pd_data(1,:), Pd_data(2,:), Pd_data(3,:), 'LineWidth',2, 'LineStyle','-', 'Color','blue', 'Parent',ax);
+    plot3(Pd_data(1,:), Pd_data(2,:), Pd_data(3,:), 'LineWidth',2, 'LineStyle','-', 'Color',[0 0 1 0.5], 'Parent',ax);
     plot3(Pg(1), Pg(2), Pg(3), 'LineWidth',4, 'LineStyle','-', 'Marker','o', 'MarkerSize',10, 'Color','red', 'Parent',ax);
     plot3(P_data(1,:), P_data(2,:), P_data(3,:), 'LineWidth',2, 'LineStyle',':', 'Color','magenta', 'Parent',ax);
     hold(ax,'off');

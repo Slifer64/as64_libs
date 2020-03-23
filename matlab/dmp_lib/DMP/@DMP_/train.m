@@ -21,8 +21,8 @@ function [train_error, F, Fd] = train(this, train_method, Time, yd_data, dyd_dat
         Psi(:,i) = this.kernelFunction(x(i));
     end
 
-    if (train_method == DMP_TRAIN.LWR), this.w = LWR(Psi, s, Fd, this.zero_tol);
-    elseif (train_method == DMP_TRAIN.LS), this.w = leastSquares(Psi, s, Fd, this.zero_tol);
+    if (strcmpi(train_method,'LWR') == 1), this.w = LWR(Psi, s, Fd, this.zero_tol);
+    elseif (strcmpi(train_method,'LS') == 1), this.w = leastSquares(Psi, s, Fd, this.zero_tol);
     else, error('[DMP_::train]: Unsopported training method...');
     end
 

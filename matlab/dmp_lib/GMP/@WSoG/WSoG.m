@@ -226,8 +226,8 @@ classdef WSoG < matlab.mixin.Copyable
                 Psi(:,i) = this.kernelFun(x(i));
             end
 
-            if (train_method == GMP_TRAIN.LWR), this.w = LWR(Psi, s, Fd, this.zero_tol);
-            elseif (train_method == GMP_TRAIN.LS), this.w = leastSquares(Psi, s, Fd, this.zero_tol);
+            if (strcmpi(train_method,'LWR') == 1), this.w = LWR(Psi, s, Fd, this.zero_tol);
+            elseif (strcmpi(train_method,'LS') == 1), this.w = leastSquares(Psi, s, Fd, this.zero_tol);
             else, error('[WSoG::train]: Unsupported training method...');
             end
 

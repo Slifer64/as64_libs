@@ -33,6 +33,9 @@ GMP::GMP(unsigned N_kernels, double D, double K, double kernels_std_scaling)
   this->setY0(0);
   this->setGoal(1);
 
+  this->y_dot = 0;
+  this->z_dot = 0;
+
   #ifdef GMP_DEBUG_
   }catch(std::exception &e) { throw std::runtime_error(std::string("[GMP::GMP]: ") + e.what()); }
   #endif

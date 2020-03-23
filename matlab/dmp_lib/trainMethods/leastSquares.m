@@ -33,7 +33,7 @@ for i=1:w_dim
     H(k:k+N_kernels-1,:) = Psi.*repmat(X(i,:),N_kernels,1);
     k = k+N_kernels;
 end
-    
+
 w = reshape((Fd/H)', N_kernels, w_dim);
 
 end

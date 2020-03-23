@@ -49,6 +49,11 @@ classdef DMP_ < matlab.mixin.Copyable
             this.setCenters();
             this.setStds(1.0);
             this.setY0(0.0);
+            
+            this.dy = 0;
+            this.dz = 0;
+            this.dx = 0;
+            
         end
 
         
@@ -77,7 +82,7 @@ classdef DMP_ < matlab.mixin.Copyable
         %  @param[out] dy: derivative of the \a y state of the this.
         %  @param[out] dz: derivative of the \a z state of the this.
         %  @param[out] dx: derivative of the phase variable of the this.
-        uqdate(this, x, y, z, g, y_c, z_c)
+        update(this, x, y, z, g, y_c, z_c)
         
         
         function dx = getXdot(this), dx=this.dx; end

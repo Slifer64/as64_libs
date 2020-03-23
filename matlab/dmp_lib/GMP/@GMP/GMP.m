@@ -17,8 +17,9 @@ classdef GMP < matlab.mixin.Copyable
             
             this.D = D;
             this.K = K;
-            this.shape_attr_gating_ptr = SigmoidGatingFunction(1.0, 0.99);
-            this.shape_attr_gating_ptr.setSteepness(750);
+%             this.shape_attr_gating_ptr = SigmoidGatingFunction(1.0, 0.99);
+%             this.shape_attr_gating_ptr.setSteepness(750);
+            this.shape_attr_gating_ptr = LinGatingFunction(1.0, 1.0);
             
             this.wsog = WSoG(N_kernels, kernels_std_scaling);
             this.wsog_opt = this.wsog.deepCopy();
@@ -27,6 +28,8 @@ classdef GMP < matlab.mixin.Copyable
             
             this.setY0(0);
             this.setGoal(1);
+            this.y_dot = 0;
+            this.z_dot = 0;
             
         end
 
