@@ -88,16 +88,6 @@ classdef DMPo < matlab.mixin.Copyable
                     this.dmp{i}.train(train_method, Time, q_data(i,:), qdot_data(i,:), qddot_data(i,:));
                 end
             end
-            
-            fid = fopen('weights.bin','w');
-            w = zeros(3, this.dmp{1}.N_kernels);
-            for i=1:3, w(i,:) = this.dmp{i}.w; end
-            write_mat(w, fid, true);
-            write_mat(q_data, fid, true);
-            write_mat(qdot_data, fid, true);
-            write_mat(qddot_data, fid, true);
-            write_mat(Quat_data, fid, true);
-            fclose(fid);
 
         end
       

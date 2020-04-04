@@ -6,15 +6,16 @@ classdef GMP_nDoF < matlab.mixin.Copyable
     
     methods (Access = public)
         
-        %% DMP constructor.
+        %% GMP constructor.
         %  @param[in] n: number of degrees of freedom.
         %  @param[in] N_kernels: the number of kernels
         %  @param[in] D: damping.
         %  @param[in] K: stiffness.
-        %  @param[in] kernels_std_scaling: Scaling for std of kernels (optional, default=2).
+        %  @param[in] kernels_std_scaling: Scaling for std of kernels (optional, default=1).
+        %  \note: Each of the arguments 'N_kernels', 'D', 'K' can be scalar or a nx1 vector.
         function this = GMP_nDoF(n, N_kernels, D, K, kernels_std_scaling)
                 
-            if (nargin < 5), kernels_std_scaling = 2.0; end
+            if (nargin < 5), kernels_std_scaling = 1.0; end
             
             if (length(N_kernels) == 1), N_kernels = ones(n,1)*N_kernels(1); end
             if (length(D) == 1), D = ones(n,1)*D(1); end
@@ -33,6 +34,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         
         
         %% Returns the number of DoFs.
+        %  return: number of DoFs.
         function n = length(this)
            
             n = length(this.gmp);
@@ -40,9 +42,11 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         end
 
         
-        %% Trains the DMP.
+        %% Trains the GMP.
+        %  @param[in] train_method: the training method to use, as a string ('LWR', 'LS').
         %  @param[in] Time: Row vector with the timestamps of the training data points.
-        %  @param[in] yd_data: Row vector with the desired potition.
+        %  @param[in] yd_data: Matrix with the desired potition for each DoF in each row.
+        %  @param[out] train_error: The training error expressed as the mse error.
         function train_error = train(this, train_method, Time, yd_data)
 
             n = this.length();
@@ -55,34 +59,13 @@ classdef GMP_nDoF < matlab.mixin.Copyable
             
         end
 
-        
-        %% Constrained optimization.
-        %  @param[in] T: Time duration of the motion.
-        %  @param[in] pos_constr: Cell array where the i-th entry is a vector of @GMPConstr position constraints for the i-th gmp. For no constraints pass '[]'.
-        %  @param[in] vel_constr: Cell array where the i-th entry is a vector of @GMPConstr velocity constraints for the i-th gmp. For no constraints pass '[]'.
-        %  @param[in] accel_constr: Cell array where the i-th entry is a vector of @GMPConstr acceleration constraints for the i-th gmp. For no constraints pass '[]'.
-        %  @param[in] opt_set: Cell array where the i-th entry is an object of type @GMPOptSet for setting optimization options for the i-th gmp.
-        function constrOpt(this, T, pos_constr, vel_constr, accel_constr, opt_set)
-        
-            n = this.length();
-            for i=1:n
-               this.constrOpt(T, pos_constr{i}, vel_constr{i}, accel_constr{i}, opt_set{i});
-            end
- 
-        end
-            
-        
-        %% TODO
-        %% Updates the weights so that the generated trajectory passes from the given points.
-        % function updateWeights(this, s, z, type, z_var)
-        
-        
-        %% Returns the derivatives of the DMP states.
-        %  @param[in] x: phase variable.
-        %  @param[in] y: \a y state of the this.
-        %  @param[in] z: \a z state of the this.
-        %  @param[in] y_c: coupling term for the dynamical equation of the \a y state.
-        %  @param[in] z_c: coupling term for the dynamical equation of the \a z state.
+
+        %% Calculates the time derivatives of the GMP's states.
+        %  @param[in] s: Vector with the phase variable state, i.e. s = [x; x_dot; x_ddot].
+        %  @param[in] y: 'y' state of the GMP.
+        %  @param[in] z: 'z' state of the GMP.
+        %  @param[in] y_c: coupling term for the dynamical equation of the 'y' state (optional, default=0).
+        %  @param[in] z_c: coupling term for the dynamical equation of the 'z' state (optional, default=0).
         function update(this, s, y, z, y_c, z_c)
 
             n = this.length();
@@ -102,11 +85,26 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         end
 
         
-        function y_dot = getYdot(this), y_dot = this.y_dot; end
-        function z_dot = getZdot(this), z_dot = this.z_dot; end
+        %% Returns the 'y' state time derivative.
+        %  Call after @update.
+        %  @return: time derivative of 'y' state.
+        function y_dot = getYdot(this)
+            y_dot = this.y_dot; 
+        end
         
         
-        %% Returns the DMP's acceleration.
+        %% Returns the 'z' state time derivative.
+        %  Call after @update.
+        %  @return: time derivative of 'z' state.
+        function z_dot = getZdot(this)
+            z_dot = this.z_dot; 
+        end
+        
+        
+        %% Returns the GMP's acceleration.
+        %  Call after @update.
+        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
+        %  @return: acceleration.
         function y_ddot = getYddot(this, yc_dot)
             
             n = this.length();
@@ -119,7 +117,14 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         end
         
         
-        %% Calculates the DMP's acceleration.
+        %% Calculates the GMP's acceleration.
+        %  @param[in] s: Vector with the phase variable state, i.e. s = [x; x_dot; x_ddot].
+        %  @param[in] y: 'y' state of the GMP.
+        %  @param[in] y_dot: time derivative of 'y' state.
+        %  @param[in] y_c: coupling term for the dynamical equation of the 'y' state (optional, default=0).
+        %  @param[in] z_c: coupling term for the dynamical equation of the 'z' state (optional, default=0).
+        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
+        %  @return: acceleration.
         function y_ddot = calcYddot(this, s, y, y_dot, yc, zc, yc_dot)
 
             n = this.length();
@@ -138,6 +143,8 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         
         
         %% Returns the number of kernels for the i-th gmp.
+        %  @param[in] i: index for the i-th DoF.
+        %  @return: number of kernels for the i-th gmp.
         function n_ker = numOfKernels(this, i)
             
             n_ker = this.gmp{i}.numOfKernels();
@@ -146,6 +153,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
 
         
         %% Sets the initial position.
+        %  @param[in] y0: initial position.
         function setY0(this, y0)
             
             n = this.length();
@@ -155,6 +163,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         
         
         %% Set goal position.
+        %  @param[in] g: goal position.
         function setGoal(this, g)
 
             n = this.length();
@@ -163,7 +172,8 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         end
 
         
-        %% Creates a deep copy of this object
+        %% Returns a deep copy of this object.
+        %  @return: deep copy of this object.
         function cp_obj = deepCopy(this)
             
             % Make a shallow copy of all properties
@@ -176,6 +186,9 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         end
 
         
+        %% Returns the scaled desired position.
+        %  @param[in] x: phase variable.
+        %  @return: scaled desired position.
         function p_ref = getYd(this, x)
             
             n = this.length();
@@ -185,6 +198,10 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         end
         
         
+        %% Returns the scaled desired velocity.
+        %  @param[in] x: phase variable.
+        %  @param[in] x_dot: 1st time derivative of the phase variable.
+        %  @return: scaled desired velocity.
         function p_ref_dot = getYdDot(this, x, x_dot)
             
             n = this.length();
@@ -194,6 +211,11 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         end
         
         
+        %% Returns the scaled desired acceleration.
+        %  @param[in] x: phase variable.
+        %  @param[in] x_dot: 1st time derivative of the phase variable.
+        %  @param[in] x_ddot: 2nd time derivative of the phase variable.
+        %  @return: scaled desired acceleration.
         function p_ref_ddot = getYdDDot(this, x, x_dot, x_ddot)
             
             if (nargin < 4), x_ddot = 0; end
@@ -203,7 +225,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
             for i=1:n, p_ref_ddot(i) = this.gmp{i}.getYdDDot(x, x_dot, x_ddot); end
             
         end
-        
+
         
     end
     

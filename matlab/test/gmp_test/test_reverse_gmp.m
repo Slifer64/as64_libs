@@ -19,7 +19,7 @@ Ts = Timed(2)-Timed(1);
 %% initialize and train GMP
 D = 30;
 K = 100;
-train_method = GMP_TRAIN.LS;
+train_method = 'LS';
 N_kernels = 50;
 kernels_std_scaling = 2;
 gmp = GMP(N_kernels, D, K, kernels_std_scaling);

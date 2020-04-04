@@ -17,7 +17,7 @@ ddPd_data = Data.Accel;
 Ts = Timed(2)-Timed(1);
 
 %% initialize and train GMP
-train_method = GMP_TRAIN.LS;
+train_method = 'LS';
 N_kernels = 50;
 kernels_std_scaling = 2;
 n_dof = 3;

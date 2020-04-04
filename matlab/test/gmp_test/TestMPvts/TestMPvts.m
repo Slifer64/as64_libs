@@ -23,7 +23,9 @@ classdef TestMPvts < handle
         
 
         %% Plots the simulation results
-        function plotResults(this)
+        function plotResults(this, animated)
+            
+            if (nargin < 2), animated = false; end
             
             %% Reference trajectory (scaled)
             %Timed2 = this.Timed / this.kt;
@@ -74,12 +76,24 @@ classdef TestMPvts < handle
 %             ylabel('$\tau$', 'interpreter','latex', 'fontsize',15);
 %             axis tight;
 %             hold off;
-
+            
+            %% 3D path
             ax = axes('Parent',figure());
             hold(ax,'on');
             plot3(Pd_data2(1,:), Pd_data2(2,:), Pd_data2(3,:), 'LineWidth',2, 'LineStyle','-', 'Color',[0 0 1 0.5], 'Parent',ax);
             plot3(this.yg(1), this.yg(2), this.yg(3), 'LineWidth',4, 'LineStyle','-', 'Marker','o', 'MarkerSize',10, 'Color','red', 'Parent',ax);
-            plot3(this.P_data(1,:), this.P_data(2,:), this.P_data(3,:), 'LineWidth',2, 'LineStyle',':', 'Color','magenta', 'Parent',ax);
+            if (animated)
+                pl = plot3(nan, nan, nan, 'LineWidth',2, 'LineStyle',':', 'Color','magenta', 'Parent',ax);
+                pl_ee = plot3(nan, nan, nan, 'LineWidth',3, 'LineStyle','-', 'Marker','+', 'MarkerSize',14, 'Color',[0 0.8 0], 'Parent',ax);
+                for j=1:size(this.P_data,2)
+                   pl.XData = [pl.XData this.P_data(1,j)]; pl.YData = [pl.YData this.P_data(2,j)]; pl.ZData = [pl.ZData this.P_data(3,j)];
+                   pl_ee.XData = this.P_data(1,j); pl_ee.YData = this.P_data(2,j); pl_ee.ZData = this.P_data(3,j);
+                   drawnow;
+                   pause(0.001);
+                end
+            else
+                plot3(this.P_data(1,:), this.P_data(2,:), this.P_data(3,:), 'LineWidth',2, 'LineStyle',':', 'Color','magenta', 'Parent',ax);       
+            end
             hold(ax,'off');
             
             figure;
@@ -136,7 +150,7 @@ classdef TestMPvts < handle
             
         end
         
-        
+
         %% ODE related functions
         function s_dot = stateTransFun(this, t, s)
 
@@ -150,6 +164,9 @@ classdef TestMPvts < handle
             %% DMP simulation
             y_c = zeros(this.Dim,1);
             z_c = zeros(this.Dim,1);
+%             if (t>0.5 & t<0.55)
+%                 z_c = 20*ones(this.Dim,1);
+%             end
             [y_dot, z_dot] = this.model.update(x, x_dot, this.x_ddot, y, z, this.yg, tau, this.tau_dot, y_c, z_c);
   
             %% State derivative
@@ -242,12 +259,13 @@ classdef TestMPvts < handle
             
             %% set params
             this.ks = 1.5; % spatial scale
-            kt = 0.1; % temporal scale
+            kt = 0.01; % temporal scale
             kt_new = 5; % target temporal scale
             this.a_tau = 10;
             dt = 0.002; % euler integration step
             T_max = 8; % maximum simulation time
-            train_params = struct('train_method','LS', 'D',1, 'K',1, 'N_kernels',50);
+            train_params = struct('train_method','LS', 'D',30, 'K',100, 'N_kernels',50);
+            animate_plot = false;
             
             
             %% set MP model
@@ -311,7 +329,7 @@ classdef TestMPvts < handle
             
             %% Plot results
             disp('Plotting...');
-            this.plotResults();
+            this.plotResults(animate_plot);
 
         end
         

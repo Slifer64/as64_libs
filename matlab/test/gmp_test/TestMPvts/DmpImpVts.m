@@ -49,8 +49,8 @@ classdef DmpImpVts < MPvts_
             
             K_ = this.K/tau^2;
             D_ = (this.D + tau_dot)/tau;
-            y_dot = z;
-            z_dot = y_ref_ddot - D_*(z - y_ref_dot) - K_*(y - y_ref);
+            y_dot = z + y_c;
+            z_dot = y_ref_ddot - D_*(z - y_ref_dot) - K_*(y - y_ref) + z_c;
             
             this.y_dot = y_dot;
             this.y_ddot = z_dot;

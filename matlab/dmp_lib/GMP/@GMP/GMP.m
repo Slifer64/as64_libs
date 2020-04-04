@@ -6,26 +6,19 @@ classdef GMP < matlab.mixin.Copyable
     
     methods (Access = public)
         
-        %% DMP constructor.
-        %  @param[in] N_kernels: the number of kernels
+        %% GMP constructor.
+        %  @param[in] N_kernels: number of kernels
         %  @param[in] D: damping.
         %  @param[in] K: stiffness.
-        %  @param[in] kernels_std_scaling: Scaling for std of kernels (optional, default=2).
+        %  @param[in] kernels_std_scaling: Scaling for std of kernels (optional, default=1).
         function this = GMP(N_kernels, D, K, kernels_std_scaling)
                 
-            if (nargin < 4), kernels_std_scaling = 2.0; end
+            if (nargin < 4), kernels_std_scaling = 1.0; end
             
             this.D = D;
             this.K = K;
-%             this.shape_attr_gating_ptr = SigmoidGatingFunction(1.0, 0.99);
-%             this.shape_attr_gating_ptr.setSteepness(750);
-            this.shape_attr_gating_ptr = LinGatingFunction(1.0, 1.0);
-            
             this.wsog = WSoG(N_kernels, kernels_std_scaling);
-            this.wsog_opt = this.wsog.deepCopy();
-            
-            this.setOptTraj(false);
-            
+
             this.setY0(0);
             this.setGoal(1);
             this.y_dot = 0;
@@ -34,65 +27,202 @@ classdef GMP < matlab.mixin.Copyable
         end
 
         
-        %% Trains the DMP.
+        %% Trains the GMP.
+        %  @param[in] train_method: the training method to use, as a string ('LWR', 'LS').
         %  @param[in] Time: Row vector with the timestamps of the training data points.
         %  @param[in] yd_data: Row vector with the desired potition.
+        %  @param[out] train_error: The training error expressed as the mse error.
         function train_error = train(this, train_method, Time, yd_data)
 
             x = Time / Time(end);
             train_error = this.wsog.train(train_method, x, yd_data);
             
-            this.wsog_opt = this.wsog.deepCopy();
+        end
+
+        
+        %% Returns the derivatives of the GMP states.
+        %  @param[in] s: Vector with the phase variable state, i.e. s = [x; x_dot; x_ddot].
+        %  @param[in] y: 'y' state of the GMP.
+        %  @param[in] z: 'z' state of the GMP.
+        %  @param[in] y_c: coupling term for the dynamical equation of the 'y' state (optional, default=0).
+        %  @param[in] z_c: coupling term for the dynamical equation of the 'z' state (optional, default=0).
+        function update(this, s, y, z, y_c, z_c)
+
+            if (nargin < 5), y_c=0; end
+            if (nargin < 6), z_c=0; end
+            
+            this.z_dot = ( this.goalAttractor(y, z) + this.shapeAttractor(s) + z_c);
+            this.y_dot = z + y_c;
+
+        end
+
+        
+        %% Returns the 'y' state time derivative.
+        %  Call after @update.
+        %  @return: time derivative of 'y' state.
+        function y_dot = getYdot(this)
+            y_dot = this.y_dot; 
+        end
+        
+        
+        %% Returns the 'z' state time derivative.
+        %  Call after @update.
+        %  @return: time derivative of 'z' state.
+        function z_dot = getZdot(this)
+            z_dot = this.z_dot; 
+        end
+        
+        
+        %% Returns the GMP's acceleration.
+        %  Call after @update.
+        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
+        %  @return: acceleration.
+        function y_ddot = getYddot(this, yc_dot)
+            
+            if (nargin < 2), yc_dot = 0; end
+            y_ddot = this.getZdot() + yc_dot;
+
+        end
+        
+        
+        %% Calculates the GMP's acceleration.
+        %  @param[in] s: Vector with the phase variable state, i.e. s = [x; x_dot; x_ddot].
+        %  @param[in] y: 'y' state of the GMP.
+        %  @param[in] y_dot: time derivative of 'y' state.
+        %  @param[in] y_c: coupling term for the dynamical equation of the 'y' state (optional, default=0).
+        %  @param[in] z_c: coupling term for the dynamical equation of the 'z' state (optional, default=0).
+        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
+        %  @return: acceleration.
+        function y_ddot = calcYddot(this, s, y, y_dot, yc, zc, yc_dot)
+
+            if (nargin < 5), yc = 0; end
+            if (nargin < 6), zc = 0; end
+            if (nargin < 7), yc_dot = 0; end
+
+            z = y_dot - yc;
+            z_dot = ( this.goalAttractor(y, z) + this.shapeAttractor(s) + zc);
+
+            y_ddot = (z_dot + yc_dot);
+
+        end
+        
+        
+        %% Returns the number of kernels.
+        %  @return: number of kernels.
+        function n_ker = numOfKernels(this)
+            
+            n_ker = length(this.wsog.w);
             
         end
 
         
-        %% Constrained optimization.
+        %% Sets the initial position.
+        %  @param[in] y0: initial position.
+        function setY0(this, y0)
+            
+            this.wsog.setStartValue(y0); 
+            
+        end
+        
+        
+        %% Set goal position.
+        %  @param[in] g: goal position.
+        function setGoal(this, g)
+            
+            this.g = g;
+            this.wsog.setFinalValue(g); 
+            
+        end
+
+        
+        %% Returns a deep copy of this object.
+        %  @return: deep copy of this object.
+        function cp_obj = deepCopy(this)
+            
+            % Make a shallow copy of all properties
+            cp_obj = this.copy();
+            % Make a deep copy of the pointers
+            cp_obj.wsog = this.wsog.deepCopy();
+
+        end
+          
+
+        %% Returns the scaled desired position.
+        %  @param[in] x: phase variable.
+        %  @return: scaled desired position.
+        function p_ref = getYd(this, x)
+            
+            p_ref = this.wsog.output(x);
+            
+        end
+        
+        
+        %% Returns the scaled desired velocity.
+        %  @param[in] x: phase variable.
+        %  @param[in] x_dot: 1st time derivative of the phase variable.
+        %  @return: scaled desired velocity.
+        function p_ref_dot = getYdDot(this, x, x_dot)
+            
+            p_ref_dot = this.wsog.outputDot(x, x_dot);
+            
+        end
+        
+        
+        %% Returns the scaled desired acceleration.
+        %  @param[in] x: phase variable.
+        %  @param[in] x_dot: 1st time derivative of the phase variable.
+        %  @param[in] x_ddot: 2nd time derivative of the phase variable.
+        %  @return: scaled desired acceleration.
+        function p_ref_ddot = getYdDDot(this, x, x_dot, x_ddot)
+            
+            if (nargin < 4), x_ddot = 0; end
+            
+            p_ref_ddot = this.wsog.outputDDot(x, x_dot, x_ddot);
+            
+        end
+
+        
+        %% Constrained optimization GMP.
+        %  Returns a GMP object optimized to minimize the error from the
+        %  unconstrained trajectory, subject to the input constraints. 
         %  @param[in] T: Time duration of the motion.
         %  @param[in] pos_constr: Vector of @GMPConstr position constraints. For no constraints pass '[]'.
         %  @param[in] vel_constr: Vector of @GMPConstr velocity constraints. For no constraints pass '[]'.
         %  @param[in] accel_constr: Vector of @GMPConstr acceleration constraints. For no constraints pass '[]'.
         %  @param[in] opt_set: Object of type @GMPOptSet for setting optimization options.
-        function constrOpt(this, T, pos_constr, vel_constr, accel_constr, opt_set)
+        %  @param[in] N: number of data points generated for the optimization.
+        %  @return: GMP object that produces a trajectory that satisfies the constraints.
+        function gmp_opt = constrOpt(this, T, pos_constr, vel_constr, accel_constr, opt_set, N)
         
             ref_data = struct('pos',[], 'vel',[], 'accel',[], 'w_p',[], 'w_v',[], 'w_a',[]);
             
-            N = 4000;
-            
             x = (0:(N-1))/(N-1);
             x_dot = 1/T;
-            
-            this.setOptTraj(false);
-            
+            x_ddot = 0;
+
             if (opt_set.opt_pos)
                 ref_data.pos = zeros(1, N);
-                for i=1:N
-                    ref_data.pos(i) = this.getYd(x(i));
-                end
+                for i=1:N, ref_data.pos(i) = this.getYd(x(i)); end
             end
             
             if (opt_set.opt_vel)
                 ref_data.vel = zeros(1, N);
-                for i=1:N
-                    ref_data.vel(i) = this.getYdDot(x(i), x_dot);
-                end
+                for i=1:N, ref_data.vel(i) = this.getYdDot(x(i), x_dot); end
             end
             
             if (opt_set.opt_accel)
                 ref_data.accel = zeros(1, N);
-                for i=1:N
-                    ref_data.accel(i) = this.getYdDDot(x(i), x_dot, 0);
-                end
+                for i=1:N, ref_data.accel(i) = this.getYdDDot(x(i), x_dot, x_ddot); end
             end
             
-            this.wsog_opt.constrOpt(x, ref_data, T, pos_constr, vel_constr, accel_constr, opt_set);
+            gmp_opt = this.deepCopy();
+            gmp_opt.wsog.constrOpt(x, ref_data, T, pos_constr, vel_constr, accel_constr, opt_set);
             
         end
             
         
         %% Updates the weights so that the generated trajectory passes from the given points.
-        %  @param[in] s: Matrix of phase variable states, i.e. s = [x;x_dot; x_ddot].
-        %                If s = [x; x_dot], x_ddot is assumed to be 0.
+        %  @param[in] s: Matrix of phase variable states, i.e. s = [x; x_dot; x_ddot].
         %  @param[in] z: Row vector with the desired value for each timestamp.
         %  @param[in] type: Row vector with the type of each point (GMP_UPDATE_TYPE).
         %  @param[in] z_var: Row vector with the variance of each point (optional, default = 1e-3).
@@ -110,176 +240,40 @@ classdef GMP < matlab.mixin.Copyable
             
             if (isscalar(z_var)), z_var = z_var*ones(n,1); end
             
-            k = this.wsog_.numOfKernels();
+            k = this.wsog.numOfKernels();
             
             H = zeros(n, k);
             z_hat = zeros(1,n);
             
             for i=1:n
                 if (type(i) == GMP_UPDATE_TYPE.POS)
-                    Hi = this.wsog_.regressVec(x(i))';
-                    z_hat(i) = this.wsog_.output(x(i));
+                    Hi = this.wsog.regressVec(x(i))';
+                    z_hat(i) = this.wsog.output(x(i));
                 elseif (type(i) == GMP_UPDATE_TYPE.VEL)
-                    Hi = this.wsog_.regressVecDot(x(i), x_dot(i))';
-                    z_hat(i) = this.wsog_.outputDot(x(i), x_dot(i));
+                    Hi = this.wsog.regressVecDot(x(i), x_dot(i))';
+                    z_hat(i) = this.wsog.outputDot(x(i), x_dot(i));
                 elseif (type(i) == GMP_UPDATE_TYPE.ACCEL)
-                    Hi = this.wsog_.regressVecDDot(x(i), x_dot(i), x_ddot(i))';
-                    z_hat(i) = this.wsog_.outputDDot(x(i), x_dot(i), x_ddot(i));
+                    Hi = this.wsog.regressVecDDot(x(i), x_dot(i), x_ddot(i))';
+                    z_hat(i) = this.wsog.outputDDot(x(i), x_dot(i), x_ddot(i));
                 end
                 H(i,:) = Hi;
             end
             
             e = (z - z_hat)';
-            this.wsog_.updateWeights(H, e, diag(z_var));
-            
-        end
-        
-        
-        %% Returns the derivatives of the DMP states.
-        %  @param[in] x: phase variable.
-        %  @param[in] y: \a y state of the this.
-        %  @param[in] z: \a z state of the this.
-        %  @param[in] y_c: coupling term for the dynamical equation of the \a y state.
-        %  @param[in] z_c: coupling term for the dynamical equation of the \a z state.
-        function update(this, s, y, z, y_c, z_c)
-
-            if (nargin < 5), y_c=0; end
-            if (nargin < 6), z_c=0; end
-            
-            this.z_dot = ( this.goalAttractor(y, z) + this.shapeAttractor(s) + z_c);
-            this.y_dot = z + y_c;
-
-        end
-
-        
-        function y_dot = getYdot(this), y_dot = this.y_dot; end
-        function z_dot = getZdot(this), z_dot = this.z_dot; end
-        
-        
-        %% Returns the DMP's acceleration.
-        function y_ddot = getYddot(this, yc_dot)
-            
-            if (nargin < 2), yc_dot = 0; end
-            y_ddot = this.getZdot() + yc_dot;
-
-        end
-        
-        
-        %% Calculates the DMP's acceleration.
-        function y_ddot = calcYddot(this, s, y, y_dot, yc, zc, yc_dot)
-
-            if (nargin < 5), yc = 0; end
-            if (nargin < 6), zc = 0; end
-            if (nargin < 7), yc_dot = 0; end
-
-            z = y_dot - yc;
-            z_dot = ( this.goalAttractor(y, z) + this.shapeAttractor(s) + zc);
-
-            y_ddot = (z_dot + yc_dot);
-
-        end
-        
-        
-        %% Returns the number of kernels.
-        function n_ker = numOfKernels(this), n_ker = length(this.wsog_.w); end
-
-        
-        %% Sets the initial position.
-        function setY0(this, y0)
-            
-            this.wsog_.setStartValue(y0); 
-            
-        end
-        
-        
-        %% Set goal position.
-        function setGoal(this, g)
-            
-            this.g = g;
-            this.wsog_.setFinalValue(g); 
-            
-        end
-
-        
-        %% Creates a deep copy of this object
-        function cp_obj = deepCopy(this)
-            
-            % Make a shallow copy of all properties
-            cp_obj = this.copy();
-            % Make a deep copy of the pointers
-            cp_obj.shape_attr_gating_ptr = this.shape_attr_gating_ptr.copy();
-            cp_obj.wsog = this.wsog.deepCopy();
-            cp_obj.wsog_ = cp_obj.wsog;
-            if (~isempty(this.wsog_opt)), cp_obj.wsog_opt = this.wsog_opt.deepCopy(); end
-
-        end
-          
-        
-        function p_ref = getYdOpt(this, x)
-            
-            p_ref = this.wsog_opt.output(x);
-            
-        end
-        
-        
-        function p_ref_dot = getYdDotOpt(this, x, x_dot)
-            
-            p_ref_dot = this.wsog_opt.outputDot(x, x_dot);
-            
-        end
-        
-        
-        function p_ref_ddot = getYdDDotOpt(this, x, x_dot, x_ddot)
-            
-            if (nargin < 4), x_ddot = 0; end
-            
-            p_ref_ddot = this.wsog_opt.outputDDot(x, x_dot, x_ddot);
-            
-        end
-
-        
-        function p_ref = getYd(this, x)
-            
-            p_ref = this.wsog_.output(x);
-            
-        end
-        
-        
-        function p_ref_dot = getYdDot(this, x, x_dot)
-            
-            p_ref_dot = this.wsog_.outputDot(x, x_dot);
-            
-        end
-        
-        
-        function p_ref_ddot = getYdDDot(this, x, x_dot, x_ddot)
-            
-            if (nargin < 4), x_ddot = 0; end
-            
-            p_ref_ddot = this.wsog_.outputDDot(x, x_dot, x_ddot);
-            
-        end
-
-        
-        %% Enables/Disables the use of the optimized mp-model
-        function setOptTraj(this, set)
-           
-            if (set), this.wsog_ = this.wsog_opt;
-            else, this.wsog_ = this.wsog;
-            end
+            this.wsog.updateWeights(H, e, diag(z_var));
             
         end
         
         
     end
     
-    methods (Access = protected)
+    methods (Access = {?GMP_nDoF, ?GMPo} )
                 
         
         %% Returns the goal attractor of the this.
-        %  @param[in] y: \a y state of the this.
-        %  @param[in] z: \a z state of the this.
-        %  @param[out] goal_attr: The goal attractor of the this.
+        %  @param[in] y: 'y' state of the GMP.
+        %  @param[in] z: 'z' state of the GMP.
+        %  @return: goal attractor.
         function goal_attr = goalAttractor(this, y, z)
 
             goal_attr = this.K*(this.g-y)- this.D*z;
@@ -288,29 +282,23 @@ classdef GMP < matlab.mixin.Copyable
         
         
         %% Returns the shape attractor
+        %  @param[in] s: Vector with the phase variable state, i.e. s = [x; x_dot; x_ddot].
+        %  @return: shape attractor.
         function shape_attr = shapeAttractor(this, s)
-            
-            x = s(1);
-            sAttrGat = this.shape_attr_gating_ptr.getOutput(x);
-            if (sAttrGat<0), sAttrGat = 0.0; end
-            shape_attr = sAttrGat * this.forcingTerm(s);
-            
-        end
-        
-        
-        %% Returns the forcing term
-        function f = forcingTerm(this, s)
             
             x = s(1);
             x_dot = s(2);
             x_ddot = 0;
             if (length(s) > 2), x_ddot = s(3); end
             
-            yd = this.wsog_.output(x);
-            yd_dot = this.wsog_.outputDot(x, x_dot);
-            yd_ddot = this.wsog_.outputDDot(x, x_dot, x_ddot);
+            yd = this.getYd(x);
+            yd_dot = this.getYdDot(x, x_dot);
+            yd_ddot = this.getYdDDot(x, x_dot, x_ddot);
             
             f = yd_ddot + this.D*yd_dot + this.K*(yd - this.g);
+            
+            sAttrGat = 1;
+            shape_attr = sAttrGat * f;
             
         end
         
@@ -321,13 +309,8 @@ classdef GMP < matlab.mixin.Copyable
      
         D % damping
         K % stiffness
-
-        shape_attr_gating_ptr % pointer to gating function for the shape attractor
         
-        wsog_ % abstract WSoG object
-        
-        wsog % WSoG object
-        wsog_opt % optimized WSoG object
+        wsog % WSoG object for encoding the desired position
 
     end
     
@@ -335,8 +318,8 @@ classdef GMP < matlab.mixin.Copyable
     properties (Access = protected)
         
         %% output state
-        y_dot % position derivative
-        z_dot % scaled velocity derivative
+        y_dot % 'y' state time derivative
+        z_dot % 'z' state time derivative
         
         g % target/goal
 

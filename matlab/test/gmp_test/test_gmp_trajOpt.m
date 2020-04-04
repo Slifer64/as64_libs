@@ -22,7 +22,7 @@ N_kernels = 50;
 kernels_std_scaling = 2;
 gmp = GMP(N_kernels, a_z, a_z*b_z, kernels_std_scaling);
 
-gmp.train(DMP_TRAIN.LS, Timed, Pd_data);
+gmp.train('LS', Timed, Pd_data);
 
 taud = Timed(end);
 yd0 = Pd_data(1);
@@ -47,13 +47,12 @@ vel_constr = [vel_constr; thresholdConstr(ti, 0.12)];
 accel_constr = [GMPConstr(0,0,'='); GMPConstr(2,0.15,'='); GMPConstr(tau,0,'=')];
 ti = 0:0.04:tau;
 accel_constr = [accel_constr; upperBoundConstr(ti, 0.4); lowerBoundConstr(ti, -0.2)];
-% tic
+tic
 gmp.setY0(y0);
 gmp.setGoal(g);
 opt_set = GMPOptSet(true, true, true, 1, 0.5, 0.1);
-gmp.constrOpt(tau, pos_constr, vel_constr, accel_constr, opt_set);
-gmp.setOptTraj(true);
-% toc
+gmp = gmp.constrOpt(tau, pos_constr, vel_constr, accel_constr, opt_set, 1000);
+toc
 
 
 %% calculate scaled demo trajectory
@@ -86,9 +85,9 @@ while (true)
     
     x = t/tau;
     x_dot = 1/tau;
-    p = gmp.getYdOpt(x);
-    p_dot = gmp.getYdDotOpt(x, x_dot);
-    p_ddot = gmp.getYdDDotOpt(x, x_dot, 0);
+    p = gmp.getYd(x);
+    p_dot = gmp.getYdDot(x, x_dot);
+    p_ddot = gmp.getYdDDot(x, x_dot, 0);
     
 %     x = t/tau;
 %     p_ddot = gmp.calcYddot(x, p, p_dot, g);

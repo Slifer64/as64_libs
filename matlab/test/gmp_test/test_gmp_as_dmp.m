@@ -17,9 +17,9 @@ ddPd_data = Data.Accel(1,:);
 Ts = Timed(2)-Timed(1);
 
 %% initialize and train GMP
-train_method = GMP_TRAIN.LS;
+train_method = 'LS';
 N_kernels = 50;
-kernels_std_scaling = 2;
+kernels_std_scaling = 1.5;
 gmp = GMP(N_kernels, 30, 100, kernels_std_scaling);
 tic
 offline_train_mse = gmp.train(train_method, Timed, Pd_data);

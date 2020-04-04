@@ -85,8 +85,8 @@ classdef DMP_pos < matlab.mixin.Copyable
         %  @param[in] Z_c: Coupling term for the dynamical equation of the 'z' state.
         function update(this, x, Y, Z, Yg, Y_c, Z_c)
             
-            if (nargin < 7), Y_c=zeros(3,1); end
-            if (nargin < 8), Z_c=zeros(3,1); end
+            if (nargin < 6), Y_c=zeros(3,1); end
+            if (nargin < 7), Z_c=zeros(3,1); end
             
             n_dim = length(this.dmp);
             for i=1:n_dim, this.dmp{i}.update(x, Y(i), Z(i), Yg(i), Y_c(i), Z_c(i)); end

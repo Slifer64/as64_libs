@@ -31,7 +31,7 @@ classdef DMPvts < MPvts_
         function [y_dot, z_dot] = update(this, x, x_dot, x_ddot, y, z, yg, tau, tau_dot, y_c, z_c)
   
             this.dmp.setTau(tau);
-            this.dmp.update(x, y, z, yg, y_c, z_c);
+            this.dmp.update(x, y, z, yg, y_c, tau^2*z_c);
             y_dot = this.dmp.getYdot();
             z_dot = this.dmp.getZdot();
 

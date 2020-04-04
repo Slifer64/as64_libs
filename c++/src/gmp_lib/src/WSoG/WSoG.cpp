@@ -8,7 +8,7 @@ namespace as64_
 namespace gmp_
 {
 
-double WSoG::zero_tol = 1e-30;
+double WSoG::zero_tol = 1e-200;
 double WSoG::sigma_eps = 1e-3;
 
 // ===================================
