@@ -92,10 +92,13 @@ CTestTestfile.cmake
 ##---------------------------------------------------
 ## ROS
 ##---------------------------------------------------
-c++/as64_ws/src/CMakeLists.txt
-build/
-devel/
-bin/
+c++/src/robots/lwr4p/FRILibrary
+c++/src/CMakeLists.txt
+c++/install/deps/armadillo*
+c++/install/deps/eigen*
+c++/build/
+c++/devel/
+c++/bin/
 #lib/
 msg_gen/
 srv_gen/
@@ -150,4 +153,3 @@ CATKIN_IGNORE
 c++/src/cmake-build-debug/
 c++/src/cmake-build-debug/
 c++/src/.idea/
-

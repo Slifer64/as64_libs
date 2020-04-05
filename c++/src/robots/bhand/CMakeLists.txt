@@ -8,6 +8,11 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-narrowing -Wno-write-str
 
 add_definitions(-DLINUX)
 
+# Set the path containing additional modules like armadillo
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/../install/deps/ ${CMAKE_MODULE_PATH} )
+
+find_package(armadillo REQUIRED)
+find_package(eigen REQUIRED)
 find_package(orocos_kdl)
 find_package(catkin REQUIRED
   orocos_kdl
@@ -36,7 +41,8 @@ SET(SRC_LIST
 
 include_directories(
   include
-  usr/include/eigen3
+  ${ARMADILLO_INCLUDE_DIR}
+  ${EIGEN_INCLUDE_DIR}
   include/bhand/bhand_API
   include/bhand/bhand_API/ctb-0.14
   include/bhand/bhand_API/ctb-0.14/linux
@@ -58,6 +64,6 @@ target_link_libraries(${PROJECT_NAME}
   PocoFoundation
   pthread
   orocos-kdl
-  armadillo
+  ${ARMADILLO_LIBRARY}
   ${catkin_LIBRARIES}
 )

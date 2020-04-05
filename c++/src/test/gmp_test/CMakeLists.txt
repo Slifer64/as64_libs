@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(gmp_test)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# Set the path containing additional modules like armadillo
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/../install/deps/ ${CMAKE_MODULE_PATH} )
 
+find_package(armadillo REQUIRED)
+find_package(eigen REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   roslib
@@ -25,6 +29,7 @@ set(SRC_LIST
 
 set(LINK_LIBS
   ${catkin_LIBRARIES}
+  ${ARMADILLO_LIBRARY}
   gmp_lib
   io_lib
 )
@@ -39,7 +44,8 @@ file(GLOB INCLUDE_LIST "")
 ## Your package locations should be listed before other locations
 include_directories(
   include
-  /usr/include/eigen3
+  ${ARMADILLO_INCLUDE_DIR}
+  ${EIGEN_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
 )
 

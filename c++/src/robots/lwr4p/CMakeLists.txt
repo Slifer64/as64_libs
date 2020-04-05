@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(lwr4p)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 add_definitions(-DLINUX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ ${CMAKE_MODULE_PATH} )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+# Set the path containing additional modules like armadillo
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/../install/deps/ ${CMAKE_MODULE_PATH} )
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
+
+find_package(armadillo REQUIRED)
+find_package(eigen REQUIRED)
 find_package(orocos_kdl)
 find_package(FastResearchInterfaceLibrary REQUIRED)
 find_package(catkin REQUIRED
@@ -34,7 +38,8 @@ SET(SRC_LIST
 
 include_directories(
   include
-  usr/include/eigen3
+  ${ARMADILLO_INCLUDE_DIR}
+  ${EIGEN_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
   ${FastResearchInterfaceLibrary_INCLUDE_DIR}
 )
@@ -51,7 +56,7 @@ add_dependencies(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   pthread
   orocos-kdl
-  armadillo
+  ${ARMADILLO_LIBRARY}
   ${catkin_LIBRARIES}
   ${FastResearchInterfaceLibrary_LIBRARIES}
 )
