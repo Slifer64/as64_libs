@@ -1,0 +1,245 @@
+#include <io_lib/file_io.h>
+
+namespace as64_
+{
+
+namespace io_
+{
+
+const char* FileIO::error_msg[] =
+{
+  "EMPTY_HEADER",
+  "CORRUPTED_HEADER",
+  "ENTRY DOES NOT EXIST:",
+  "DUPLICATE_ENTRY",
+  "TYPE_MISMATCH",
+  "DIMENSIONS_MISMATCH",
+  "UNKNOWN_TYPE"
+};
+
+const char *FileIO::TypeName[] =
+{
+  "scalar",
+  "arma::Mat",
+  "Eigen::Matrix",
+  "std::vector"
+};
+
+const char *FileIO::ScalarTypeName[] =
+{
+  "bool",
+  "int",
+  "unsigned int",
+  "long",
+  "unsigned long",
+  "long long",
+  "unsigned long long",
+  "float",
+  "double",
+  "N/A"
+};
+
+
+FileIO::FileIO(const std::string &filename)
+{
+  this->header_start = 0;
+
+  // Check if file already exists. If it doesn't create it.
+  {
+    std::ifstream in(filename, std::ios::in | std::ios::binary);
+    if (!in) // file doesn't exist
+    {
+      // create the file
+      fid.open(filename, std::ios::out | std::ios::binary);
+      if (!fid) throw std::ios_base::failure(std::string("[FileIO::FileIO]: Failed to create file \"") + filename + "\"...\n");
+      this->writeHeader(); // write empty header
+      fid.close();
+    }
+  }
+
+  fid.open(filename, std::ios::in | std::ios::out | std::ios::binary);
+  if (!fid) throw std::ios_base::failure(std::string("[FileIO::FileIO]: Failed to open file \"") + filename + "\"...\n");
+
+  this->readHeader();
+}
+
+FileIO::~FileIO()
+{
+  fid.close();
+}
+
+void FileIO::printHeader(std::ostream &out) const
+{
+  int name_len = 0;
+  for (int k=0; k<name.size(); k++)
+  {
+    if (name[k].length() > name_len) name_len = name[k].length();
+  }
+  name_len += 5;
+
+  std::vector<std::string> type_name(type.size());
+
+  int type_len = 0;
+  for (int k=0; k<type.size(); k++)
+  {
+    type_name[k] = getFullTypeName(type[k], sc_type[k]);
+    if (type[k]==ARMA || type[k]==EIGEN) type_name[k] += getMatDim2str(k);
+    int n = type_name[k].length();
+    if (n > type_len) type_len = n;
+  }
+  type_len += 5;
+
+  std::string horiz_line;
+  horiz_line.resize(name_len + type_len + 6);
+  for (int i=0; i<horiz_line.length(); i++) horiz_line[i] = '-';
+
+  out << horiz_line << "\n";
+  out << std::setw(name_len) << std::left << "Name" << std::setw(type_len) << std::left << "Type" << "Pos\n";
+  out << horiz_line << "\n";
+  for (int k=0; k<name.size(); k++)
+  {
+    out << std::setw(name_len) << std::left << name[k]
+        << std::setw(type_len) << std::left << type_name[k]
+        << i_pos[k] << "\n";
+  }
+}
+
+int FileIO::findNameIndex(const std::string &name_) const
+{
+  auto it = name_map.find(name_);
+  if (it != name_map.end()) return it->second;
+  else return -1;
+}
+
+void FileIO::checkType(int i, enum Type t2, enum ScalarType sc_t2) const
+{
+  Type t = type[i];
+  ScalarType sc_t = sc_type[i];
+
+  if (t!=t2 | sc_t!=sc_t2)
+    throw std::runtime_error("[FileIO::checkType]: " + getErrMsg(TYPE_MISMATCH) +
+                             ": " + getFullTypeName(t,sc_t) + " != " + getFullTypeName(t2,sc_t2));
+}
+
+std::string FileIO::getMatDim2str(int k) const
+{
+  fid.seekg(i_pos[k], fid.beg);
+
+  long_t n_rows;
+  long_t n_cols;
+  FileIO::readScalar_(n_rows, this->fid);
+  FileIO::readScalar_(n_cols, this->fid);
+
+  std::ostringstream out;
+  out << "(" << n_rows << "," << n_cols << ")";
+  return out.str();
+}
+
+void FileIO::writeHeader() const
+  {
+    this->fid.seekp(this->header_start, this->fid.beg);
+
+    size_t_ i1 = this->fid.tellp();
+
+    for (int k=0; k<name.size(); k++)
+    {
+      Type t = type[k];
+      ScalarType sc_t = sc_type[k];
+      size_t_ i = i_pos[k];
+      long_t name_len = name[k].length();
+      this->fid.write(reinterpret_cast<const char *>(&name_len), sizeof(name_len));
+      this->fid.write(reinterpret_cast<const char *>(name[k].c_str()), name_len);
+      this->fid.write(reinterpret_cast<const char *>(&t), sizeof(t));
+      this->fid.write(reinterpret_cast<const char *>(&sc_t), sizeof(sc_t));
+      this->fid.write(reinterpret_cast<const char *>(&i), sizeof(i));
+    }
+
+    size_t_ i2 = this->fid.tellp();
+
+    long_t header_len = i2-i1 + sizeof(header_len);
+    this->fid.write(reinterpret_cast<const char *>(&header_len), sizeof(header_len));
+    this->fid.flush();
+  }
+
+void FileIO::readHeader()
+{
+  this->name_map.clear();
+  this->name.clear();
+  this->type.clear();
+  this->sc_type.clear();
+  this->i_pos.clear();
+
+  fid.seekg (0, fid.beg);
+  size_t_ i_start = fid.tellg();
+  fid.seekg (0, fid.end);
+  size_t_ i_end = fid.tellg();
+  if (i_start == i_end) throw std::runtime_error("[FileIO::readHeader]: " + FileIO::getErrMsg(EMPTY_HEADER));
+
+  long_t header_len;
+  this->fid.seekg(-sizeof(header_len), this->fid.end);
+  i_end = this->fid.tellg();
+  this->fid.read(reinterpret_cast<char *>(&header_len), sizeof(header_len));
+  if (header_len < 0) throw std::runtime_error("[FileIO::readHeader]: " + FileIO::getErrMsg(CORRUPTED_HEADER));
+
+  this->fid.seekg(-header_len, this->fid.end);
+  this->header_start = this->fid.tellg();
+  while (this->fid.tellg() != i_end)
+  {
+    Type t;
+    ScalarType sc_t;
+    size_t_ i;
+    long_t len;
+    char *name_i;
+    this->fid.read(reinterpret_cast<char *>(&len), sizeof(len));
+    if (len < 0) throw std::runtime_error("[FileIO::readHeader]: " + FileIO::getErrMsg(CORRUPTED_HEADER));
+    name_i = new char[len+1];
+    this->fid.read(reinterpret_cast<char *>(name_i), len);
+    name_i[len] = '\0';
+    this->fid.read(reinterpret_cast<char *>(&t), sizeof(t));
+    this->fid.read(reinterpret_cast<char *>(&sc_t), sizeof(sc_t));
+    this->fid.read(reinterpret_cast<char *>(&i), sizeof(i));
+
+    type.push_back(t);
+    sc_type.push_back(sc_t);
+    i_pos.push_back(i);
+    name.push_back(name_i);
+    name_map[name_i] = name.size()-1;
+
+    delete name_i;
+  }
+
+}
+
+
+// ======================================
+// =======   STATIC Functions  ==========
+// ======================================
+
+std::string FileIO::getFullTypeName(enum Type type, enum ScalarType sc_type)
+{
+  return getTypeName(type) + "<" + getScalarTypeName(sc_type) + ">";
+}
+
+std::string FileIO::getTypeName(enum Type type)
+{
+  return std::string(FileIO::TypeName[static_cast<int>(type)]);
+}
+
+std::string FileIO::getScalarTypeName(enum ScalarType type)
+{
+  return std::string(FileIO::ScalarTypeName[static_cast<int>(type)]);
+}
+
+std::string FileIO::getErrMsg(enum Error err_id)
+{
+  return std::string(FileIO::error_msg[err_id]);
+}
+
+  
+} // namespace as64_
+
+} // namespace io_
+
+
+
+

@@ -88,16 +88,6 @@ void read_mat(arma::mat &m, long n_rows, long n_cols, std::istream &in, bool bin
 
 }
 
-void read_mat(arma::mat &m, std::istream &in, bool binary)
-{
-  long n_rows;
-  long n_cols;
-
-  read_scalar(n_rows, in, binary);
-  read_scalar(n_cols, in, binary);
-
-  read_mat(m, n_rows, n_cols, in, binary);
-}
 
 void read_vec(arma::vec &v, std::istream &in, bool binary)
 {
@@ -153,18 +143,6 @@ void write_mat(const arma::mat &m, int n_rows, int n_cols, std::ostream &out, bo
 
 }
 
-void write_mat(const arma::mat &m, std::ostream &out, bool binary, int precision)
-{
-  long n_rows = m.n_rows;
-  long n_cols = m.n_cols;
-
-  write_scalar(n_rows, out, binary);
-  if (!binary) out << "\n";
-  write_scalar(n_cols, out, binary);
-  if (!binary) out << "\n";
-
-  write_mat(m, n_rows, n_cols, out, binary, precision);
-}
 
 void write_vec(arma::vec &v, std::ostream &out, bool binary, int precision)
 {
