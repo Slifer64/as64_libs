@@ -17,10 +17,10 @@ classdef io_
             if (nargin < 2), binary = false; end % text format
             if (nargin < 3), type = 'double'; end
 
-            n_rows = read_scalar(fid, binary, 'int64');
-            n_cols = read_scalar(fid, binary, 'int64');
+            n_rows = io_.read_scalar(fid, binary, 'int64');
+            n_cols = io_.read_scalar(fid, binary, 'int64');
 
-            m = read_mat_(fid, n_rows, n_cols, binary, type);
+            m = io_.read_mat_(fid, n_rows, n_cols, binary, type);
 
         end
         
@@ -55,12 +55,12 @@ classdef io_
             if (nargin < 2), binary = false; end % text format
             if (nargin < 3), type = 'double'; end
 
-            n_mat = read_scalar(fid, binary, 'int64');
+            n_mat = io_.read_scalar(fid, binary, 'int64');
 
             m = cell(n_mat,1);
 
             for k=1:n_mat
-                m{k} = read_mat(fid, binary, type);
+                m{k} = io_.read_mat(fid, binary, type);
             end
 
         end
@@ -128,11 +128,11 @@ classdef io_
 
             n_mat = int64(length(m));
 
-            write_scalar(n_mat, fid, binary, precision);
+            io_.write_scalar(n_mat, fid, binary, precision);
             if (~binary), fprintf(fid, '\n'); end
 
             for k=1:n_mat
-                write_mat(m{k}, fid, binary, precision);
+                io_.write_mat(m{k}, fid, binary, precision);
             end
         end
 

@@ -16,10 +16,10 @@ dvRotd_data = Data.RotAccel;
 
 %% Write data to binary format
 % fid = fopen('train_data.bin','w');
-% write_mat(Timed, fid, true);
-% write_mat(Qd_data, fid, true);
-% write_mat(vRotd_data, fid, true);
-% write_mat(dvRotd_data, fid, true);
+% io_.write_mat(Timed, fid, true);
+% io_.write_mat(Qd_data, fid, true);
+% io_.write_mat(vRotd_data, fid, true);
+% io_.write_mat(dvRotd_data, fid, true);
 % fclose(fid);
 
 Ts = Timed(2)-Timed(1);

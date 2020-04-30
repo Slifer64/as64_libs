@@ -49,14 +49,14 @@ Data = struct('Time',Time, 'Pos',Pos, 'Vel',dPos, 'Accel',ddPos, 'Quat',Quat, 'R
 save('data/train_data6.mat', 'Data');
 
 % fid = fopen('kuka_train_data.bin','w');
-% write_mat(q0, fid, true);
-% write_mat(Time, fid, true);
-% write_mat(Pos, fid, true);
-% write_mat(dPos, fid, true);
-% write_mat(ddPos, fid, true);
-% write_mat(Quat, fid, true);
-% write_mat(RotVel, fid, true);
-% write_mat(RotAccel, fid, true);
+% io_.write_mat(q0, fid, true);
+% io_.write_mat(Time, fid, true);
+% io_.write_mat(Pos, fid, true);
+% io_.write_mat(dPos, fid, true);
+% io_.write_mat(ddPos, fid, true);
+% io_.write_mat(Quat, fid, true);
+% io_.write_mat(RotVel, fid, true);
+% io_.write_mat(RotAccel, fid, true);
 % fclose(fid);
 
     

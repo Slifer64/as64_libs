@@ -16,18 +16,18 @@ dvRotd_data = Data.RotAccel;
 
 %% Write data to binary format
 % fid = fopen('train_data.bin','w');
-% write_mat(Timed, fid, true);
-% write_mat(Qd_data, fid, true);
-% write_mat(vRotd_data, fid, true);
-% write_mat(dvRotd_data, fid, true);
+% io_.write_mat(Timed, fid, true);
+% io_.write_mat(Qd_data, fid, true);
+% io_.write_mat(vRotd_data, fid, true);
+% io_.write_mat(dvRotd_data, fid, true);
 % fclose(fid);
 
 % Read train data from binary file
 fid = fopen('data/dmpo_train_data.bin','r');
-Timed = read_mat(fid, true);
-Qd_data = read_mat(fid, true);
-vRotd_data = read_mat(fid, true);
-dvRotd_data = read_mat(fid, true);
+Timed = io_.read_mat(fid, true);
+Qd_data = io_.read_mat(fid, true);
+vRotd_data = io_.read_mat(fid, true);
+dvRotd_data = io_.read_mat(fid, true);
 fclose(fid);
 
 Ts = Timed(2)-Timed(1);
@@ -51,58 +51,58 @@ toc
 
 % % read c++ DMP weights
 % fid = fopen('/home/slifer/slifer/as64_libs/c++/devel/lib/dmp_test/weights.bin','r');
-% w = read_mat(fid, true);
-% q_data = read_mat(fid, true);
-% qdot_data = read_mat(fid, true);
-% qddot_data = read_mat(fid, true);
-% Quat_data = read_mat(fid, true);
+% w = io_.read_mat(fid, true);
+% q_data = io_.read_mat(fid, true);
+% qdot_data = io_.read_mat(fid, true);
+% qddot_data = io_.read_mat(fid, true);
+% Quat_data = io_.read_mat(fid, true);
 % fclose(fid);
-% 
+%
 % % read matlab DMP weights
 % fid = fopen('weights.bin','r');
-% w2 = read_mat(fid, true);
-% q_data2 = read_mat(fid, true);
-% qdot_data2 = read_mat(fid, true);
-% qddot_data2 = read_mat(fid, true);
-% Quat_data2 = read_mat(fid, true);
+% w2 = io_.read_mat(fid, true);
+% q_data2 = io_.read_mat(fid, true);
+% qdot_data2 = io_.read_mat(fid, true);
+% qddot_data2 = io_.read_mat(fid, true);
+% Quat_data2 = io_.read_mat(fid, true);
 % fclose(fid);
-% 
+%
 % w_err = w - w2;
 % q_err = q_data - q_data2;
 % dq_err = qdot_data - qdot_data2;
 % ddq_err = qddot_data - qddot_data2;
 % Quat_err = Quat_data - Quat_data2;
-% 
+%
 % figure;
 % bar(w_err);
-% 
+%
 % figure;
 % for i=1:3
 %     subplot(3,1,i);
-%     plot(q_err(i,:), 'LineWidth',2, 'Color','red'); 
+%     plot(q_err(i,:), 'LineWidth',2, 'Color','red');
 % end
-% 
+%
 % figure;
 % for i=1:3
 %     subplot(3,1,i);
-%     plot(dq_err(i,:), 'LineWidth',2, 'Color','red'); 
+%     plot(dq_err(i,:), 'LineWidth',2, 'Color','red');
 % end
-% 
+%
 % figure;
 % for i=1:3
 %     subplot(3,1,i);
-%     plot(ddq_err(i,:), 'LineWidth',2, 'Color','red'); 
+%     plot(ddq_err(i,:), 'LineWidth',2, 'Color','red');
 % end
-% 
+%
 % figure;
 % for i=1:4
 %     subplot(4,1,i);
-%     plot(Quat_err(i,:), 'LineWidth',2, 'Color','red'); 
+%     plot(Quat_err(i,:), 'LineWidth',2, 'Color','red');
 % end
-% 
-% 
+%
+%
 % fid = fopen('weights2.bin','w');
-% write_mat(w2, fid, true);
+% io_.write_mat(w2, fid, true);
 % fclose(fid);
 
 % return
@@ -140,7 +140,7 @@ for j=1:size(q_data,2)
 end
 
 line_width = 2.5;
- 
+
 figure('Position', [200 200 600 500]);
 y_labels = {'$e_{q,x}$','$e_{q,y}$', '$e_{q,z}$'};
 for i=1:3
@@ -208,5 +208,3 @@ end
 
 
 end
-
-
