@@ -2,8 +2,22 @@
 #define AS64_WSoG_H_
 
 // WSoG class
-//  Weighted sum of Guassians.
+// Approximates a smooth trajectory using a weighted sum of Gaussians and
+// allows the reproduction and generalization of the learned trajectory to
+// new targets and time durations through spatial and temporal scaling.
 //
+// Given a trajectory y(t), with t in [0 T] it encodes it through
+// f(x) = phi'*w, with x in [0 1]
+// so that f approximates y.
+// The phase variable x is used to avoid time dependency.
+// Learning of the weights 'w' can be done with 'LWR' or 'LS'.
+// Generalization to new time durations is accomplished by adjusting the
+// phase variables evolution (x, x_dot, x_ddot).
+// Generalization to new targets is accomplished by providing a new target
+// or (initial position). The spatial scaling term is then:
+// ks = (g - y0) / (gd - yd0)
+// and the spatially scaled trajectory:
+// y = ks*(f(x) - yd0) + y0
 
 #include <cmath>
 #include <vector>
@@ -30,13 +44,12 @@ class WSoG
 public:
   // Weighted Sum of Gaussians constructor.
   // @param[in] N_kernels: The number of kernels.
-  // @param[in] kernel_std_scaling: Scaling of the kernel.t()s std. (optional, default=1.0)
+  // @param[in] kernel_std_scaling: Scaling of the kernel's std. (optional, default=1.0)
   WSoG(unsigned N_kernels, double kernel_std_scaling = 1.0);
 
   // Returns the number of kernels.
   // @return The number of kernels.
   int numOfKernels() const;
-
 
   // Sets the initial value.
   // @param[in] f0: Initial value.
@@ -46,18 +59,56 @@ public:
   // @param[in] fg: Final value.
   void setFinalValue(double fg);
 
+  // Returns the start value.
+  // @return start value.
+  double getStartValue() const;
+
+  // Returns the final value.
+  // @return final value.
+  double getFinalValue() const;
+
+  // Returns the spatial scaling.
+  // @return spatial scaling.
+  double getSpatialScaling() const;
+
   // =============================================================
 
-  // Returns the normalized weighted sum of the Gaussians for the given phase variable (time instant).
-  // @param[in] x: The phase variable.
-  // @param[out] f: The normalized weighted sum of the Gaussians.
-  //
+  // Trains the WSoG.
+  // @param[in] train_method: The training method ( {"LWR", "LS"} ).
+  // @param[in] x: Row vector with the timestamps of the training data points. Must take values in [0 1].
+  // @param[in] Fd: Row vector with the desired values.
+  // @param[in] train_error: Optional pointer to return the training error as norm(F-Fd)/n_data.
+  void train(const std::string &train_method, const arma::rowvec &x, const arma::rowvec &Fd, double *train_err=0);
+
+  // =============================================================
+
+  // Returns the scaled position produced by the model for a given phase variable value.
+  // If a new final (or initial) value has been set, then the
+  // produced position will be spatially scaled accordingly.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @return (scaled) position.
   double output(double x) const;
 
+  // Returns the scaled velocity produced by the model for a given phase variable value.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @param[in] x_dot: The phase variable 1st time derivative.
+  // @return (scaled) velocity.
   double outputDot(double x, double dx) const;
 
+  // Returns the scaled acceleration produced by the model for a given phase variable value.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @param[in] x_dot: The phase variable 1st time derivative.
+  // @param[in] x_ddot: The phase variable 2nd time derivative.
+  // @return (scaled) acceleration.
   double outputDDot(double x, double dx, double ddx) const;
 
+  // Returns the scaled jerk produced by the model for a given phase variable value.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @param[in] x_dot: The phase variable 1st time derivative.
+  // @param[in] x_ddot: The phase variable 2nd time derivative.
+  // @param[in] x_3dot: The phase variable 3rd time derivative.
+  // @return (scaled) jerk.
+  // \warning The approximation results for the jerk may not be so good...
   double output3Dot(double x, double dx, double ddx, double d3x) const;
 
   // =============================================================
@@ -84,46 +135,49 @@ public:
 
   // =============================================================
 
-  // Trains the WSoG.
-  // @param[in] train_method: The training method ( {"LWR", "LS"} ).
-  // @param[in] x: Row vector with the timestamps of the training data points. Must take values in [0 1].
-  // @param[in] Fd: Row vector with the desired values.
-  // @param[in] train_error: Optional pointer to return the training error as norm(F-Fd)/n_data.
-  void train(const std::string &train_method, const arma::rowvec &x, const arma::rowvec &Fd, double *train_err=0);
-
-
-  // =============================================================
-
+  // Returns the scaled regressor vector ks*phi.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @return (scaled) regressor vector.
   arma::vec regressVec(double x) const;
 
+  // Returns the scaled regressor vector 1st time derivative ks*phi_dot.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @param[in] x_dot: The phase variable 1st time derivative.
+  // @return (scaled) regressor vector 1st time derivative.
   arma::vec regressVecDot(double x, double dx) const;
 
+  // Returns the scaled regressor vector 2nd time derivative ks*phi_ddot.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @param[in] x_dot: The phase variable 1st time derivative.
+  // @param[in] x_ddot: The phase variable 2nd time derivative.
+  // @return (scaled) regressor vector 2nd time derivative.
   arma::vec regressVecDDot(double x, double dx, double ddx) const;
 
+  // Returns the scaled regressor vector 3rd time derivative ks*phi_3dot.
+  // @param[in] x: The phase variable (must be in [0 1]).
+  // @param[in] x_dot: The phase variable 1st time derivative.
+  // @param[in] x_ddot: The phase variable 2nd time derivative.
+  // @param[in] x_3dot: The phase variable 3rd time derivative.
+  // @return (scaled) regressor vector 3rd time derivative.
   arma::vec regressVec3Dot(double x, double dx, double ddx, double d3x) const;
 
 // ============================================================
 
-  double getStartValue() const;
-
-  double getFinalValue() const;
-
-  double getSpatialScaling() const;
-
-// =============================================================
 
 // ======================================
 // =======  Protected Functions  ========
 // ======================================
 protected:
 
+  // Calculates the spatial scaling.
+  // Called whenever @setStartValue or @setFinalValue is called.
   void calcSpatialScaling();
 
   // =============================================================
 
   // Returns a column vector with the values of the kernel functions.
   // @param[in] x: The phase variable.
-  // @return: Column vector with the values of the kernel functions.
+  // return: Column vector with the values of the kernel functions.
   arma::vec kernelFun(double x) const;
 
   arma::vec kernelFunDot(double x, double dx) const;
@@ -149,8 +203,10 @@ private:
   double f0; //initial value
   double fg; //goal value
 
+  // =======  Static Properties  ========
+
   static double zero_tol; //small value used to avoid divisions with very small numbers
-  static double sigma_eps; //minumum noise variance for update of weights
+  static double sigma_eps; // default noise variance for update of weights
 
 };
 

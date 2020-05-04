@@ -22,13 +22,8 @@ GMP::GMP(unsigned N_kernels, double D, double K, double kernels_std_scaling)
 
   this->D = D;
   this->K = K;
-  this->shape_attr_gating_ptr.reset(new gmp_::SigmoidGatingFunction(1.0, 0.99));
-  (dynamic_cast<gmp_::SigmoidGatingFunction*>(this->shape_attr_gating_ptr.get()))->setSteepness(750);
 
   this->wsog.reset(new WSoG(N_kernels, kernels_std_scaling));
-  // this->wsogopt = this->wsog->deepCopy();
-
-  // this->setOptTraj(false);
 
   this->setY0(0);
   this->setGoal(1);
@@ -51,10 +46,24 @@ void GMP::train(const std::string &train_method, const arma::rowvec &Time, const
   int i_end = Time.size()-1;
   arma::rowvec x = Time / Time(i_end);
   this->wsog->train(train_method, x, yd_data, train_error);
-  // this->wsogopt = this->wsog->deepCopy();
 
   #ifdef GMP_DEBUG_
   }catch(std::exception &e) { throw std::runtime_error(std::string("[GMP::train]: ") + e.what()); }
+  #endif
+}
+
+
+void GMP::update(const gmp_::Phase &s, double y, double z, double y_c, double z_c)
+{
+  #ifdef GMP_DEBUG_
+  try{
+  #endif
+
+  this->z_dot = ( this->goalAttractor(y, z) + this->shapeAttractor(s) + z_c);
+  this->y_dot = z + y_c;
+
+  #ifdef GMP_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[GMP::update]: ") + e.what()); }
   #endif
 }
 
@@ -64,6 +73,7 @@ void GMP::updateWeights(const std::vector<gmp_::Phase> &s, const arma::rowvec &z
   #ifdef GMP_DEBUG_
   try{
   #endif
+
   int n = s.size();
 
   arma::rowvec z_var = z_var_;
@@ -106,23 +116,9 @@ void GMP::updateWeights(const std::vector<gmp_::Phase> &s, const arma::rowvec &z
 }
 
 
-void GMP::update(const gmp_::Phase &s, double y, double z, double y_c, double z_c)
-{
-  #ifdef GMP_DEBUG_
-  try{
-  #endif
-
-  this->z_dot = ( this->goalAttractor(y, z) + this->shapeAttractor(s) + z_c);
-  this->y_dot = z + y_c;
-
-  #ifdef GMP_DEBUG_
-  }catch(std::exception &e) { throw std::runtime_error(std::string("[GMP::update]: ") + e.what()); }
-  #endif
-}
-
-
 double GMP::getYdot() const
 { return this->y_dot; }
+
 
 double GMP::getZdot() const
 { return this->z_dot; }
@@ -272,24 +268,6 @@ double GMP::shapeAttractor(const gmp_::Phase &s) const
   #endif
 
   double x = s.x;
-  double sAttrGat = this->shape_attr_gating_ptr->getOutput(x);
-  if (sAttrGat<0) sAttrGat = 0.0;
-  double shape_attr = sAttrGat * this->forcingTerm(s);
-  return shape_attr;
-
-  #ifdef GMP_DEBUG_
-  }catch(std::exception &e) { throw std::runtime_error(std::string("[GMP::shapeAttractor]: ") + e.what()); }
-  #endif
-}
-
-
-double GMP::forcingTerm(const gmp_::Phase &s) const
-{
-  #ifdef GMP_DEBUG_
-  try{
-  #endif
-
-  double x = s.x;
   double x_dot = s.x_dot;
   double x_ddot = s.x_ddot;
 
@@ -298,10 +276,13 @@ double GMP::forcingTerm(const gmp_::Phase &s) const
   double yd_ddot = this->wsog->outputDDot(x, x_dot, x_ddot);
 
   double f = yd_ddot + this->D*yd_dot + this->K*(yd - this->g);
-  return f;
+
+  double sAttrGat = 1;
+  double shape_attr = sAttrGat * f;
+  return shape_attr;
 
   #ifdef GMP_DEBUG_
-  }catch(std::exception &e) { throw std::runtime_error(std::string("[GMP::forcingTerm]: ") + e.what()); }
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[GMP::shapeAttractor]: ") + e.what()); }
   #endif
 }
 

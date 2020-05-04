@@ -26,11 +26,6 @@ include_directories(
 
 add_library(${PROJECT_NAME}
 
-  src/GatingFunction/GatingFunction.cpp
-  src/GatingFunction/LinGatingFunction.cpp
-  src/GatingFunction/ExpGatingFunction.cpp
-  src/GatingFunction/SigmoidGatingFunction.cpp
-
   src/trainMethods/LeastSquares.cpp
   src/trainMethods/LWR.cpp
 

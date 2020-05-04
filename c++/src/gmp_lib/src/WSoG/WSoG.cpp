@@ -82,6 +82,60 @@ void WSoG::setFinalValue(double fg)
   #endif
 }
 
+
+double WSoG::getStartValue() const
+{
+  return this->f0;
+}
+
+
+double WSoG::getFinalValue() const
+{
+  return this->fg;
+}
+
+
+double WSoG::getSpatialScaling() const
+{
+  return this->spat_s;
+}
+
+// =============================================================
+
+void WSoG::train(const std::string &train_method, const arma::rowvec &x, const arma::rowvec &Fd, double *train_err)
+{
+  #ifdef WSoG_DEBUG_
+  try{
+  #endif
+
+  int n_data = x.size();
+
+  arma::rowvec s = arma::rowvec().ones(n_data);
+  arma::mat Psi(this->N_kernels, n_data);
+  for (int i=0; i<n_data; i++) Psi.col(i) = this->kernelFun(x(i));
+
+  if ( train_method.compare("LS") == 0 ) this->w = leastSquares(Psi, s, Fd, this->zero_tol);
+  else if ( train_method.compare("LWR") == 0 ) this->w = localWeightRegress(Psi, s, Fd, this->zero_tol);
+  else throw std::runtime_error("[GMP_::train]: Unsupported training method");
+
+  this->f0_d = arma::dot(this->regressVec(0),this->w);
+  this->fg_d = arma::dot(this->regressVec(1),this->w);
+  this->setStartValue(this->f0_d);
+  this->setFinalValue(this->fg_d);
+
+  if (train_err)
+  {
+    arma::rowvec F(Fd.size());
+    for (int i=0; i<F.size(); i++) F(i) = this->output(x(i));
+    *train_err = arma::norm(F-Fd)/F.size();
+  }
+
+  #ifdef WSoG_DEBUG_
+  }catch(std::exception &e) { throw std::runtime_error(std::string("[WSoG::train]: ") + e.what()); }
+  #endif
+
+}
+
 // =============================================================
 
 double WSoG::output(double x) const
@@ -282,42 +336,6 @@ void WSoG::updateWeights(const arma::mat &H, const arma::vec &e, const arma::mat
 
 // =============================================================
 
-void WSoG::train(const std::string &train_method, const arma::rowvec &x, const arma::rowvec &Fd, double *train_err)
-{
-  #ifdef WSoG_DEBUG_
-  try{
-  #endif
-
-  int n_data = x.size();
-
-  arma::rowvec s = arma::rowvec().ones(n_data);
-  arma::mat Psi(this->N_kernels, n_data);
-  for (int i=0; i<n_data; i++) Psi.col(i) = this->kernelFun(x(i));
-
-  if ( train_method.compare("LS") == 0 ) this->w = leastSquares(Psi, s, Fd, this->zero_tol);
-  else if ( train_method.compare("LWR") == 0 ) this->w = localWeightRegress(Psi, s, Fd, this->zero_tol);
-  else throw std::runtime_error("[GMP_::train]: Unsupported training method");
-
-  this->f0_d = arma::dot(this->regressVec(0),this->w);
-  this->fg_d = arma::dot(this->regressVec(1),this->w);
-  this->setStartValue(this->f0_d);
-  this->setFinalValue(this->fg_d);
-
-  if (train_err)
-  {
-    arma::rowvec F(Fd.size());
-    for (int i=0; i<F.size(); i++) F(i) = this->output(x(i));
-    *train_err = arma::norm(F-Fd)/F.size();
-  }
-
-  #ifdef WSoG_DEBUG_
-  }catch(std::exception &e) { throw std::runtime_error(std::string("[WSoG::train]: ") + e.what()); }
-  #endif
-
-}
-
-// =============================================================
-
 arma::vec WSoG::regressVec(double x) const
 {
   #ifdef WSoG_DEBUG_
@@ -402,22 +420,6 @@ arma::vec WSoG::regressVec3Dot(double x, double dx, double ddx, double d3x) cons
   #endif
 }
 
-// ============================================================
-
-double WSoG::getStartValue() const
-{
-  return this->f0;
-}
-
-double WSoG::getFinalValue() const
-{
-  return this->fg;
-}
-
-double WSoG::getSpatialScaling() const
-{
-  return this->spat_s;
-}
 
 // =============================================================
 

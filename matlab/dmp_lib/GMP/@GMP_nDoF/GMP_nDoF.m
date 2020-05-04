@@ -123,7 +123,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
         %  @param[in] y_dot: time derivative of 'y' state.
         %  @param[in] y_c: coupling term for the dynamical equation of the 'y' state (optional, default=0).
         %  @param[in] z_c: coupling term for the dynamical equation of the 'z' state (optional, default=0).
-        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
+        %  @param[in] yc_dot: time derivative of the 'y' state coupling (optional, default=0).
         %  @return: acceleration.
         function y_ddot = calcYddot(this, s, y, y_dot, yc, zc, yc_dot)
 

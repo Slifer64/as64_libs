@@ -28,8 +28,6 @@ classdef WSoG < matlab.mixin.Copyable
             if (nargin < 2), kernel_std_scaling = 1.0; end
             
             this.N_kernels = N_kernels;
-            
-            this.zero_tol = 1e-200; %realmin;
 
             this.w = zeros(this.N_kernels,1);
             this.c = ((1:this.N_kernels)-1)'/(this.N_kernels-1);
@@ -38,16 +36,14 @@ classdef WSoG < matlab.mixin.Copyable
             this.h = 1./(kernel_std_scaling*(this.c(2:end)-this.c(1:end-1))).^2;
             this.h = [this.h; this.h(end)];
             
-            d = this.c(2) - this.c(1);
-            c_end = this.c(end);
-            extra = [];%[d; 2*d; 3*d];
-            this.c = [-extra+this.c(1); this.c; extra+c_end];
-            this.h = [repmat(this.h(end),length(extra),1); this.h; repmat(this.h(end),length(extra),1)];
-            
-            this.N_kernels = this.N_kernels + 2*length(extra);
-            this.w = zeros(this.N_kernels,1);
-            
-            this.sigma_eps = 1e-3;
+%             d = this.c(2) - this.c(1);
+%             c_end = this.c(end);
+%             extra = [];%[d; 2*d; 3*d];
+%             this.c = [-extra+this.c(1); this.c; extra+c_end];
+%             this.h = [repmat(this.h(end),length(extra),1); this.h; repmat(this.h(end),length(extra),1)];
+%             
+%             this.N_kernels = this.N_kernels + 2*length(extra);
+%             this.w = zeros(this.N_kernels,1);
             
             this.f0_d = 0;
             this.fg_d = 1;
@@ -134,6 +130,11 @@ classdef WSoG < matlab.mixin.Copyable
             else, error('[WSoG::train]: Unsupported training method...');
             end
 
+            this.f0_d = dot(this.regressVec(0),this.w);
+            this.fg_d = dot(this.regressVec(1),this.w);
+            this.setStartValue(this.f0_d);
+            this.setFinalValue(this.fg_d);
+            
             if (nargout > 0)
                 F = zeros(size(Fd));
                 for i=1:size(F,2)
@@ -142,11 +143,6 @@ classdef WSoG < matlab.mixin.Copyable
                 train_error = norm(F-Fd)/length(F);
             end
             
-            this.f0_d = dot(this.regressVec(0),this.w);
-            this.fg_d = dot(this.regressVec(1),this.w);
-            this.setStartValue(this.f0_d);
-            this.setFinalValue(this.fg_d);
-
         end
         
         
@@ -323,7 +319,7 @@ classdef WSoG < matlab.mixin.Copyable
 
         end
         
-        % Returns the scaled regressor vector 1st time derivative ks*phi_dot.
+        %% Returns the scaled regressor vector 1st time derivative ks*phi_dot.
         %  @param[in] x: The phase variable (must be in [0 1]).
         %  @param[in] x_dot: The phase variable 1st time derivative.
         %  @return (scaled) regressor vector 1st time derivative.
@@ -339,7 +335,7 @@ classdef WSoG < matlab.mixin.Copyable
 
         end
         
-        % Returns the scaled regressor vector 2nd time derivative ks*phi_ddot.
+        %% Returns the scaled regressor vector 2nd time derivative ks*phi_ddot.
         %  @param[in] x: The phase variable (must be in [0 1]).
         %  @param[in] x_dot: The phase variable 1st time derivative.
         %  @param[in] x_ddot: The phase variable 2nd time derivative.
@@ -359,7 +355,7 @@ classdef WSoG < matlab.mixin.Copyable
 
         end
         
-        % Returns the scaled regressor vector 3rd time derivative ks*phi_3dot.
+        %% Returns the scaled regressor vector 3rd time derivative ks*phi_3dot.
         %  @param[in] x: The phase variable (must be in [0 1]).
         %  @param[in] x_dot: The phase variable 1st time derivative.
         %  @param[in] x_ddot: The phase variable 2nd time derivative.
@@ -982,17 +978,21 @@ classdef WSoG < matlab.mixin.Copyable
         w % N_kernels x 1 vector with the kernels' weights
         c % N_kernels x 1 vector with the kernels' centers
         h % N_kernels x 1 vector with the kernels' inverse width
-        
-        zero_tol % small value used to avoid divisions with very small numbers
-        
-        sigma_eps % minumum noise variance for update of weights
-        
+
         spat_s % spatial scaling
         
         f0_d % initial learned value
         fg_d % final learned value
         f0 % initial value
         fg % goal value
+        
+    end
+    
+    properties (Constant, Access = private)
+        
+        zero_tol = 1e-200 % small value used to avoid divisions with very small numbers
+        
+        sigma_eps = 1e-3 % default noise variance for update of weights
         
     end
     

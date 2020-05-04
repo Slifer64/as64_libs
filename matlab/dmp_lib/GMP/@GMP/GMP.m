@@ -30,7 +30,7 @@ classdef GMP < matlab.mixin.Copyable
         %% Trains the GMP.
         %  @param[in] train_method: the training method to use, as a string ('LWR', 'LS').
         %  @param[in] Time: Row vector with the timestamps of the training data points.
-        %  @param[in] yd_data: Row vector with the desired potition.
+        %  @param[in] yd_data: Row vector with the desired position.
         %  @param[out] train_error: The training error expressed as the mse error.
         function train_error = train(this, train_method, Time, yd_data)
 
@@ -59,7 +59,7 @@ classdef GMP < matlab.mixin.Copyable
         
         %% Returns the 'y' state time derivative.
         %  Call after @update.
-        %  @return: time derivative of 'y' state.
+        %  @return: time derivative of the 'y' state.
         function y_dot = getYdot(this)
             y_dot = this.y_dot; 
         end
@@ -91,7 +91,7 @@ classdef GMP < matlab.mixin.Copyable
         %  @param[in] y_dot: time derivative of 'y' state.
         %  @param[in] y_c: coupling term for the dynamical equation of the 'y' state (optional, default=0).
         %  @param[in] z_c: coupling term for the dynamical equation of the 'z' state (optional, default=0).
-        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
+        %  @param[in] yc_dot: time derivative of the 'y' state coupling (optional, default=0).
         %  @return: acceleration.
         function y_ddot = calcYddot(this, s, y, y_dot, yc, zc, yc_dot)
 
@@ -111,7 +111,7 @@ classdef GMP < matlab.mixin.Copyable
         %  @return: number of kernels.
         function n_ker = numOfKernels(this)
             
-            n_ker = length(this.wsog.w);
+            n_ker = this.wsog.numOfKernels();
             
         end
 
@@ -270,7 +270,7 @@ classdef GMP < matlab.mixin.Copyable
     methods (Access = {?GMP_nDoF, ?GMPo} )
                 
         
-        %% Returns the goal attractor of the this.
+        %% Returns the goal attractor.
         %  @param[in] y: 'y' state of the GMP.
         %  @param[in] z: 'z' state of the GMP.
         %  @return: goal attractor.
@@ -281,7 +281,7 @@ classdef GMP < matlab.mixin.Copyable
         end
         
         
-        %% Returns the shape attractor
+        %% Returns the shape attractor.
         %  @param[in] s: Vector with the phase variable state, i.e. s = [x; x_dot; x_ddot].
         %  @return: shape attractor.
         function shape_attr = shapeAttractor(this, s)
@@ -318,8 +318,8 @@ classdef GMP < matlab.mixin.Copyable
     properties (Access = protected)
         
         %% output state
-        y_dot % 'y' state time derivative
-        z_dot % 'z' state time derivative
+        y_dot % position (y-state) derivative 
+        z_dot % scaled velocity derivative(z-state) derivative
         
         g % target/goal
 
