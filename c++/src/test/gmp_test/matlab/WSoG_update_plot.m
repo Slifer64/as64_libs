@@ -9,20 +9,20 @@ if (nargin < 1), filename = 'data/wsog_update_sim_data.bin'; end
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end
 
-Timed = read_mat(in, true);
-Pd_data = read_mat(in, true);
-dPd_data = read_mat(in, true);
-ddPd_data = read_mat(in, true);
+Timed = io_.read_mat(in, true);
+Pd_data = io_.read_mat(in, true);
+dPd_data = io_.read_mat(in, true);
+ddPd_data = io_.read_mat(in, true);
 
-Time = read_mat(in, true);
-P_data = read_mat(in, true);
-dP_data = read_mat(in, true);
-ddP_data = read_mat(in, true);
+Time = io_.read_mat(in, true);
+P_data = io_.read_mat(in, true);
+dP_data = io_.read_mat(in, true);
+ddP_data = io_.read_mat(in, true);
 
-n_points = read_scalar(in, true, 'uint64');
+n_points = io_.read_scalar(in, true, 'uint64');
 s = cell(n_points,1);
 for i=1:n_points
-   a = read_mat(in, true);
+   a = io_.read_mat(in, true);
    s{i} = struct( 't',a(1), 'x',a(2), 'x_dot',a(3), 'x_ddot',a(4), ...
        'p',a(5), 'p_dot',a(6), 'p_ddot',a(7), ...
        'update_pos',a(8), 'update_vel',a(9), 'update_accel',a(10) );

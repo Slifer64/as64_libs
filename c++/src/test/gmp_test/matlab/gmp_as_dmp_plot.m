@@ -6,17 +6,17 @@ filename = 'data/gmp_as_dmp_sim_data.bin';
 in = fopen(filename,'r');
 if (in < 0), error(['Failed to load ''' filename '''']); end
 
-Timed = read_mat(in, true);
-Pd_data = read_mat(in, true);
-dPd_data = read_mat(in, true);
-ddPd_data = read_mat(in, true);
+Timed = io_.read_mat(in, true);
+Pd_data = io_.read_mat(in, true);
+dPd_data = io_.read_mat(in, true);
+ddPd_data = io_.read_mat(in, true);
 
-Time = read_mat(in, true);
-P_data = read_mat(in, true);
-dP_data = read_mat(in, true);
-ddP_data = read_mat(in, true);
-ks = read_scalar(in, true, 'double');
-kt = read_scalar(in, true, 'double');
+Time = io_.read_mat(in, true);
+P_data = io_.read_mat(in, true);
+dP_data = io_.read_mat(in, true);
+ddP_data = io_.read_mat(in, true);
+ks = io_.read_scalar(in, true, 'double');
+kt = io_.read_scalar(in, true, 'double');
 
 %% Plot results
 figure;
