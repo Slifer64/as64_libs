@@ -35,6 +35,7 @@ add_library(${PROJECT_NAME}
   src/WSoG/WSoG.cpp
   src/GMP/GMP.cpp
   src/GMP/GMP_nDoF.cpp
+  src/GMP/GMPo.cpp
 )
 
 add_dependencies(${PROJECT_NAME}

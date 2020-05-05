@@ -1,15 +1,19 @@
 %% GMPo class
-%  For encoding Cartesian Orientation.
+%  GMP for encoding Cartesian Orientation.
+%  Encodes the orientation by formulating a GMP in the quaternion log space.
+%  The class provides the necessary tranformation betweeen the quaternion
+%  log (and its 1st and 2nd time derivatives) and the quaternion,
+%  rotational velocity and acceleration.
 %
 
 
 classdef GMPo < GMP_nDoF
     
     methods  (Access = public)
-        %% GMPo constructor.
-        %  @param[in] N_kernels: the number of kernels
-        %  @param[in] D: damping.
-        %  @param[in] K: stiffness.
+        %% Constructs a GMP defined in the quat-log space.
+        %  @param[in] N_kernels: 3x1 vector with the number of kernels for each dim of the quat log.
+        %  @param[in] D: 3x1 vector with the damping for each dim of the quat log.
+        %  @param[in] K: 3x1 vector with the stiffness for each dim of the quat log.
         %  @param[in] kernels_std_scaling: Scaling for std of kernels (optional, default=2).
         %  \note: Each of the arguments 'N_kernels', 'D', 'K' can be scalar or a 3x1 vector.
         function this = GMPo(N_kernels, D, K, kernels_std_scaling)
@@ -43,50 +47,27 @@ classdef GMPo < GMP_nDoF
         end
         
         
-        %% Calculates the derivatives of the DMP states. 
-        %  The derivatives can then be retrieved with 'getXdot', 'getYdot' and 'getZdot'.
-        %  @param[in] x: phase variable.
-        %  @param[in] Y: 'y' state of the DMP: y=log(Q*Q0^{-1}).
-        %  @param[in] Z: 'z' state of the DMP (the scaled ydot state).
-        %  @param[in] G: 'g' goal/target of the DMP: y=log(Qg*Q0^{-1}).
-        %  @param[in] Yc: Coupling term for the deonamical equation of the 'y' state.
-        %  @param[in] Zc: Coupling term for the deonamical equation of the 'z' state.
+        %% See @GMP_nDoF.update
         % function update(this, s, y, z, y_c, z_c)
         
         
-        %% Returns the 'y' state time derivative.
-        %  Call after @update.
-        %  @return: time derivative of 'y' state.
+        %% See @GMP_nDoF.getYdot
         % function y_dot = getYdot(this)
         
         
-        %% Returns the 'z' state time derivative.
-        %  Call after @update.
-        %  @return: time derivative of 'z' state.
+        %% See @GMP_nDoF.getZdot
         % function z_dot = getZdot(this)
 
         
-        %% Returns the GMP's acceleration.
-        %  Call after @update.
-        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
-        %  @return: acceleration.
+        %% See @GMP_nDoF.getYddot
         % function y_ddot = getYddot(this, yc_dot)
         
         
-        %% Calculates the GMP's acceleration.
-        %  @param[in] s: Vector with the phase variable state, i.e. s = [x; x_dot; x_ddot].
-        %  @param[in] y: 'y' state of the GMP.
-        %  @param[in] y_dot: time derivative of 'y' state.
-        %  @param[in] y_c: coupling term for the dynamical equation of the 'y' state (optional, default=0).
-        %  @param[in] z_c: coupling term for the dynamical equation of the 'z' state (optional, default=0).
-        %  @param[in] yc_dot: time derivative of 'y' state coupling (optional, default=0).
-        %  @return: acceleration.
+        %% See @GMP_nDoF.calcYddot
         % function y_ddot = calcYddot(this, s, y, y_dot, yc, zc, yc_dot)
 
         
-        %% Returns the number of kernels for the i-th gmp.
-        %  @param[in] i: index for the i-th DoF.
-        %  @return: number of kernels for the i-th gmp.
+        %% See @GMP_nDoF.numOfKernels
         % function n_ker = numOfKernels(this, i)
         
         
@@ -99,8 +80,8 @@ classdef GMPo < GMP_nDoF
         end
 
         
-        %% Sets the target orientation.
-        %  @param[in] Q0: Initial orientation (as unit quaternion).
+        %% Sets the goal/target orientation.
+        %  @param[in] Qg: Goal/target orientation (as unit quaternion).
         function setQg(this, Qg)
             
             qg = GMPo.quat2q(Qg, this.Q0);
@@ -111,29 +92,19 @@ classdef GMPo < GMP_nDoF
         end
 
         
-        %% Returns a deep copy of this object.
-        %  @return: deep copy of this object.
+        %% See @GMP_nDoF.deepCopy
         % function cp_obj = deepCopy(this)
             
         
-        %% Returns the scaled desired position.
-        %  @param[in] x: phase variable.
-        %  @return: scaled desired position.
+        %% See @GMP_nDoF.getYd
         % function p_ref = getYd(this, x)
         
         
-        %% Returns the scaled desired velocity.
-        %  @param[in] x: phase variable.
-        %  @param[in] x_dot: 1st time derivative of the phase variable.
-        %  @return: scaled desired velocity.
+        %% See @GMP_nDoF.getYdDot
         % function p_ref_dot = getYdDot(this, x, x_dot)
         
         
-        %% Returns the scaled desired acceleration.
-        %  @param[in] x: phase variable.
-        %  @param[in] x_dot: 1st time derivative of the phase variable.
-        %  @param[in] x_ddot: 2nd time derivative of the phase variable.
-        %  @return: scaled desired acceleration.
+        %% See @GMP_nDoF.getYdDDot
         % function p_ref_ddot = getYdDDot(this, x, x_dot, x_ddot)
         
         
@@ -234,7 +205,7 @@ classdef GMPo < GMP_nDoF
         %% Expresses a given quaternion w.r.t. the initial orientation. 
         %  @param[in] Q: Orientation as unit quaternion.
         %  @param[in] Q0: Initial quaternion.
-        %  @return: Q1 = Orientation w.r.t. Q0, i.e. Q1 = Q*Q0^{-1}.
+        %  @return: The orientation w.r.t. Q0, i.e. Q1 = Q*Q0^{-1}.
         function Q1 = quatTf(Q, Q0), Q1 = quatProd(Q, quatInv(Q0)); end
 
         
@@ -245,7 +216,7 @@ classdef GMPo < GMP_nDoF
         function q = quat2q(Q, Q0), q = quatLog(GMPo.quatTf(Q,Q0)); end
         
         
-        %% Returns the quaternion Q given the initial orientation Q0 and the log of Q w.r.t. to Q0.
+        %% Returns the quaternion Q given the initial orientation Q0 and the log of Q w.r.t. Q0.
         %  @param[in] q: Logarithm of orientation w.r.t. the initial orientation.
         %  @param[in] Q0: Initial orientation.
         %  @return: The orientation corresponding to log, i.e. Q = exp(q)*Q0
@@ -420,7 +391,7 @@ classdef GMPo < GMP_nDoF
        
     properties  (Access = protected)
         
-        Q0 % initial orientation
+        Q0 % initial orientation (as unit quaternion)
         
     end
     

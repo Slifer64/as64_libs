@@ -41,7 +41,7 @@ unsigned length() const;
 // @param[in] Time: Row vector with the timestamps of the training data points.
 // @param[in] yd_data: Matrix with the desired potition for each DoF in each row.
 // @param[out] train_error: The training error expressed as the mse error.
-void train(const std::string &train_method, const arma::rowvec &Time, const arma::mat &yd_data, arma::vec *train_error=0);
+virtual void train(const std::string &train_method, const arma::rowvec &Time, const arma::mat &yd_data, arma::vec *train_error=0);
 
 
 // Calculates the time derivatives of the GMP's states.
