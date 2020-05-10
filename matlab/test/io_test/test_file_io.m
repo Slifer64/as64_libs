@@ -5,7 +5,6 @@ clear;
 set_matlab_utils_path();
 
 filename = 'data.bin';
-delete(filename);
 
 %% Generate some data
 b = int8( 1 );
@@ -20,7 +19,7 @@ ull_mat = uint64( 100*rand(1,6) );
 
 
 %% Create and write file
-f_io = FileIO(filename);
+f_io = FileIO(filename, bitor(FileIO.out,FileIO.trunc) );
 
 fprintf('\n==== Write::Header =====\n');
 
@@ -38,7 +37,7 @@ f_io.printHeader();
 f_io.close();
 
 %% Open and read file
-f_io = FileIO(filename);
+f_io = FileIO(filename, FileIO.in);
 
 fprintf('\n==== Read::Header =====\n');
 f_io.printHeader();

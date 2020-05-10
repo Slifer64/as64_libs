@@ -25,7 +25,7 @@ ull_mat = uint64( [10 20 30; 40 50 60; 70 80 90] );
 if (read_data_from_cpp)
     
     %% Open and read file
-    f_io = FileIO(filename);
+    f_io = FileIO(filename, FileIO.in);
 
     f_io.printHeader();
 
@@ -53,8 +53,7 @@ if (read_data_from_cpp)
     
 else
     %% Create and write file
-    delete(filename);  
-    f_io = FileIO(filename);
+    f_io = FileIO(filename, bitor(FileIO.out,FileIO.trunc) );
     f_io.write('b', b);
     f_io.write('i', i);
     f_io.write('u', u);

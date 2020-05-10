@@ -8,25 +8,46 @@ classdef FileIO < matlab.mixin.Copyable
         
         %% FileIO constructor.
         %  @param[in] filename: Name of the file to open.
-        function this = FileIO(filename)
+        %  @param[in] open_mode: Determines the open mode. Combination of flags from @FileIO.OpenMode. (optional, default=in|out)
+        function this = FileIO(filename, open_mode)
+            
+            if (nargin < 2), open_mode = bitor(FileIO.in, FileIO.out); end
             
             this.setMatType(FileIO.ARMA); % set default matrix type to ARMA
             
             this.header_start = 0;
+                        
+            this.in_flag = bitand(open_mode, FileIO.in);
+            this.out_flag = bitand(open_mode, FileIO.out);
+            trunc_flag = bitand(open_mode, FileIO.trunc);
 
-            % Check if file already exists. If it doesn't create it.
-            this.fid = fopen(filename, 'r');
-            if (this.fid < 0) % file doesn't exist
-                % create the file
+            % check if file exists
+            file_exist = exist(filename, 'file') == 2; % replace by isfile in R2017b and above
+
+            if (~this.out_flag)
+                if (~this.in_flag), error('[FileIO.FileIO]: Open-mode "in" and/or "out" must be specified!'); end
+                if (this.in_flag && trunc_flag), error('[FileIO.FileIO]: Setting only "in" and "trunc" makes no sense :P ...'); end
+                if (this.in_flag && ~file_exist), error(['[FileIO.FileIO]: Open-mode "in" was specified but file "' filename '" does not exist or cannot be accessed...']); end
+            end
+
+            if (trunc_flag && file_exist)  
+                delete(filename); % check if delete succeeded?
+                file_exist = false;
+            end
+
+            if (this.out_flag && ~file_exist) % create the file and add empty header
                 this.fid = fopen(filename, 'w');
-                if (this.fid<0), error(['[FileIO::FileIO]: Failed to create file "' filename '"...\n']); end
+                if (this.fid<0), error(['[FileIO.FileIO]: Failed to create file "' filename '"...\n']); end
                 this.writeHeader(); % write empty header
                 fclose(this.fid);
-            else, fclose(this.fid);
             end
-            
-            this.fid = fopen(filename, 'r+');
-            if (~this.fid), error(['[FileIO::FileIO]: Failed to open file ""' filename '""...\n']); end
+
+            % op_mode = std::ios::binary;
+            if (this.in_flag), op_mode = 'r'; end
+            if (this.out_flag), op_mode = 'r+'; end % add "r+" to avoid overriding previous contents
+
+            this.fid = fopen(filename, op_mode);
+            if (~this.fid), error(['[FileIO.FileIO]: Failed to open file "' filename '"... The file may not exist or it cannot be accessed...\n']); end
 
             this.readHeader();
 
@@ -75,7 +96,7 @@ classdef FileIO < matlab.mixin.Copyable
         function s = read(this, name_)
             
             i = this.findNameIndex(name_);
-            if (i<0), error(['[FileIO::read]: ' this.getErrMsg(FileIO.ENTRY_NOT_EXIST) '"' + name_ '"']); end
+            if (i<0), error(['[FileIO.read]: ' this.getErrMsg(FileIO.ENTRY_NOT_EXIST) ' "' name_ '"']); end
 
             t = this.type{i};
             matlab_type = this.getMatlabType(this.sc_type{i});
@@ -108,7 +129,7 @@ classdef FileIO < matlab.mixin.Copyable
 
             else
                 
-                error(['[FileIO::read]: Unsopported type "' matlab_type '".']);
+                error(['[FileIO.read]: Unsopported type "' matlab_type '".']);
                 
             end
             
@@ -117,10 +138,12 @@ classdef FileIO < matlab.mixin.Copyable
         
         function write(this, name_, s)
 
+            if (~this.out_flag), error(['[FileIO::write]: ' FileIO.getErrMsg(FileIO.INVALID_OP_FOR_OPENMODE) ': "' this.getOpenModeName() '"']); end
+                
             if (isscalar(s)), this.writeScalar(name_, s);
             elseif (iscell(s)), this.writeCell(name_, s);
             elseif (sum(size(s)) > 2), this.writeMat(name_, s);
-            else, error(['[FileIO::write]: Unsopported type "' class(s) '".']);
+            else, error(['[FileIO.write]: Unsopported type "' class(s) '".']);
             end
             
         end
@@ -130,7 +153,7 @@ classdef FileIO < matlab.mixin.Copyable
             
             if (mat_type == FileIO.ARMA), this.MAT_TYPE = FileIO.ARMA;
             elseif (mat_type == FileIO.EIGEN), this.MAT_TYPE = FileIO.EIGEN;
-            else error('[FileIO::setMatType]: Unsupported matrix type');
+            else error('[FileIO.setMatType]: Unsupported matrix type');
             end
             
         end
@@ -142,7 +165,7 @@ classdef FileIO < matlab.mixin.Copyable
         function writeScalar(this, name_, s)
   
             i = this.findNameIndex(name_);
-            if (i>=0), error(['[FileIO::write]: ' this.getErrMsg(FileIO.DUPLICATE_ENTRY) ': "' name_ '"']); end
+            if (i>=0), error(['[FileIO.write]: ' this.getErrMsg(FileIO.DUPLICATE_ENTRY) ': "' name_ '"']); end
 
             k = length(this.name) + 1;
             
@@ -163,7 +186,7 @@ classdef FileIO < matlab.mixin.Copyable
             [n_rows, n_cols] = cast(size(v), this.long_t);
             
             if (n_rows~=1 & n_cols~=1)
-                error('[FileIO::writeCell]: cell must be a vector.');
+                error('[FileIO.writeCell]: cell must be a vector.');
             end
             
             n_elem = max([n_rows, n_cols]);
@@ -174,7 +197,7 @@ classdef FileIO < matlab.mixin.Copyable
             for i=1:n_elem
                 t_i = findScalarType(class(v{i}));
                 if (t ~= t_i)
-                   error('[FileIO::writeCell]: cell entries must be of the same class(data type).');
+                   error('[FileIO.writeCell]: cell entries must be of the same class(data type).');
                 end
             end
             
@@ -212,7 +235,7 @@ classdef FileIO < matlab.mixin.Copyable
         function writeMatDim(this, sc_t, name_, t, n_rows, n_cols)
   
             i = this.findNameIndex(name_);
-            if (i>=0), error(['[FileIO::write]: ' this.getErrMsg(FileIO.DUPLICATE_ENTRY) ': "' name_ '"']); end
+            if (i>=0), error(['[FileIO.write]: ' this.getErrMsg(FileIO.DUPLICATE_ENTRY) ': "' name_ '"']); end
 
             k = length(this.name) + 1;
             this.name{k} = name_;
@@ -263,13 +286,13 @@ classdef FileIO < matlab.mixin.Copyable
             fseek(this.fid, 0, 'eof');
             i_end = ftell(this.fid);
             
-            if (i_start == i_end), error(['[FileIO::readHeader]: ' FileIO.getErrMsg(FileIO.EMPTY_HEADER)]); end
+            if (i_start == i_end), error(['[FileIO.readHeader]: ' FileIO.getErrMsg(FileIO.EMPTY_HEADER)]); end
 
             header_len = cast(0, this.long_t);
             fseek(this.fid, -this.sizeof(header_len), 'eof');
             i_end = ftell(this.fid);
             header_len = fread(this.fid, 1, [class(header_len) '=>' class(header_len)]);
-            if (header_len < 0), error(['FileIO::readHeader]: ' FileIO.getErrMsg(FileIO.CORRUPTED_HEADER)]); end
+            if (header_len < 0), error(['FileIO.readHeader]: ' FileIO.getErrMsg(FileIO.CORRUPTED_HEADER)]); end
 
             this.name_map = containers.Map();
             
@@ -296,7 +319,7 @@ classdef FileIO < matlab.mixin.Copyable
         function [n_rows, n_cols] = readMatDim(this, name_)
 
             i = this.findNameIndex(name_);
-            if (i<0), error(['[FileIO::read]: ' this.getErrMsg(FileIO.ENTRY_NOT_EXIST) '"' name_ '"']); end
+            if (i<0), error(['[FileIO.read]: ' this.getErrMsg(FileIO.ENTRY_NOT_EXIST) '"' name_ '"']); end
 
             fseek(this.fid, this.i_pos{i}, 'bof');
 
@@ -304,7 +327,7 @@ classdef FileIO < matlab.mixin.Copyable
             n_cols = this.readScalar_(this.long_t);
 
             if (n_rows<0 || n_cols<0)
-              error(['[FileIO::read]: ' this.getErrMsg(FileIO.CORRUPTED_HEADER) ...
+              error(['[FileIO.read]: ' this.getErrMsg(FileIO.CORRUPTED_HEADER) ...
                   ': Negative matrix dimensions: "' name_ '" ' num2str(n_rows) ' x ' num2str(n_cols)] );
             end
 
@@ -354,10 +377,18 @@ classdef FileIO < matlab.mixin.Copyable
             else, t = FileIO.UNKNOWN;
             end
     
-            if (t == FileIO.UNKNOWN), error(['[FileIO::findScalarType]: ' this.getErrMsg(FileIO.UNKNOWN_TYPE)]); end
+            if (t == FileIO.UNKNOWN), error(['[FileIO.findScalarType]: ' this.getErrMsg(FileIO.UNKNOWN_TYPE)]); end
             
         end
+          
+        function op_mode = getOpenModeName(this)
+            
+            if (this.in_flag), op_mode = 'in';
+            elseif (this.out_flag), op_mode = 'out';
+            else, op_mode = 'in|out';
+            end
   
+        end
     end
     
     methods (Static, Access = protected)
@@ -497,11 +528,20 @@ classdef FileIO < matlab.mixin.Copyable
         % static const char* error_msg[];
         % static const char *TypeName[];
         % static const char *ScalarTypeName[];
+        
+        in_flag; % true when the open_mode is "in"
+        out_flag; % true when the open_mode is "out"
 
     end
     
     properties (Constant, Access = public)
         
+        % enum OpenMode
+        in = bitshift(1, 0);     % Allow input operations.
+        out = bitshift(1, 1);    % Allow output operations.
+        trunc = bitshift(1, 2);   % Discard all previous contents from the file.
+        % binary = 1<<3
+
         % enum Type
         SCALAR = int32(1001);    % scalar, see @ScalarType
         ARMA = int32(1002);      % arma (Mat, Col, Row), Eigen (Matrix, Vecotr, RowVector)

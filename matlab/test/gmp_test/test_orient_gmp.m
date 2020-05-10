@@ -40,9 +40,10 @@ Qd0 = Qd_data(:,1);
 Q0 = Qd0;
 Qgd = Qd_data(:,end);
 ks = 1.5;
+kt = 1.3;
 e0 = ks*quatLog( quatProd( Qgd, quatInv(Qd0) ) );
 Qg = quatProd(quatExp(e0), Q0); %quatExp(1.0*quatLog(Qd_data(:,end)));
-T = 1.0*Timed(end);
+T = kt*Timed(end);
 dt = Ts;
 [Time, Q_data, vRot_data, dvRot_data] = simulateGMPo(gmp_o, Q0, Qg, T, dt);
 toc

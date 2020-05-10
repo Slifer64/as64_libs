@@ -1,10 +1,8 @@
 <launch>
 
-  <node pkg="io_test" type="file_io_test" name="file_io_test" output="screen">
+  <node pkg="io_test" type="file_io_test" name="file_io_test" output="screen" cwd="node">
     <rosparam>
-      binary: false
-      precision: 16
-      filename: data
+
     </rosparam>
   </node>
 

@@ -41,12 +41,13 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+
 # *******************************************
 # ************   FILE IO   ******************
 # *******************************************
 
 add_executable(file_io_test
-  src/file_io_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
+		src/file_io_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
 )
 
 add_dependencies(file_io_test
@@ -54,6 +55,40 @@ add_dependencies(file_io_test
   ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(file_io_test
+  ${catkin_LIBRARIES}
+  io_lib
+)
+
+# ---------------------------------------------
+
+add_executable(file_io_matlab_test
+	src/file_io_matlab_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
+)
+
+add_dependencies(file_io_matlab_test
+	${${PROJECT_NAME}_EXPORTED_TARGETS}
+	${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(file_io_matlab_test
+	${catkin_LIBRARIES}
+	io_lib
+)
+
+
+
+# **********************************************
+# ************   General IO   ******************
+# **********************************************
+
+add_executable(io_test
+        src/io_test.cpp ${INCLUDE_LIST} ${SRC_LIST}
+)
+
+add_dependencies(io_test
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(io_test
   ${catkin_LIBRARIES}
   io_lib
 )

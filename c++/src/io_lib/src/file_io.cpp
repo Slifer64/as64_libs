@@ -14,6 +14,7 @@ const char* FileIO::error_msg[] =
   "DUPLICATE_ENTRY",
   "TYPE_MISMATCH",
   "DIMENSIONS_MISMATCH",
+  "INVALID_OP_FOR_OPENMODE",
   "UNKNOWN_TYPE"
 };
 
@@ -40,25 +41,50 @@ const char *FileIO::ScalarTypeName[] =
 };
 
 
-FileIO::FileIO(const std::string &filename)
+FileIO::FileIO(const std::string &filename, int open_mode)
 {
   this->header_start = 0;
 
-  // Check if file already exists. If it doesn't create it.
-  {
-    std::ifstream in(filename, std::ios::in | std::ios::binary);
-    if (!in) // file doesn't exist
-    {
-      // create the file
-      fid.open(filename, std::ios::out | std::ios::binary);
-      if (!fid) throw std::ios_base::failure(std::string("[FileIO::FileIO]: Failed to create file \"") + filename + "\"...\n");
-      this->writeHeader(); // write empty header
-      fid.close();
-    }
+  in_flag = open_mode & FileIO::in;
+  out_flag = open_mode & FileIO::out;
+  bool trunc_flag = open_mode & FileIO::trunc;
+
+  bool file_exist;
+  { // check if file exists
+    std::ifstream in(filename, std::ios::in);
+    file_exist = in.good();
   }
 
-  fid.open(filename, std::ios::in | std::ios::out | std::ios::binary);
-  if (!fid) throw std::ios_base::failure(std::string("[FileIO::FileIO]: Failed to open file \"") + filename + "\"...\n");
+  if (!out_flag)
+  {
+    if (!in_flag) throw std::runtime_error("[FileIO::FileIO]: Open-mode \"in\" and/or \"out\" must be specified!");
+    if (in_flag && trunc_flag) throw std::runtime_error("[FileIO::FileIO]: Setting only \"in\" and \"trunc\" makes no sense :P ...");
+    if (in_flag && !file_exist) throw std::runtime_error("[FileIO::FileIO]: Open-mode \"in\" was specified but file \"" + filename + "\" doesn't exist or cannot be accessed...");
+  }
+
+  if (trunc_flag && file_exist)
+  {
+    if (std::remove(filename.c_str()) != 0) // or fid.open(filename, ios::out | ios::trunc) ?
+    // if (!std::ofstream(filename, std::ios::out | std::ios::trunc))  // have to also write empty header...
+      throw std::runtime_error("[FileIO::FileIO]: Cannot discard the previous contents of the file \"" + filename + "\"...");
+    file_exist = false;
+  }
+
+  if (out_flag && !file_exist) // create the file and add empty header
+  {
+    fid.open(filename, std::ios::out);
+    if (!fid) throw std::runtime_error("[FileIO::FileIO]: Failed to create file \"" + filename + "\"...");
+    this->writeHeader(); // write empty header
+    fid.close();
+  }
+
+  std::ios::openmode op_mode = std::ios::binary;
+  if (in_flag) op_mode |= std::ios::in;
+  if (out_flag) op_mode |= std::ios::out | std::ios::in; // add "in" to avoid overriding previous contents
+
+  fid.open(filename, op_mode);
+  if (!fid) throw std::ios_base::failure(std::string("[FileIO::FileIO]: Failed to open file \"") + filename + "\". The file "
+                                                      "may not exist or it cannot be accessed...\n");
 
   this->readHeader();
 }
@@ -210,6 +236,14 @@ void FileIO::readHeader()
 
 }
 
+std::string FileIO::getOpenModeName() const
+{
+  std::string op_mode;
+  if (in_flag) op_mode = "in";
+  else if (out_flag) op_mode = "out";
+  else op_mode = "in|out";
+  return op_mode;
+}
 
 // ======================================
 // =======   STATIC Functions  ==========

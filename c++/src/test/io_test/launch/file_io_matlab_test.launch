@@ -1,0 +1,10 @@
+<launch>
+
+  <node pkg="io_test" type="file_io_matlab_test" name="file_io_matlab_test" output="screen" cwd="node">
+    <rosparam>
+      read_matlab_data: true
+
+    </rosparam>
+  </node>
+
+</launch>
