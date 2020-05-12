@@ -1,68 +1,40 @@
-function test_orient_gmp()
+addpath('utils/');
 
-set_matlab_utils_path();
+filename = 'data/gmp_orient_sim_data.bin';
 
-%% Load training data
+%% Load sim data
+in = fopen(filename,'r');
+if (in < 0), error(['Failed to load ''' filename '''']); end
 
-load('data/train_data.mat', 'Data');
-Timed = Data.Time;
-Qd_data = Data.Quat;
-vRotd_data = Data.RotVel;
-dvRotd_data = Data.RotAccel;
+in = FileIO(filename, FileIO.in);
+Timed = in.read('Timed');
+Qd_data = in.read('Qd_data');
+vRotd_data = in.read('vRotd_data');
+dvRotd_data = in.read('dvRotd_data');
+Time = in.read('Time');
+Q_data = in.read('Q_data');
+vRot_data = in.read('vRot_data');
+dvRot_data = in.read('dvRot_data');
+ks = in.read('ks');
+kt = in.read('kt');
 
-%% Write data to binary format
-% fid = fopen('gmp_orient_train_data.bin','w');
-% io_.write_mat(Timed, fid, true);
-% io_.write_mat(Qd_data, fid, true);
-% io_.write_mat(vRotd_data, fid, true);
-% io_.write_mat(dvRotd_data, fid, true);
-% fclose(fid);
-
-Ts = Timed(2)-Timed(1);
-
-simulateGMPo = @simulateGMPo_in_quat_space; % simulateGMPo_in_log/quat_space
-
-%% initialize and train GMP
-train_method = 'LS';
-N_kernels = 50;
-kernels_std_scaling = 2;
-gmp_o = GMPo(N_kernels, 5, 20, kernels_std_scaling);
-tic
-offline_train_mse = gmp_o.train(train_method, Timed, Qd_data);
-offline_train_mse
-toc
-
-
-%% DMP simulation
-disp('GMP simulation...');
-tic
+Q0 = Q_data(:,1);
 Qd0 = Qd_data(:,1);
-Q0 = Qd0;
-Qgd = Qd_data(:,end);
-ks = 1.5;
-kt = 1.3;
-e0 = ks*quatLog( quatProd( Qgd, quatInv(Qd0) ) );
-Qg = quatProd(quatExp(e0), Q0); %quatExp(1.0*quatLog(Qd_data(:,end)));
-T = kt*Timed(end);
-dt = Ts;
-[Time, Q_data, vRot_data, dvRot_data] = simulateGMPo(gmp_o, Q0, Qg, T, dt);
-toc
-
 
 %% Plot results
-
 Pqd_data = zeros(3, size(Qd_data,2));
 for j=1:size(Pqd_data,2)
-    Pqd_data(:,j) = GMPo.quat2q(Qd_data(:,j), Qd0);
+    Pqd_data(:,j) = math_.quatLog( math_.quatProd(Qd_data(:,j), math_.quatInv(Qd0)) );
+    
 end
 
 Pq_data = zeros(3, size(Q_data,2));
 for j=1:size(Pq_data,2)
-    Pq_data(:,j) = GMPo.quat2q(Q_data(:,j), Q0);
+    Pq_data(:,j) = math_.quatLog( math_.quatProd(Q_data(:,j), math_.quatInv(Q0)) );
 end
 
 line_width = 2.5;
- 
+
 figure('Position', [200 200 600 500]);
 y_labels = {'$e_{q,x}$','$e_{q,y}$', '$e_{q,z}$'};
 for i=1:3
@@ -123,14 +95,12 @@ for i=1:3
    subplot(3,1,i);
    hold on;
    plot(Time, dvRot_data(i,:), 'LineWidth', line_width);
-   plot(Timed, dvRotd_data(i,:), 'LineWidth', line_width, 'LineStyle',':');
+   plot(Timed,dvRotd_data(i,:), 'LineWidth', line_width, 'LineStyle',':');
    legend({dvRot_labels{i}, dvRotd_labels{i}}, 'interpreter','latex', 'fontsize',15);
    if (i==1), title('Rotational Acceleration', 'interpreter','latex', 'fontsize',17); end
    if (i==3), xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15); end
    hold off;
 end
 
-
-end
-
-
+%% ==================================================================
+%% ==================================================================

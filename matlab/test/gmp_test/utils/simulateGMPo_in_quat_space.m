@@ -32,7 +32,7 @@ while (true)
     rotAccel_data = [rotAccel_data rotAccel];
 
     
-    %% DMP simulation
+    %% GMP simulation
     yc = 0; % optional coupling for 'y' state
     zc = 0; % optional coupling for 'z' state
     yc_dot = 0; % derivative of coupling for 'y' state

@@ -162,13 +162,6 @@ public:
   /** \brief TODO doc.*/
   static arma::mat jacobDotQq(const arma::vec &Q1, const arma::vec &rotVel);
 
-
-// =======================================
-// =======  Protected Properties  ========
-// =======================================
-public:
-  std::vector<std::shared_ptr<gmp_::GMP>> gmp;
-
 // =======================================
 // =======  Protected Properties  ========
 // =======================================

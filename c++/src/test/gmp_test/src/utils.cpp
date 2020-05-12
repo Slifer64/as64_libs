@@ -134,3 +134,112 @@ void simulateGMP_nDoF(std::shared_ptr<gmp_::GMP_nDoF> &gmp, const arma::vec &y0,
   }
 
 }
+
+
+void simulateGMPo_in_log_space(std::shared_ptr<gmp_::GMPo> &gmp_o, const arma::vec &Q0, const arma::vec &Qg,
+                               double T, double dt, arma::rowvec &Time, arma::mat &Q_data, arma::mat &rotVel_data, arma::mat &rotAccel_data)
+{
+  // set initial values
+  double t_end = T;
+  double tau = t_end;
+
+  double t = 0.0;
+  double x = 0.0;
+  double x_dot = 1/tau;
+  double x_ddot = 0;
+  arma::vec Q = Q0;
+  arma::vec rotVel = arma::vec().zeros(3);
+  arma::vec rotAccel = arma::vec().zeros(3);
+
+  gmp_o->setQ0(Q0);  // set initial orientation
+  gmp_o->setQg(Qg);  // set target orientation
+
+  // simulate
+  while (true)
+  {
+    // data logging
+    Time = arma::join_horiz(Time, arma::vec({t}));
+    Q_data = arma::join_horiz(Q_data, Q);
+    rotVel_data = arma::join_horiz(rotVel_data, rotVel);
+    rotAccel_data = arma::join_horiz(rotAccel_data, rotAccel);
+
+    // GMP simulation
+    arma::vec yc = arma::vec().zeros(3); // optional coupling for 'y' state
+    arma::vec zc = arma::vec().zeros(3); // optional coupling for 'z' state
+    arma::vec yc_dot = arma::vec().zeros(3); // derivative of coupling for 'y' state
+    gmp_::Phase s(x,x_dot,x_ddot);
+    rotAccel = gmp_o->calcRotAccel(s, Q, rotVel, Qg, yc, zc, yc_dot);
+
+    // Stopping criteria
+    if (t>1.5*t_end)
+    {
+      io_::PRINT_WARNING_MSG("Time limit reached... Stopping simulation!");
+      break;
+    }
+
+    arma::vec eo = gmp_::quatLog(gmp_::quatProd(Qg, gmp_::quatInv(Q)));
+    if (t>=t_end && arma::norm(eo)<0.02) break;
+
+    // Numerical integration
+    t = t + dt;
+    x = x + x_dot*dt;
+    Q = gmp_::quatProd( gmp_::quatExp(rotVel*dt), Q);
+    rotVel = rotVel + rotAccel*dt;
+  }
+
+}
+
+
+void simulateGMPo_in_quat_space(std::shared_ptr<gmp_::GMPo> &gmp_o, const arma::vec &Q0, const arma::vec &Qg,
+                               double T, double dt, arma::rowvec &Time, arma::mat &Q_data, arma::mat &rotVel_data, arma::mat &rotAccel_data)
+{
+  // set initial values
+  double t_end = T;
+  double tau = t_end;
+
+  double t = 0.0;
+  double x = 0.0;
+  double x_dot = 1/tau;
+  double x_ddot = 0;
+  arma::vec Q = Q0;
+  arma::vec rotVel = arma::vec().zeros(3);
+  arma::vec rotAccel = arma::vec().zeros(3);
+
+  gmp_o->setQ0(Q0);  // set initial orientation
+  gmp_o->setQg(Qg);  // set target orientation
+
+  // simulate
+  while (true)
+  {
+     // data logging
+     Time = arma::join_horiz(Time, arma::vec({t}));
+     Q_data = arma::join_horiz(Q_data, Q);
+     rotVel_data = arma::join_horiz(rotVel_data, rotVel);
+     rotAccel_data = arma::join_horiz(rotAccel_data, rotAccel);
+
+     // GMP simulation
+     arma::vec yc = arma::vec().zeros(3); // optional coupling for 'y' state
+     arma::vec zc = arma::vec().zeros(3); // optional coupling for 'z' state
+     arma::vec yc_dot = arma::vec().zeros(3); // derivative of coupling for 'y' state
+     gmp_::Phase s(x,x_dot,x_ddot);
+     rotAccel = gmp_o->calcRotAccel(s, Q, rotVel, Qg, yc, zc, yc_dot);
+
+     // Stopping criteria
+     if (t>1.5*t_end)
+     {
+       io_::PRINT_WARNING_MSG("Time limit reached... Stopping simulation!");
+       break;
+     }
+
+     arma::vec eo = gmp_::quatLog(gmp_::quatProd(Qg, gmp_::quatInv(Q)));
+     if (t>=t_end && arma::norm(eo)<0.02) break;
+
+     // Numerical integration
+     t = t + dt;
+     x = x + x_dot*dt;
+     Q = gmp_::quatProd( gmp_::quatExp(rotVel*dt), Q);
+     rotVel = rotVel + rotAccel*dt;
+
+  }
+
+}

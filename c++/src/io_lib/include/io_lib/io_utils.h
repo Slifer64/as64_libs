@@ -46,6 +46,11 @@ namespace as64_
 namespace io_
 {
 
+void PRINT_INFO_MSG(const std::string &msg, std::ostream &out = std::cout);
+void PRINT_CONFIRM_MSG(const std::string &msg, std::ostream &out = std::cout);
+void PRINT_WARNING_MSG(const std::string &msg, std::ostream &out = std::cout);
+void PRINT_ERROR_MSG(const std::string &msg, std::ostream &out = std::cout);
+
 template <typename T>
 void print_vector(const std::vector<T> &v, std::ostream& out=std::cout, char delim=' ')
 {

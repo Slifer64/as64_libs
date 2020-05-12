@@ -85,9 +85,7 @@ classdef GMPo < GMP_nDoF
         function setQg(this, Qg)
             
             qg = GMPo.quat2q(Qg, this.Q0);
-
-            n = this.length();
-            for i=1:n, this.gmp{i}.setGoal(qg(i)); end
+            this.setGoal(qg);
             
         end
 

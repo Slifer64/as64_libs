@@ -26,7 +26,7 @@ GMPo::GMPo(arma::uvec N_kernels, arma::vec D, arma::vec K, double kernels_std_sc
   }catch(std::exception &e) { throw std::runtime_error(std::string("[GMPo::GMPo]: ") + e.what()); }
   #endif
 }
-        
+
 
 void GMPo::train(const std::string &train_method, const arma::rowvec &Time, const arma::mat &Quat_data, arma::vec *train_error)
 {
@@ -74,9 +74,7 @@ void GMPo::setQg(const arma::vec &Qg)
   #endif
 
   arma::vec qg = GMPo::quat2q(Qg, this->Q0);
-
-  unsigned n = this->length();
-  for (int i=0; i<n; i++) this->gmp[i]->setGoal(qg(i));
+  GMP_nDoF::setGoal(qg);
 
   #ifdef GMPo_DEBUG_
   }catch(std::exception &e) { throw std::runtime_error(std::string("[GMPo::setGoal]: ") + e.what()); }
@@ -102,7 +100,6 @@ arma::vec GMPo::getRotAccel(const arma::vec &Q, double tau_dot, const arma::vec 
 arma::vec GMPo::calcRotAccel(const gmp_::Phase &s, const arma::vec &Q, const arma::vec &rotVel, const arma::vec &Qg,
                                const arma::vec &Yc, const arma::vec &Zc, const arma::vec &Yc_dot) const
 {
-
   arma::vec D = arma::vec({this->gmp[0]->D, this->gmp[1]->D, this->gmp[2]->D});
   arma::vec K = arma::vec({this->gmp[0]->K, this->gmp[1]->K, this->gmp[2]->K});
 
@@ -139,7 +136,7 @@ arma::vec GMPo::getZ(const arma::vec &rotVel, const arma::vec &Q) const
 
   return z;
 }
-    
+
 // ====================================================
 // ****************************************************
 // ************      Static Functions      ************

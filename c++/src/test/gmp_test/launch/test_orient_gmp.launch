@@ -12,6 +12,7 @@
       train_method: "LS" # {LWR, LS}
       ks: 1.5
       kt: 1.3
+      sim_fun: "quat" # {log, quat}
     </rosparam>
 
   </node>
