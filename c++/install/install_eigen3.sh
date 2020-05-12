@@ -26,7 +26,7 @@ EIGEN_VERSION="3.3.7"
 #
 # if [ -n "$FOUND_EIGEN" ]; then
 #   echo -e $COLOR_GREEN"Found Eigen!"$COLOR_RESET
-#   UR_ERROR=0
+#   AS64_ERROR=0
 #   return
 # else
 #   echo -e $COLOR_YELLOW"Didn't find Eigen!"$COLOR_RESET
@@ -38,7 +38,13 @@ echo -e $COLOR_BLUE"Installing dependencies: fortran..."$COLOR_RESET
 printf 'y\n' | sudo apt-get install gfortran &&\
 
 echo -e $COLOR_BLUE"Downloading Eigen-"$EIGEN_VERSION"..."$COLOR_RESET
-wget http://bitbucket.org/eigen/eigen/get/$EIGEN_VERSION.tar.gz > /dev/null &&\
+wget http://bitbucket.org/eigen/eigen/get/$EIGEN_VERSION.tar.gz > /dev/null
+if [ $? -ne 0 ]; then
+  echo -e $COLOR_RED"Failed to download Eigen-"$EIGEN_VERSION"...."$COLOR_RESET
+  echo -e $COLOR_RED"Eigen installation failed..."$COLOR_RESET
+  AS64_ERROR=1
+  return 1
+fi
 tar xvf $EIGEN_VERSION.tar.gz > /dev/null && \
 rm -rf $EIGEN_VERSION.tar.gz && \
 EIGEN_FOLDER=$(ls -d */ | grep eigen)
@@ -52,8 +58,8 @@ cmake .. > /dev/null && \
 
 if [ $? -eq 0 ]; then
   echo -e $COLOR_GREEN"Eigen-"$EIGEN_VERSION" installed successfully!"$COLOR_RESET
-  UR_ERROR=0
+  AS64_ERROR=0
 else
   echo -e $COLOR_RED"Failed to install Eigen-"$EIGEN_VERSION$COLOR_RESET
-  UR_ERROR=1
+  AS64_ERROR=1
 fi

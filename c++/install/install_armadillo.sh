@@ -17,7 +17,7 @@ echo -e $COLOR_CYAN"*******************************"$COLOR_RESET
 echo -e $COLOR_CYAN"********   Armadillo   ********"$COLOR_RESET
 echo -e $COLOR_CYAN"*******************************"$COLOR_RESET
 
-ARMA_VERSION="9.860.1"
+ARMA_VERSION="9.860.2"
 
 # remove other armadillo downloads
 find  ./ -type d -name "armadillo-*" | xargs rm -rf
@@ -28,7 +28,13 @@ sudo apt-get install -y cmake libopenblas-dev liblapack-dev wget xz-utils > /dev
 
 echo -e $COLOR_BLUE"Downloading and building Armadillo-"$ARMA_VERSION$COLOR_RESET
 
-wget --no-check-certificate http://sourceforge.net/projects/arma/files/armadillo-$ARMA_VERSION.tar.xz > /dev/null && \
+wget --no-check-certificate http://sourceforge.net/projects/arma/files/armadillo-$ARMA_VERSION.tar.xz > /dev/null
+if [ $? -ne 0 ]; then
+  echo -e $COLOR_RED"Failed to download Armadillo-"$ARMA_VERSION"...."$COLOR_RESET
+  echo -e $COLOR_RED"Armadillo installation failed..."$COLOR_RESET
+  AS64_ERROR=1
+  return 1
+fi
 tar xvf armadillo-$ARMA_VERSION.tar.xz > /dev/null && \
 rm -rf armadillo-$ARMA_VERSION.tar.xz && \
 cd armadillo-$ARMA_VERSION && \
@@ -42,8 +48,8 @@ cd .. && \
 
 if [ $? -eq 0 ]; then
   echo -e $COLOR_GREEN"Armadillo-"$ARMA_VERSION" successfully installed!"$COLOR_RESET
-  UR_ERROR=0
+  AS64_ERROR=0
 else
-  echo -e $COLOR_RED"Armadillo installation failed!"$COLOR_RESET
-  UR_ERROR=1
+  echo -e $COLOR_RED"Armadillo installation failed..."$COLOR_RESET
+  AS64_ERROR=1
 fi
