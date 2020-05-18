@@ -25,19 +25,22 @@ find_package(LAPACK REQUIRED)
 # Search for armadillo locally
 # =============================
 
+# define arma version
+set( ARMA_VERSION "9.860.2")
+
 # clear previous values
 unset( ARMADILLO_INCLUDE_DIR CACHE)
 unset( ARMADILLO_LIBRARY CACHE )
 
 find_path( ARMADILLO_INCLUDE_DIR armadillo
   NO_DEFAULT_PATH
-  PATHS ${CMAKE_BINARY_DIR}/../install/deps/armadillo-9.860.1/include
+  PATHS ${CMAKE_SOURCE_DIR}/../install/deps/armadillo-${ARMA_VERSION}/include
 )
 
 find_library( ARMADILLO_LIBRARY
   NAME armadillo
   NO_DEFAULT_PATH
-  PATHS ${CMAKE_BINARY_DIR}/../install/deps/armadillo-9.860.1
+  PATHS ${CMAKE_SOURCE_DIR}/../install/deps/armadillo-${ARMA_VERSION}
 )
 
 # =============================
