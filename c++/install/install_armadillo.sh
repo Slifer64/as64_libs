@@ -37,7 +37,8 @@ if [ $? -ne 0 ]; then
 fi
 tar xvf armadillo-$ARMA_VERSION.tar.xz > /dev/null && \
 rm -rf armadillo-$ARMA_VERSION.tar.xz && \
-cd armadillo-$ARMA_VERSION && \
+mv armadillo-$ARMA_VERSION armadillo
+cd armadillo && \
 echo -e $COLOR_BLUE"Building locally Armadillo-"$ARMA_VERSION$COLOR_RESET && \
 cmake . && \
 make && \
