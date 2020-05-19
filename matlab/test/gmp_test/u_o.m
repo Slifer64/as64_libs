@@ -9,6 +9,15 @@ Qd_data = fid.read('Qd_data');
 vRotd_data = fid.read('vRotd_data');
 dvRotd_data = fid.read('dvRotd_data');
 
+out = fopen('gmp_orient_train_data.bin', 'w');
+io_.write_mat(Timed, out);
+io_.write_mat(Qd_data, out);
+io_.write_mat(vRotd_data, out);
+io_.write_mat(dvRotd_data, out);
+fclose(out);
+
+return
+
 Ts = Timed(2)-Timed(1);
 
 simulateGMPo = @simulateGMPo_in_log_space; % simulateGMPo_in_log/quat_space
@@ -17,7 +26,7 @@ simulateGMPo = @simulateGMPo_in_log_space; % simulateGMPo_in_log/quat_space
 train_method = 'LS';
 N_kernels = 30;
 kernels_std_scaling = 1;
-gmp_o = GMPo(N_kernels, 0.1, 20, kernels_std_scaling);
+gmp_o = GMPo(N_kernels, 4, 12, kernels_std_scaling);
 tic
 offline_train_mse = gmp_o.train(train_method, Timed, Qd_data);
 offline_train_mse
