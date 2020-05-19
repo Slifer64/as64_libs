@@ -18,6 +18,8 @@ using namespace as64_;
 
 void loadParams();
 
+std::string path;
+
 std::string train_data_file;
 std::string sim_data_file;
 std::string train_method;
@@ -67,6 +69,9 @@ int main(int argc, char** argv)
   gmp->train(train_method, Timed, yd_data, &offline_train_mse);
   std::cout << "offline_train_mse = " << offline_train_mse << "\n";
   std::cout << "Elapsed time: " << timer.toc() << " sec\n";
+
+//  gmp->exportToFile(path+"/gmp_model.bin");
+//  gmp = gmp_::GMP::importFromFile(path+"/gmp_model.bin");
 
   // ===========  gmp update and simulation  ===============
   double y0d = yd_data(0);
@@ -124,7 +129,7 @@ void loadParams()
   ros::NodeHandle nh_("~");
 
   // ===========  Read params  ===============
-  std::string path = ros::package::getPath("gmp_test") + "/matlab/data/";
+  path = ros::package::getPath("gmp_test") + "/matlab/data/";
 
   if (!nh_.getParam("train_data_file", train_data_file)) train_data_file = "gmp_train_data.bin";
   if (!nh_.getParam("sim_data_file", sim_data_file)) sim_data_file = "gmp_update_sim_data.bin";

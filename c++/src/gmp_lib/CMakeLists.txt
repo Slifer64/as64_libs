@@ -31,6 +31,7 @@ add_library(${PROJECT_NAME}
 
   src/math/quaternions.cpp
   src/io/io.cpp
+  src/io/file_io.cpp
 
   src/WSoG/WSoG.cpp
   src/GMP/GMP.cpp

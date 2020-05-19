@@ -194,11 +194,58 @@ classdef GMPo < GMP_nDoF
             z = qdot; 
 
         end
+        
+        
+        %% Export the GMP model to a file.
+        % @param[in] filename: The name of the file.
+        function exportToFile(this, filename)
+
+            fid = FileIO(filename, bitor(FileIO.out,FileIO.trunc));
+            this.writeToFile(fid, '');
+            
+        end
+        
+        
+        %% Write the GMP model to a file.
+        % @param[in] fid: Object of type @FileIO associated with the file.
+        % @param[in] prefix: The prefix that will be used for writing the names of all GMP params (optional, default="").
+        function writeToFile(this, fid, prefix)
+            
+            if (nargin < 3), prefix=''; end
+            
+            writeToFile@GMP_nDoF(this, fid, prefix);
+            fid.write('Q0', this.Q0);
+           
+        end
+        
+        %% Reads the GMP model from a file.
+        % @param[in] fid: Object of type @FileIO associated with the file.
+        % @param[in] prefix: The prefix that will be used for reading the names of all GMP params (optional, default="").
+        function readFromFile(this, fid, prefix)
+            
+            if (nargin < 3), prefix=''; end
+            
+            readFromFile@GMP_nDoF(this, fid, prefix);
+            this.Q0 = fid.read('Q0');
+            
+        end
 
         
     end
     
-    methods (Static)
+    methods (Static, Access = public)
+        
+        
+        %% Import a GMP model from a file.
+        % @param[in] filename: The name of the file.
+        function gmp = importFromFile(filename)
+
+            gmp = GMPo(2, 1, 1, 1);
+            fid = FileIO(filename, FileIO.in);
+            gmp.readFromFile(fid, '');
+  
+        end
+        
         
         %% Expresses a given quaternion w.r.t. the initial orientation. 
         %  @param[in] Q: Orientation as unit quaternion.

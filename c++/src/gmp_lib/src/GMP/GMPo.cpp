@@ -137,6 +137,34 @@ arma::vec GMPo::getZ(const arma::vec &rotVel, const arma::vec &Q) const
   return z;
 }
 
+
+void GMPo::exportToFile(const std::string &filename) const
+{
+  FileIO fid(filename, FileIO::out | FileIO::trunc);
+  writeToFile(fid, "");
+}
+
+std::shared_ptr<GMPo> GMPo::importFromFile(const std::string &filename)
+{
+  std::shared_ptr<GMPo> gmp( new gmp_::GMPo(arma::uvec({2}), arma::vec({1}), arma::vec({1}), 1) );
+  FileIO fid(filename, FileIO::in);
+  gmp->readFromFile(fid, "");
+  return gmp;
+}
+
+void GMPo::writeToFile(FileIO &fid, const std::string &prefix) const
+{
+  GMP_nDoF::writeToFile(fid, prefix);
+  fid.write("Q0", this->Q0);
+}
+
+void GMPo::readFromFile(FileIO &fid, const std::string &prefix)
+{
+  GMP_nDoF::readFromFile(fid, prefix);
+  fid.read("Q0", this->Q0);
+}
+
+
 // ====================================================
 // ****************************************************
 // ************      Static Functions      ************
@@ -309,6 +337,7 @@ arma::mat GMPo::jacobDotQq(const arma::vec &Q1, const arma::vec &rotVel)
 
   return JQq_dot;
 }
+
 
 } // namespace gmp_
 

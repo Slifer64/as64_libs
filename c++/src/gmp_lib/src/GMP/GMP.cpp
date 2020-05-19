@@ -286,6 +286,45 @@ double GMP::shapeAttractor(const gmp_::Phase &s) const
   #endif
 }
 
+void GMP::exportToFile(const std::string &filename) const
+{
+  FileIO fid(filename, FileIO::out | FileIO::trunc);
+  writeToFile(fid, "");
+}
+
+std::shared_ptr<GMP> GMP::importFromFile(const std::string &filename)
+{
+  std::shared_ptr<GMP> gmp( new gmp_::GMP(2, 1, 1, 1) );
+  FileIO fid(filename, FileIO::in);
+  gmp->readFromFile(fid, "");
+  return gmp;
+}
+
+void GMP::writeToFile(FileIO &fid, const std::string &prefix) const
+{
+  fid.write(prefix+"D", this->D);
+  fid.write(prefix+"K", this->K);
+  fid.write(prefix+"N_kernels", this->wsog->N_kernels);
+  fid.write(prefix+"w", this->wsog->w);
+  fid.write(prefix+"c", this->wsog->c);
+  fid.write(prefix+"h", this->wsog->h);
+}
+
+void GMP::readFromFile(FileIO &fid, const std::string &prefix)
+{
+  fid.read(prefix+"D", this->D);
+  fid.read(prefix+"K", this->K);
+  fid.read(prefix+"N_kernels", this->wsog->N_kernels);
+  fid.read(prefix+"w", this->wsog->w);
+  fid.read(prefix+"c", this->wsog->c);
+  fid.read(prefix+"h", this->wsog->h);
+
+  this->wsog->f0_d = arma::dot(this->wsog->regressVec(0),this->wsog->w);
+  this->wsog->fg_d = arma::dot(this->wsog->regressVec(1),this->wsog->w);
+  this->wsog->setStartValue(this->wsog->f0_d);
+  this->wsog->setFinalValue(this->wsog->fg_d);
+}
+
 } // namespace gmp_
 
 } // namespace as64_

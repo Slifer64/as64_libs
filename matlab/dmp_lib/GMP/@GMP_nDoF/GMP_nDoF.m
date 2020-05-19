@@ -225,7 +225,65 @@ classdef GMP_nDoF < matlab.mixin.Copyable
             for i=1:n, p_ref_ddot(i) = this.gmp{i}.getYdDDot(x, x_dot, x_ddot); end
             
         end
+        
+        
+        %% Export the GMP model to a file.
+        % @param[in] filename: The name of the file.
+        function exportToFile(this, filename)
 
+            fid = FileIO(filename, bitor(FileIO.out,FileIO.trunc));
+            this.writeToFile(fid, '');
+            
+        end
+        
+        
+        %% Write the GMP model to a file.
+        % @param[in] fid: Object of type @FileIO associated with the file.
+        % @param[in] prefix: The prefix that will be used for writing the names of all GMP params (optional, default="").
+        function writeToFile(this, fid, prefix)
+            
+            if (nargin < 3), prefix=''; end
+            
+            n_dof = this.length();
+            fid.write([prefix 'n_dof'], n_dof);
+            for i=1:n_dof, this.gmp{i}.writeToFile(fid, ['gmp' num2str(i) '_']); end
+           
+        end
+        
+        %% Reads the GMP model from a file.
+        % @param[in] fid: Object of type @FileIO associated with the file.
+        % @param[in] prefix: The prefix that will be used for reading the names of all GMP params (optional, default="").
+        function readFromFile(this, fid, prefix)
+            
+            if (nargin < 3), prefix=''; end
+            
+            n_dof = fid.read([prefix 'n_dof']);
+            this.gmp = cell(n_dof, 1);
+            this.y_dot = zeros(n_dof, 1);
+            this.z_dot = zeros(n_dof, 1);
+
+            for i=1:n_dof
+                this.gmp{i} = GMP(2, 1, 1, 1);
+                this.gmp{i}.readFromFile(fid, ['gmp' num2str(i) '_']);
+            end
+            
+        end
+
+        
+    end
+    
+    
+    methods (Static, Access = public)
+        
+        %% Import a GMP model from a file.
+        % @param[in] filename: The name of the file.
+        function gmp = importFromFile(filename)
+
+            gmp = GMP_nDoF(1, 2, 1, 1, 1);
+            fid = FileIO(filename, FileIO.in);
+            gmp.readFromFile(fid, '');
+  
+        end
         
     end
     

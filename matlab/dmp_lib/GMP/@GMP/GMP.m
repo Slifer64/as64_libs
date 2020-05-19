@@ -264,6 +264,65 @@ classdef GMP < matlab.mixin.Copyable
             
         end
         
+        %% Export the GMP model to a file.
+        % @param[in] filename: The name of the file.
+        function exportToFile(this, filename)
+            
+            fid = FileIO(filename, bitor(FileIO.out,FileIO.trunc));
+            this.writeToFile(fid, '');
+            
+        end
+        
+        %% Write the GMP model to a file.
+        % @param[in] fid: Object of type @FileIO associated with the file.
+        % @param[in] prefix: The prefix that will be used for writing the names of all GMP params (optional, default="").
+        function writeToFile(this, fid, prefix)
+            
+            if (nargin < 3), prefix=''; end
+            
+            fid.write([prefix 'D'], this.D);
+            fid.write([prefix 'K'], this.K);
+            fid.write([prefix 'N_kernels'], this.wsog.N_kernels);
+            fid.write([prefix 'w'], this.wsog.w);
+            fid.write([prefix 'c'], this.wsog.c);
+            fid.write([prefix 'h'], this.wsog.h);
+            
+        end
+        
+        %% Reads the GMP model from a file.
+        % @param[in] fid: Object of type @FileIO associated with the file.
+        % @param[in] prefix: The prefix that will be used for reading the names of all GMP params (optional, default="").
+        function readFromFile(this, fid, prefix)
+            
+            if (nargin < 3), prefix=''; end
+            
+            this.D = fid.read([prefix 'D']);
+            this.K = fid.read([prefix 'K']);
+            this.wsog.N_kernels = fid.read([prefix 'N_kernels']);
+            this.wsog.w = fid.read([prefix 'w']);
+            this.wsog.c = fid.read([prefix 'c']);
+            this.wsog.h = fid.read([prefix 'h']);
+
+            this.wsog.f0_d = dot(this.wsog.regressVec(0),this.wsog.w);
+            this.wsog.fg_d = dot(this.wsog.regressVec(1),this.wsog.w);
+            this.wsog.setStartValue(this.wsog.f0_d);
+            this.wsog.setFinalValue(this.wsog.fg_d);
+            
+        end
+  
+    end
+    
+    methods (Static, Access = public)
+        
+        %% Import a GMP model from a file.
+        % @param[in] filename: The name of the file.
+        function gmp = importFromFile(filename)
+            
+            gmp = GMP(2, 1, 1, 1);
+            fid = FileIO(filename, FileIO.in);
+            gmp.readFromFile(fid, '');
+  
+        end
         
     end
     

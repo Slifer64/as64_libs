@@ -35,6 +35,8 @@ namespace as64_
 namespace gmp_
 {
 
+class GMP; // forward decleration
+
 class WSoG
 {
 
@@ -190,7 +192,10 @@ protected:
 // =====================================
 // =======  Private Properties  ========
 // =====================================
-private:
+protected:
+
+  friend GMP;
+
   unsigned N_kernels; //number of kernels (basis functions)
   arma::vec w; //N_kernels x 1 vector with the kernels' weights
   arma::vec c; //N_kernels x 1 vector with the kernels' centers

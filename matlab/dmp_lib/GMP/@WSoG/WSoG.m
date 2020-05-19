@@ -972,7 +972,7 @@ classdef WSoG < matlab.mixin.Copyable
         
     end
     
-    properties (Access = private)
+    properties (Access = {?GMP})
         
         N_kernels % number of kernels (basis functions)
         w % N_kernels x 1 vector with the kernels' weights

@@ -240,6 +240,44 @@ arma::vec GMP_nDoF::getYdDDot(double x, double x_dot, double x_ddot) const
 }
 
 
+void GMP_nDoF::exportToFile(const std::string &filename) const
+{
+  FileIO fid(filename, FileIO::out | FileIO::trunc);
+  writeToFile(fid, "");
+}
+
+std::shared_ptr<GMP_nDoF> GMP_nDoF::importFromFile(const std::string &filename)
+{
+  std::shared_ptr<GMP_nDoF> gmp( new gmp_::GMP_nDoF(1, arma::uvec({2}), arma::vec({1}), arma::vec({1}), 1) );
+  FileIO fid(filename, FileIO::in);
+  gmp->readFromFile(fid, "");
+  return gmp;
+}
+
+void GMP_nDoF::writeToFile(FileIO &fid, const std::string &prefix) const
+{
+  unsigned n_dof = this->length();
+  fid.write(prefix+"n_dof", n_dof);
+  for (int i=0; i<n_dof; i++) this->gmp[i]->writeToFile(fid, "gmp"+std::to_string(i+1)+"_");
+}
+
+void GMP_nDoF::readFromFile(FileIO &fid, const std::string &prefix)
+{
+  unsigned n_dof;
+  fid.read(prefix+"n_dof", n_dof);
+
+  this->gmp.resize(n_dof);
+  this->y_dot = arma::vec().zeros(n_dof);
+  this->z_dot = arma::vec().zeros(n_dof);
+
+  for (int i=0; i<n_dof; i++)
+  {
+    this->gmp[i].reset( new gmp_::GMP(2, 1, 1, 1) );
+    this->gmp[i]->readFromFile(fid, "gmp"+std::to_string(i+1)+"_");
+  }
+}
+
+
 } // namespace gmp_
 
 } // namespace as64_

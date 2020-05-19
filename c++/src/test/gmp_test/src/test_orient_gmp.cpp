@@ -22,6 +22,8 @@ typedef void (*sim_fun_ptr)(std::shared_ptr<gmp_::GMPo> &, const arma::vec &, co
 
 void loadParams();
 
+std::string path;
+
 std::string train_data_file;
 std::string sim_data_file;
 std::string train_method;
@@ -74,6 +76,10 @@ int main(int argc, char** argv)
   std::cout << "offline_train_mse = \n" << offline_train_mse << "\n";
   std::cout << "Elapsed time: " << timer.toc() << " sec\n";
 
+  gmp->exportToFile(path+"/gmp_o_model.bin");
+  gmp = gmp_::GMPo::importFromFile(path+"/gmp_o_model.bin");
+//  std::shared_ptr<gmp_::GMPo> gmp = gmp_::GMPo::importFromFile(path+"/gmp_o_model.bin");
+
   // ===========  gmp update and simulation  ===============
   arma::vec Q0d = Qd_data.col(0);
   arma::vec Qgd = Qd_data.col(i_end);
@@ -121,7 +127,7 @@ void loadParams()
   ros::NodeHandle nh_("~");
 
   // ===========  Read params  ===============
-  std::string path = ros::package::getPath("gmp_test") + "/matlab/data/";
+  path = ros::package::getPath("gmp_test") + "/matlab/data/";
 
   if (!nh_.getParam("train_data_file", train_data_file)) train_data_file = "gmp_train_data.bin";
   if (!nh_.getParam("sim_data_file", sim_data_file)) sim_data_file = "gmp_update_sim_data.bin";

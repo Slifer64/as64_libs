@@ -32,6 +32,8 @@ offline_train_mse = gmp_o.train(train_method, Timed, Qd_data);
 offline_train_mse
 toc
 
+% gmp_o.exportToFile('data/gmp_o_model.bin');
+% gmp_o = GMPo.importFromFile('data/gmp_o_model.bin');
 
 %% DMP simulation
 disp('GMP simulation...');
