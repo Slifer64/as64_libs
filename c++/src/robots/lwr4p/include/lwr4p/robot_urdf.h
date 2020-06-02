@@ -45,12 +45,27 @@ public:
   arma::mat getJacobian(const arma::vec &j_pos) const;
   arma::mat getEEJacobian(const arma::vec &j_pos) const;
 
-  arma::vec getLowerJointLimits() const { return arma::vec(joint_pos_lower_lim); }
-  arma::vec getUpperJointLimits() const { return arma::vec(joint_pos_upper_lim); }
+  std::string getJointName(int i) const { return joint_names[i]; }
+  double getJointPosLowLim(int i) const { return joint_pos_lower_lim[i]; }
+  double getJointPosUpperLim(int i) const { return joint_pos_upper_lim[i]; }
+  double getJointVelLim(int i) const { return joint_vel_lim[i]; }
+  double getJointEffortLim(int i) const { return effort_lim[i]; }
 
-protected:
+  std::vector<std::string> getJointsName() const { return joint_names; }
+  std::vector<double> getJointsPosLowLim() const { return joint_pos_lower_lim; }
+  std::vector<double> getJointsPosUpperLim() const { return joint_pos_upper_lim; }
+  std::vector<double> getJointsVelLim() const { return joint_vel_lim; }
+  std::vector<double> getJointsEffortLim() const { return effort_lim; }
+
+private:
 
   void init();
+
+  std::vector<std::string> joint_names;
+  std::vector<double> joint_pos_lower_lim;
+  std::vector<double> joint_pos_upper_lim;
+  std::vector<double> joint_vel_lim;
+  std::vector<double> effort_lim;
 
   urdf::Model urdf_model;
   std::shared_ptr<KDL::ChainFkSolverPos_recursive> fk_solver;
@@ -58,14 +73,6 @@ protected:
   std::shared_ptr<KDL::ChainIkSolverPos_NR> ik_solver;
   std::shared_ptr<KDL::ChainJntToJacSolver> jac_solver;
   KDL::Chain chain;
-
-  ros::NodeHandle node;
-
-  std::vector<std::string> joint_names;
-  std::vector<double> joint_pos_lower_lim;
-  std::vector<double> joint_pos_upper_lim;
-  std::vector<double> joint_vel_lim;
-  std::vector<double> effort_lim;
 
   std::string base_link_name;
   std::string tool_link_name;

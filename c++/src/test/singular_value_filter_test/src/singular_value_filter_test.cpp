@@ -95,7 +95,7 @@ int main(int argc, char **argv)
   // =================================================
 
   // get final Cartesian pose
-  arma::mat pose2 = lwr4p_robot->getTaskPose(q2);
+  arma::mat pose2 = lwr4p_robot->robot_urdf->getTaskPose(q2);
   arma::vec p2 = pose2.submat(0,3,2,3);
   arma::vec Q2 = lwr4p_::rotm2quat(pose2.submat(0,0,3,3));
 

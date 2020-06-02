@@ -90,6 +90,8 @@ RobotArm::~RobotArm() {}
 
 void RobotArm::init()
 {
+  robot_urdf.reset(new RobotUrdf(urdf_model, base_link_name, tool_link_name));
+
   mode_name[lwr4p_::IDLE] = "IDLE";
   mode_name[lwr4p_::FREEDRIVE] = "FREEDRIVE";
   mode_name[lwr4p_::JOINT_POS_CONTROL] = "JOINT_POS_CONTROL";
@@ -103,103 +105,8 @@ void RobotArm::init()
 
   setSingularityThreshold(0.05);
 
-  // find base_link and tool_link
-  bool found_base_link = false;
-  bool found_tool_link = false;
-  boost::shared_ptr<const urdf::Link> base_link;
-  boost::shared_ptr<const urdf::Link> tool_link;
-  std::stack<boost::shared_ptr<const urdf::Link>> link_stack;
-  link_stack.push(urdf_model.getRoot());
-  while (!link_stack.empty())
-  {
-    auto link = link_stack.top();
-    link_stack.pop();
-
-    if (base_link_name.compare(link->name) == 0)
-    {
-      base_link = link;
-      found_base_link = true;
-    }
-
-    if (tool_link_name.compare(link->name) == 0)
-    {
-      tool_link = link;
-      found_tool_link = true;
-    }
-
-    for (int i=0;i<link->child_links.size();i++) link_stack.push(link->child_links[i]);
-    // for (int i=0;i<link->child_joints.size();i++) _joints.push_back(link->child_joints[i]);
-  }
-
-  if (!found_base_link)
-    throw std::runtime_error("[RobotArm Error]: Couldn't find specified base link \"" + base_link_name + "\" in the robot urdf model...\n");
-
-  if (!found_tool_link)
-    throw std::runtime_error("[RobotArm Error]: Couldn't find specified tool link \"" + tool_link_name + "\" in the robot urdf model...\n");
-
-  // find all links in the chain from tool_link to base_link
-  std::vector<boost::shared_ptr<const urdf::Link>> chain_links;
-  auto link = tool_link;
-  while (link->name.compare(base_link->name))
-  {
-    chain_links.push_back(link);
-    link = link->getParent();
-  }
-  chain_links.push_back(base_link);
-
-  // parse all joints for each link starting from base_link
-  for (int i=chain_links.size()-1; i>0; i--)
-  {
-    link = chain_links[i];
-    auto next_link = chain_links[i-1];
-
-    for (int i=0;i<link->child_joints.size();i++)
-    {
-      auto joint = link->child_joints[i];
-      auto jtype = joint->type;
-
-      if (jtype==urdf::Joint::FIXED || jtype==urdf::Joint::FLOATING) continue;
-
-      if (joint->mimic) continue;
-
-      if (joint->child_link_name.compare(next_link->name)) continue;
-
-      joint_names.push_back(joint->name);
-
-      if (jtype==urdf::Joint::CONTINUOUS)
-      {
-        joint_pos_lower_lim.push_back(-M_PI);
-        joint_pos_upper_lim.push_back(M_PI);
-      }
-      else
-      {
-        joint_pos_lower_lim.push_back(joint->limits->lower);
-        joint_pos_upper_lim.push_back(joint->limits->upper);
-      }
-
-      effort_lim.push_back(joint->limits->effort);
-      joint_vel_lim.push_back(joint->limits->velocity);
-    }
-  }
-
-  // create KDL::Chain and forward/inverse kinematics and Jacobian solvers
-  KDL::Tree tree;
-  kdl_parser::treeFromUrdfModel(urdf_model, tree);
-
-  if (!tree.getChain(base_link_name, tool_link_name, chain))
-  {
-    throw std::runtime_error("[RobotArm Error]: Failed to create kdl chain from " + base_link_name + " to " + tool_link_name + " ...\n");
-  }
-  else
-  {
-    fk_solver.reset(new KDL::ChainFkSolverPos_recursive(chain));
-    jac_solver.reset(new KDL::ChainJntToJacSolver(chain));
-    ik_vel_solver.reset(new KDL::ChainIkSolverVel_pinv(chain));
-    ik_solver.reset(new KDL::ChainIkSolverPos_NR(chain,*fk_solver,*ik_vel_solver,200,1e-6));
-  }
-
   // preallocate space for all states
-  N_JOINTS = joint_names.size();
+  N_JOINTS = robot_urdf->getNumJoints();
   joint_pos.zeros(N_JOINTS);
   prev_joint_pos.zeros(N_JOINTS);
   Fext.zeros(6);
@@ -252,7 +159,7 @@ void RobotArm::addJointState(sensor_msgs::JointState &joint_state_msg)
 
   for (int i=0;i<N_JOINTS;i++)
   {
-    joint_state_msg.name.push_back(joint_names[i]);
+    joint_state_msg.name.push_back(robot_urdf->getJointName(i));
     joint_state_msg.position.push_back(j_pos(i));
     joint_state_msg.velocity.push_back(j_vel(i));
     joint_state_msg.effort.push_back(0.0);
@@ -331,28 +238,28 @@ bool RobotArm::setTaskTrajectory(const arma::mat &target_pose, double duration)
   for (int i=N_JOINTS-1; i>-1; i--)
   {
     int n_div = 8;
-    arma::vec jp = arma::linspace<arma::vec>(joint_pos_lower_lim[i], joint_pos_upper_lim[i], n_div);
+    arma::vec jp = arma::linspace<arma::vec>(robot_urdf->getJointPosLowLim(i), robot_urdf->getJointPosUpperLim(i), n_div);
     jp = jp.subvec(1,n_div-2);
     arma::vec j_pos = j_pos0;
     for (int j=0; j<jp.size() ; j++)
     {
       j_pos[i] = jp[j];
-      arma::mat pose0 = getTaskPose(j_pos0);
-      arma::mat pose = getTaskPose(j_pos);
+      arma::mat pose0 = robot_urdf->getTaskPose(j_pos0);
+      arma::mat pose = robot_urdf->getTaskPose(j_pos);
       double e0 = arma::norm(lwr4p_::posError(pose0.submat(0,3,2,3),target_pose.submat(0,3,2,3))) + arma::norm(lwr4p_::orientError(pose0.submat(0,0,2,2),target_pose.submat(0,0,2,2)));
       double e = arma::norm(lwr4p_::posError(pose.submat(0,3,2,3),target_pose.submat(0,3,2,3))) + arma::norm(lwr4p_::orientError(pose.submat(0,0,2,2),target_pose.submat(0,0,2,2)));
       if (e < e0) j_pos0 = j_pos;
     }
   }
 
-  arma::vec j_target = getJointsPosition(target_pose, j_pos0, &found_solution);
+  arma::vec j_target = robot_urdf->getJointsPosition(target_pose, j_pos0, &found_solution);
 
   if (found_solution)
   {
     // check if the found solution respects the joint limits
     for (int i=0; i<j_target.size(); i++)
     {
-      if (j_target(i)>joint_pos_upper_lim[i] || j_target(i)<joint_pos_lower_lim[i]) return false;
+      if (j_target(i)>robot_urdf->getJointPosUpperLim(i) || j_target(i)<robot_urdf->getJointPosLowLim(i)) return false;
     }
     return setJointsTrajectory(j_target, duration);
   }
@@ -399,34 +306,6 @@ arma::vec RobotArm::getJointsPosition() const
   return joint_pos;
 }
 
-arma::vec RobotArm::getJointsPosition(const arma::mat &pose, const arma::vec &q0, bool *found_solution) const
-{
-  KDL::JntArray jnt(N_JOINTS);
-  KDL::JntArray jnt0(N_JOINTS);
-
-  for (int i=0;i<N_JOINTS;i++) jnt0(i) = q0(i);
-
-  KDL::Frame kdl_pose;
-  for (int i=0;i<3;i++)
-  {
-    kdl_pose.p[i] = pose(i,3);
-    for (int j=0;j<3;j++) kdl_pose.M(i,j) = pose(i,j);
-  }
-
-  int ret = ik_solver->CartToJnt(jnt0,kdl_pose,jnt);
-
-  if (found_solution) *found_solution = ret >= 0;
-
-  arma::vec q = arma::vec().zeros(N_JOINTS);
-
-  if (ret>=0)
-  {
-    for (int i=0;i<N_JOINTS;i++) q(i) = jnt(i);
-  }
-
-  return q;
-}
-
 arma::vec RobotArm::getJointsVelocity() const
 {
   // std::unique_lock<std::mutex> lck(robot_state_mtx);
@@ -436,25 +315,7 @@ arma::vec RobotArm::getJointsVelocity() const
 arma::mat RobotArm::getTaskPose() const
 {
   // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return getTaskPose(getJointsPosition());
-}
-
-arma::mat RobotArm::getTaskPose(const arma::vec &j_pos) const
-{
-  arma::mat task_pose(4,4);
-
-  KDL::JntArray jnt(N_JOINTS);
-  for (int i=0;i<N_JOINTS;i++) jnt(i) = j_pos(i);
-
-  KDL::Frame fk;
-  fk_solver->JntToCart(jnt, fk);
-  for (int i=0;i<3;i++)
-  {
-    for (int j=0;j<4;j++) task_pose(i,j) = fk(i,j);
-  }
-  task_pose.row(3) = arma::rowvec({0,0,0,1});
-
-  return task_pose;
+  return robot_urdf->getTaskPose(getJointsPosition());
 }
 
 arma::vec RobotArm::getTaskPosition() const
@@ -474,23 +335,7 @@ arma::vec RobotArm::getTaskOrientation() const
 arma::mat RobotArm::getJacobian() const
 {
   // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return getJacobian(getJointsPosition());
-}
-
-arma::mat RobotArm::getJacobian(const arma::vec &j_pos) const
-{
-  KDL::JntArray jnt(N_JOINTS);
-  for (int i=0;i<N_JOINTS;i++) jnt(i) = j_pos(i);
-
-  KDL::Jacobian J(N_JOINTS);
-  jac_solver->JntToJac(jnt, J);
-  arma::mat Jac(6, N_JOINTS);
-  for (int i=0;i<Jac.n_rows;i++)
-  {
-    for (int j=0;j<Jac.n_cols;j++) Jac(i,j) = J(i,j);
-  }
-
-  return Jac;
+  return robot_urdf->getJacobian(getJointsPosition());
 }
 
 arma::mat RobotArm::getEEJacobian() const
@@ -521,10 +366,11 @@ bool RobotArm::checkJointPosLimits(const arma::vec &j_pos)
 {
   for (int i=0;i<N_JOINTS;i++)
   {
-    if (j_pos(i)>joint_pos_upper_lim[i] || j_pos(i)<joint_pos_lower_lim[i])
+
+    if (j_pos(i)>robot_urdf->getJointPosUpperLim(i) || j_pos(i)<robot_urdf->getJointPosLowLim(i))
     {
       std::ostringstream out;
-      out << joint_names[i] << ": position limit reached: " << j_pos(i) << " rad";
+      out << robot_urdf->getJointName(i) << ": position limit reached: " << j_pos(i) << " rad";
       err_msg = out.str();
       // print_err_msg(err_msg);
       setMode(lwr4p_::Mode::PROTECTIVE_STOP);
@@ -539,10 +385,10 @@ bool RobotArm::checkJointVelLimits(const arma::vec &dj_pos)
 {
   for (int i=0;i<N_JOINTS;i++)
   {
-    if (std::fabs(dj_pos(i))>joint_vel_lim[i])
+    if (std::fabs(dj_pos(i))>robot_urdf->getJointVelLim(i))
     {
       std::ostringstream out;
-      out << joint_names[i] << ": velocity limit reached: " << dj_pos(i) << " rad/s";
+      out << robot_urdf->getJointName(i) << ": velocity limit reached: " << dj_pos(i) << " rad/s";
       err_msg = out.str();
       // print_err_msg(err_msg);
       setMode(lwr4p_::Mode::PROTECTIVE_STOP);

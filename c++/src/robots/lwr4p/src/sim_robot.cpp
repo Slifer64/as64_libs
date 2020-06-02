@@ -167,8 +167,8 @@ void SimRobot::jStateSubCallback(const sensor_msgs::JointState::ConstPtr& j_stat
   for (int i=0;i<j_state->name.size();i++)
     j_map.insert( std::pair<std::string,double>(j_state->name[i], j_state->position[i]) );
 
-  for (int i=0;i<joint_names.size();i++)
-    joint_pos[i] = j_map[joint_names[i]];
+  for (int i=0;i<robot_urdf->getNumJoints();i++)
+    joint_pos[i] = j_map[robot_urdf->getJointName(i)];
   // joint_vel = j_state->velocity;
   // joint_torques = j_state->effort;
 }

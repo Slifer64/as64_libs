@@ -71,11 +71,6 @@ public:
   virtual arma::vec getJointsTorque() const;
   virtual arma::vec getExternalWrench() const;
 
-  // return using the urdf model and kdl forward-inverse kinematics solvers
-  arma::vec getJointsPosition(const arma::mat &pose, const arma::vec &q0, bool *found_solution=NULL) const;
-  arma::mat getTaskPose(const arma::vec &j_pos) const;
-  arma::mat getJacobian(const arma::vec &j_pos) const;
-
   void setJointLimitCheck(bool check);
   void setSingularityCheck(bool check);
   void setSingularityThreshold(double thres);
@@ -90,8 +85,10 @@ public:
 
   void addJointState(sensor_msgs::JointState &joint_state_msg);
 
-  arma::vec getLowerJointLimits() const { return arma::vec(joint_pos_lower_lim); }
-  arma::vec getUpperJointLimits() const { return arma::vec(joint_pos_upper_lim); }
+  arma::vec getLowerJointLimits() const { return arma::vec(robot_urdf->getJointsPosLowLim()); }
+  arma::vec getUpperJointLimits() const { return arma::vec(robot_urdf->getJointsPosUpperLim()); }
+
+  std::shared_ptr<RobotUrdf> robot_urdf;
 
 protected:
 
@@ -114,22 +111,9 @@ protected:
 
   std::mutex robot_state_mtx;
 
-  std::shared_ptr<RobotUrdf> robot_urdf;
-
   urdf::Model urdf_model;
-  std::shared_ptr<KDL::ChainFkSolverPos_recursive> fk_solver;
-  std::shared_ptr<KDL::ChainIkSolverVel_pinv> ik_vel_solver;//Inverse velocity solver
-  std::shared_ptr<KDL::ChainIkSolverPos_NR> ik_solver;
-  std::shared_ptr<KDL::ChainJntToJacSolver> jac_solver;
-  KDL::Chain chain;
 
   ros::NodeHandle node;
-
-  std::vector<std::string> joint_names;
-  std::vector<double> joint_pos_lower_lim;
-  std::vector<double> joint_pos_upper_lim;
-  std::vector<double> joint_vel_lim;
-  std::vector<double> effort_lim;
 
   std::string base_link_name;
   std::string tool_link_name;

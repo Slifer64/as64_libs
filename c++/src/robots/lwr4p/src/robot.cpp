@@ -10,7 +10,7 @@ namespace as64_
 
     Robot::Robot(const char *path_to_FRI_init)
     {
-      initRobot();
+      initRobot(path_to_FRI_init);
     }
 
     Robot::Robot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link,

@@ -164,8 +164,8 @@ void cartesianVelocityControl(const arma::vec &qT, double total_time, lwr4p_::Ro
   robot->update();
   arma::vec q = robot->getJointsPosition();
   arma::vec q0 = q;
-  arma::mat p0 = robot->getTaskPose(q0);
-  arma::mat pT = robot->getTaskPose(qT);
+  arma::mat p0 = robot->robot_urdf->getTaskPose(q0);
+  arma::mat pT = robot->robot_urdf->getTaskPose(qT);
   arma::mat p = robot->getTaskPose();
   double t = 0;
   double Ts = robot->getCtrlCycle();
@@ -178,7 +178,7 @@ void cartesianVelocityControl(const arma::vec &qT, double total_time, lwr4p_::Ro
     arma::vec q_ref = lwr4p_::get5thOrder(t, q0, qT, total_time)[0];
     // arma::vec dq_ref = lwr4p_::get5thOrder(t, q0, qT, total_time)[1];
     arma::vec v_click(6);
-    arma::mat p_ref = robot->getTaskPose(q_ref);
+    arma::mat p_ref = robot->robot_urdf->getTaskPose(q_ref);
     // position error
     v_click.subvec(0,2) = p_ref.submat(0,3,2,3) - p.submat(0,3,2,3);
     // orientation error (difference of quaternions vector parts)
@@ -207,7 +207,7 @@ void taskTrajectory(const arma::vec &qT, double total_time, lwr4p_::RobotArm *ro
   // ======================================================
   std::cerr << "=====================================\n";
   PRINT_INFO_MSG("==> Moving with Task Trajectory...");
-  arma::mat target_pose = robot->getTaskPose(qT);
+  arma::mat target_pose = robot->robot_urdf->getTaskPose(qT);
   bool reached_target = robot->setTaskTrajectory(target_pose, total_time);
   if (reached_target) PRINT_INFO_MSG("==> Reached target pose!");
   else  PRINT_ERR_MSG("==> Failed to reach target pose!");
