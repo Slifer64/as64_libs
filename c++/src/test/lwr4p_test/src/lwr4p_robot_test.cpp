@@ -70,8 +70,11 @@ int main(int argc, char **argv)
   // ===========   Set Joints trajectory  =================
   jointsTrajectory(q1, time_duration, lwr4p_robot.get());
 
+  jointsTrajectory(q2, time_duration, lwr4p_robot.get());
+
   // // ===========   Joint Position Control  ================
   // jointPositionControl(q2, time_duration, lwr4p_robot.get());
+
   //
   // // ===========   Joint Velocity Control  ================
   // jointVelocityControl(q1, time_duration, lwr4p_robot.get());
