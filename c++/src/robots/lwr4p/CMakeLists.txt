@@ -34,6 +34,7 @@ SET(SRC_LIST
   src/robot_arm.cpp
   src/robot.cpp
   src/sim_robot.cpp
+  src/robot_urdf.cpp
 )
 
 include_directories(

@@ -23,6 +23,8 @@
 
 #include <armadillo>
 #include <lwr4p/utils.h>
+#include <lwr4p/robot_urdf.h>
+
 
 namespace as64_
 {
@@ -111,6 +113,8 @@ protected:
   double SINGULARITY_THRES;
 
   std::mutex robot_state_mtx;
+
+  std::shared_ptr<RobotUrdf> robot_urdf;
 
   urdf::Model urdf_model;
   std::shared_ptr<KDL::ChainFkSolverPos_recursive> fk_solver;
