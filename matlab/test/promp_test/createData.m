@@ -12,16 +12,15 @@ dt = 0.005;
 tf = 4.5;
 Time = 0:dt:tf;
 
-q0 = [-0.43, 0.96, 0.61, -1.53, -1.66, -0.32, -1.39];
-qf = [0.15, 0.58, 1.5, -1.4, 1.3, 1.19, 0.24];
+q0 = [-0.43, 0.96, 0.61, -1.53, -1.66, -0.32, -1.39]';
+qf = [0.15, 0.58, 1.5, -1.4, 1.3, 1.19, 0.24]';
 
 N_joints = length(q0);
 n_data = length(Time);
 
 
 %% Create desired trajectory
-qd_data = zeros(N_joints, n_data);
-for i=1:N_joints, qd_data(i,:) = get5th1D(q0(i), qf(i), Time); end
+qd_data = get5thOrderPol(q0, qf, Time);
 
 
 %% Train ProMP and use it to create many demos
@@ -33,6 +32,7 @@ q_data = cell(n_samples);
 for i=1:N_joints
     mp{i} = ProMP(N_kernels);
     mp{i}.train(x, qd_data(i,:));
+    mp{i}.setPhiBasedSigma(0.05);
 end
 
 for k=1:n_samples
@@ -66,6 +66,11 @@ for k=1:n_samples
         Q_prev = Q_data{k}(:,j);
     end
 end
+
+%% Save data
+Data = struct('Time',Time, 'qd_data',q_data);
+save('data/demo_data.mat', 'Data');
+
 
 %% Plot Joints trajectory
 figure;
@@ -106,7 +111,9 @@ for i=1:4
     axis tight;
 end
 
-% Cartesian path
+%% Cartesian path
+
+% position
 figure;
 hold on;
 for k=1:n_samples
@@ -117,6 +124,30 @@ xlabel('$X$', 'interpreter','latex', 'fontsize',15);
 ylabel('$Y$', 'interpreter','latex', 'fontsize',15);
 zlabel('$Z$', 'interpreter','latex', 'fontsize',15);
 
+% orientation
+eod_data = zeros(3, n_data);
+Q0 = Qd_data(:,1);
+for j=1:n_data
+   eod_data(:,j) = math_.quatLog( math_.quatProd( Qd_data(:,j), math_.quatInv(Q0) ) ); 
+end
 
+eo_data = cell(n_samples, 1);
+for k=1:n_samples
+    Q0 = Q_data{k}(:,1);
+    for j=1:n_data
+       eo_data{k}(:,j) = math_.quatLog( math_.quatProd( Q_data{k}(:,j), math_.quatInv(Q0) ) ); 
+    end
+end
+
+figure;
+hold on;
+for k=1:n_samples
+   plot3(eo_data{k}(1,:), eo_data{k}(2,:), eo_data{k}(3,:), 'LineWidth',2, 'Color',[1 0 1 0.3]); 
+end
+plot3(eod_data(1,:), eod_data(2,:), eod_data(3,:), 'LineWidth',2, 'Color','blue', 'LineStyle','--');
+title('Cartesian Orientation path', 'interpreter','latex', 'fontsize',18);
+xlabel('$X$', 'interpreter','latex', 'fontsize',15);
+ylabel('$Y$', 'interpreter','latex', 'fontsize',15);
+zlabel('$Z$', 'interpreter','latex', 'fontsize',15);
 
 

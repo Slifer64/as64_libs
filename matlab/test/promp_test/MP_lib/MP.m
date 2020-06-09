@@ -1,11 +1,11 @@
 %% ProMP class
 %
 
-classdef ProMP < handle
+classdef MP < handle
     
     methods (Access = public)
         
-        function this = ProMP(N_kernels)
+        function this = MP(N_kernels)
             
             this.N_kernels = N_kernels;
             
@@ -21,19 +21,7 @@ classdef ProMP < handle
             Psi = zeros(this.N_kernels, n_data);
             for j=1:n_data, Psi(:,j) = this.regressVec(x(j)); end
             this.w = (yd/Psi)';
-            
 
-            this.mu_w = this.w;
-            this.Sigma_w = zeros(this.N_kernels, this.N_kernels);
-            for j=1:this.N_kernels
-               psi = this.kernelFun(this.c(j)); 
-               this.Sigma_w(j,:) = psi';
-               this.Sigma_w(:,j) = psi;
-            end
-            this.Sigma_w = 0.05*this.Sigma_w/this.N_kernels;
-            this.L_w = sqrt(this.Sigma_w);
-            
-            
             if (nargout > 0)
                 y = zeros(size(yd));
                 for j=1:n_data, y(j) = this.output(x(j)); end
@@ -41,15 +29,7 @@ classdef ProMP < handle
             end
             
         end
-        
-        
-        function sampleWeights(this)
-           
-            this.w = this.mu_w + this.L_w*randn(this.N_kernels, 1);
-            
-        end
-        
-        
+
         function psi = kernelFun(this, x)
             
             psi = exp(-this.h*(x-this.c).^2);
@@ -78,10 +58,6 @@ classdef ProMP < handle
         w
         c
         h
-        
-        mu_w
-        Sigma_w
-        L_w
         
         zero_tol = 1e-32;
         

@@ -1,8 +1,12 @@
-function [y, y_dot, y_ddot] = get5th1D(y0, yf, Time)
+function [y, y_dot, y_ddot] = get5thOrderPol(y0, yf, Time)
 
+    y0 = y0(:);
+    yf = yf(:);
+    Time = Time(:)';
+    
     T = Time(end);
     t = Time/T;
-
+    
     y = y0 + (yf - y0) * (10*t.^3 - 15*t.^4 + 6*t.^5 );
 
     if (nargout > 1)
