@@ -1,0 +1,54 @@
+<launch>
+
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find apriltags_ros)/urdf/kinect1_sensor.xacro'" />
+
+  <!-- Starting robot state publish which will publish tf -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+
+  <!-- creates and publishes to all topics relevant to the camera sensor -->
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="publish_tf" value="false" />
+  </include>
+
+  <arg name="rvizconfig" default="$(find apriltags_ros)/rviz/config.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <node pkg="apriltags_ros" type="apriltag_detector_node" name="apriltag_detector" output="screen">
+    <!-- Remap topic required by the node to custom topics -->
+    <remap from="image_rect" to="/camera/rgb/image_rect_color" />
+    <remap from="camera_info" to="/camera/rgb/camera_info" />
+
+    <!-- Optional: Subscribe to the compressed stream-->
+    <param name="image_transport" type="str" value="compressed" />
+
+    <!-- Select the tag family: 16h5, 25h7, 25h9, 36h9, or 36h11(default) -->
+    <param name="tag_family" type="str" value="36h11" />
+
+    <!-- Enable projected optical measurements for more accurate tag transformations -->
+    <!-- This exists for backwards compatability and should be left true for new setups -->
+    <param name="projected_optics" type="bool" value="true" />
+
+    <!-- Describe the tags -->
+    <rosparam param="tag_descriptions">[
+      {id: 0, size: 0.081, frame_id: tag_0},
+      {id: 1, size: 0.161, frame_id: tag_1},
+      {id: 2, size: 0.163513, frame_id: tag_2},
+      {id: 3, size: 0.163513, frame_id: tag_3},
+      {id: 4, size: 0.163513, frame_id: tag_4},
+      {id: 5, size: 0.163513, frame_id: tag_5}]
+    </rosparam>
+  </node>
+
+  <!--
+  <remap from="image" to="/tag_detections_image"/>
+
+  <node name="image_view_node" pkg="image_view" type="image_view" output="screen" respawn="false">
+	  <param name="autosize" value="false" />
+	  <param name="filename_format" value="$(env PWD)/screenshot%04i.jpg" />
+	  <param name="image_transport" value="raw" />
+	  <param name="window_name" value="April tags detections" />
+  </node>
+  -->
+
+</launch>
