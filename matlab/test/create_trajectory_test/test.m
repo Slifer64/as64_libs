@@ -2,6 +2,8 @@ clc;
 close all;
 clear;
 
+set_matlab_utils_path();
+
 ax = axes();
 ax.XLim = [0 1];
 ax.YLim = [0 1];
