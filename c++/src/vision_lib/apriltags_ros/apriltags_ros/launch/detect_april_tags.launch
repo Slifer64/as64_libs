@@ -29,6 +29,13 @@
     <!-- This exists for backwards compatability and should be left true for new setups -->
     <param name="projected_optics" type="bool" value="true" />
 
+    <rosparam>
+      tag_detections_image_topic: "tag_detections_image"
+      tag_detections_topic: "tag_detections"
+      pub_tag_frames_flag: true
+
+    </rosparam>
+
     <!-- Describe the tags -->
     <rosparam param="tag_descriptions">[
       {id: 0, size: 0.081, frame_id: tag_0},

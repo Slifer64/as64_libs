@@ -42,6 +42,11 @@ class AprilTagDetector{
   tf::TransformBroadcaster tf_pub_;
   boost::shared_ptr<AprilTags::TagDetector> tag_detector_;
   bool projected_optics_;
+
+  bool pub_tag_detect_image_flag;
+  std::string tag_detections_image_topic;
+  std::string tag_detections_topic;
+  bool pub_tag_frames_flag;
 };
 
 

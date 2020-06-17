@@ -15,7 +15,8 @@
 
 namespace apriltags_ros{
 
-AprilTagDetector::AprilTagDetector(ros::NodeHandle& nh, ros::NodeHandle& pnh): it_(nh){
+AprilTagDetector::AprilTagDetector(ros::NodeHandle& nh, ros::NodeHandle& pnh): it_(nh)
+{
   XmlRpc::XmlRpcValue april_tag_descriptions;
   if(!pnh.getParam("tag_descriptions", april_tag_descriptions)){
     ROS_WARN("No april tags specified");
@@ -38,45 +39,50 @@ AprilTagDetector::AprilTagDetector(ros::NodeHandle& nh, ros::NodeHandle& pnh): i
   pnh.param<bool>("projected_optics", projected_optics_, false);
 
   const AprilTags::TagCodes* tag_codes;
-  if(tag_family == "16h5"){
-    tag_codes = &AprilTags::tagCodes16h5;
-  }
-  else if(tag_family == "25h7"){
-    tag_codes = &AprilTags::tagCodes25h7;
-  }
-  else if(tag_family == "25h9"){
-    tag_codes = &AprilTags::tagCodes25h9;
-  }
-  else if(tag_family == "36h9"){
-    tag_codes = &AprilTags::tagCodes36h9;
-  }
-  else if(tag_family == "36h11"){
-    tag_codes = &AprilTags::tagCodes36h11;
-  }
-  else{
+  if(tag_family == "16h5") tag_codes = &AprilTags::tagCodes16h5;
+  else if(tag_family == "25h7") tag_codes = &AprilTags::tagCodes25h7;
+  else if(tag_family == "25h9") tag_codes = &AprilTags::tagCodes25h9;
+  else if(tag_family == "36h9") tag_codes = &AprilTags::tagCodes36h9;
+  else if(tag_family == "36h11") tag_codes = &AprilTags::tagCodes36h11;
+  else
+  {
     ROS_WARN("Invalid tag family specified; defaulting to 36h11");
     tag_codes = &AprilTags::tagCodes36h11;
   }
 
+  pub_tag_detect_image_flag = pnh.getParam("tag_detections_image_topic", tag_detections_image_topic);
+
+  if (!pnh.getParam("tag_detections_topic", tag_detections_topic))
+    throw std::runtime_error("AprilTagDetector::AprilTagDetector: failed to read param \"tag_detections_topic\"..." );
+
+  if (!pnh.getParam("pub_tag_frames_flag", pub_tag_frames_flag)) pub_tag_frames_flag = false;
+
   tag_detector_= boost::shared_ptr<AprilTags::TagDetector>(new AprilTags::TagDetector(*tag_codes));
   image_sub_ = it_.subscribeCamera("image_rect", 1, &AprilTagDetector::imageCb, this);
-  image_pub_ = it_.advertise("tag_detections_image", 1);
-  detections_pub_ = nh.advertise<AprilTagDetectionArray>("tag_detections", 1);
-  pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("tag_detections_pose", 1);
+  if (pub_tag_detect_image_flag) image_pub_ = it_.advertise(tag_detections_image_topic, 1);
+  detections_pub_ = nh.advertise<AprilTagDetectionArray>(tag_detections_topic, 1);
+  // pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("tag_detections_pose", 1);
 }
-AprilTagDetector::~AprilTagDetector(){
+
+AprilTagDetector::~AprilTagDetector()
+{
   image_sub_.shutdown();
 }
 
-void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info){
+void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
+{
   cv_bridge::CvImagePtr cv_ptr;
-  try{
+
+  try
+  {
     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   }
-  catch (cv_bridge::Exception& e){
+  catch (cv_bridge::Exception& e)
+  {
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
+
   cv::Mat gray;
   cv::cvtColor(cv_ptr->image, gray, CV_BGR2GRAY);
   std::vector<AprilTags::TagDetection>	detections = tag_detector_->extractTags(gray);
@@ -102,8 +108,7 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
     py = cam_info->K[5];
   }
 
-  if(!sensor_frame_id_.empty())
-    cv_ptr->header.frame_id = sensor_frame_id_;
+  if(!sensor_frame_id_.empty()) cv_ptr->header.frame_id = sensor_frame_id_;
 
   AprilTagDetectionArray tag_detection_array;
   geometry_msgs::PoseArray tag_pose_array;
@@ -111,14 +116,16 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
 
   BOOST_FOREACH(AprilTags::TagDetection detection, detections){
     std::map<int, AprilTagDescription>::const_iterator description_itr = descriptions_.find(detection.id);
-    if(description_itr == descriptions_.end()){
+    if(description_itr == descriptions_.end())
+    {
       ROS_WARN_THROTTLE(10.0, "Found tag: %d, but no description was found for it", detection.id);
       continue;
     }
     AprilTagDescription description = description_itr->second;
     double tag_size = description.size();
 
-    detection.draw(cv_ptr->image);
+    if (pub_tag_detect_image_flag) detection.draw(cv_ptr->image);
+
     Eigen::Matrix4d transform = detection.getRelativeTransform(tag_size, fx, fy, px, py);
     Eigen::Matrix3d rot = transform.block(0, 0, 3, 3);
     Eigen::Quaternion<double> rot_quaternion = Eigen::Quaternion<double>(rot);
@@ -138,22 +145,27 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
     tag_detection.id = detection.id;
     tag_detection.size = tag_size;
     tag_detection_array.detections.push_back(tag_detection);
-    tag_pose_array.poses.push_back(tag_pose.pose);
+    // tag_pose_array.poses.push_back(tag_pose.pose);
 
-    tf::Stamped<tf::Transform> tag_transform;
-    tf::poseStampedMsgToTF(tag_pose, tag_transform);
-    tf_pub_.sendTransform(tf::StampedTransform(tag_transform, tag_transform.stamp_, tag_transform.frame_id_, description.frame_name()));
+    if (pub_tag_frames_flag)
+    {
+      tf::Stamped<tf::Transform> tag_transform;
+      tf::poseStampedMsgToTF(tag_pose, tag_transform);
+      tf_pub_.sendTransform(tf::StampedTransform(tag_transform, tag_transform.stamp_, tag_transform.frame_id_, description.frame_name()));
+    }
   }
   detections_pub_.publish(tag_detection_array);
-  pose_pub_.publish(tag_pose_array);
-  image_pub_.publish(cv_ptr->toImageMsg());
+  // pose_pub_.publish(tag_pose_array);
+  if (pub_tag_detect_image_flag) image_pub_.publish(cv_ptr->toImageMsg());
 }
 
 
-std::map<int, AprilTagDescription> AprilTagDetector::parse_tag_descriptions(XmlRpc::XmlRpcValue& tag_descriptions){
+std::map<int, AprilTagDescription> AprilTagDetector::parse_tag_descriptions(XmlRpc::XmlRpcValue& tag_descriptions)
+{
   std::map<int, AprilTagDescription> descriptions;
   ROS_ASSERT(tag_descriptions.getType() == XmlRpc::XmlRpcValue::TypeArray);
-  for (int32_t i = 0; i < tag_descriptions.size(); ++i) {
+  for (int32_t i = 0; i < tag_descriptions.size(); ++i)
+  {
     XmlRpc::XmlRpcValue& tag_description = tag_descriptions[i];
     ROS_ASSERT(tag_description.getType() == XmlRpc::XmlRpcValue::TypeStruct);
     ROS_ASSERT(tag_description["id"].getType() == XmlRpc::XmlRpcValue::TypeInt);
