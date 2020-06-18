@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"
+       name="kinect1_sensor" >
+
+  <!-- include kinect description -->
+  <xacro:include filename="$(find kinect_description)/urdf/kinect.urdf.xacro" />
+
+  <link name="world" />
+
+  <!-- kinect1_sensor -->
+  <xacro:kinect xyz="0 0 0" rpy="0 0 0" parent_frame="world" prefix=""/>
+
+</robot>

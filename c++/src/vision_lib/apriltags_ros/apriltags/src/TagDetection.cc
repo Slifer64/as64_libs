@@ -16,21 +16,25 @@ namespace std {
 }
 #endif
 
-namespace AprilTags {
+namespace AprilTags
+{
 
 TagDetection::TagDetection() 
   : good(false), obsCode(), code(), id(), hammingDistance(), rotation(), p(),
-    cxy(), observedPerimeter(), homography(), hxy() {
+    cxy(), observedPerimeter(), homography(), hxy()
+{
   homography.setZero();
 }
 
 TagDetection::TagDetection(int _id)
   : good(false), obsCode(), code(), id(_id), hammingDistance(), rotation(), p(),
-    cxy(), observedPerimeter(), homography(), hxy() {
+    cxy(), observedPerimeter(), homography(), hxy()
+{
   homography.setZero();
 }
 
-float TagDetection::getXYOrientation() const {
+float TagDetection::getXYOrientation() const
+{
   // Because the order of segments in a quad is arbitrary, so is the
   // homography's rotation, so we can't determine orientation directly
   // from the homography.  Instead, use the homography to find two
@@ -42,16 +46,20 @@ float TagDetection::getXYOrientation() const {
   return ! std::isnan(float(orient)) ? orient : 0.;
 }
 
-std::pair<float,float> TagDetection::interpolate(float x, float y) const {
+std::pair<float,float> TagDetection::interpolate(float x, float y) const
+{
   float z = homography(2,0)*x + homography(2,1)*y + homography(2,2);
   if ( z == 0 )
     return std::pair<float,float>(0,0);  // prevents returning a pair with a -NaN, for which gcc 4.4 flubs isnan
+
   float newx = (homography(0,0)*x + homography(0,1)*y + homography(0,2))/z + hxy.first;
   float newy = (homography(1,0)*x + homography(1,1)*y + homography(1,2))/z + hxy.second;
+
   return std::pair<float,float>(newx,newy);
 }
 
-bool TagDetection::overlapsTooMuch(const TagDetection &other) const {
+bool TagDetection::overlapsTooMuch(const TagDetection &other) const
+{
   // Compute a sort of "radius" of the two targets. We'll do this by
   // computing the average length of the edges of the quads (in
   // pixels).
@@ -73,7 +81,8 @@ bool TagDetection::overlapsTooMuch(const TagDetection &other) const {
   return ( dist < radius );
 }
 
-Eigen::Matrix4d TagDetection::getRelativeTransform(double tag_size, double fx, double fy, double px, double py) const {
+Eigen::Matrix4d TagDetection::getRelativeTransform(double tag_size, double fx, double fy, double px, double py) const
+{
   std::vector<cv::Point3f> objPts;
   std::vector<cv::Point2f> imgPts;
   double s = tag_size/2.;
@@ -112,7 +121,8 @@ Eigen::Matrix4d TagDetection::getRelativeTransform(double tag_size, double fx, d
 }
 
 void TagDetection::getRelativeTranslationRotation(double tag_size, double fx, double fy, double px, double py,
-                                                  Eigen::Vector3d& trans, Eigen::Matrix3d& rot) const {
+                                                  Eigen::Vector3d& trans, Eigen::Matrix3d& rot) const
+{
   Eigen::Matrix4d T =
     getRelativeTransform(tag_size, fx, fy, px, py);
 
@@ -134,7 +144,8 @@ void TagDetection::getRelativeTranslationRotation(double tag_size, double fx, do
 }
 
 // draw one April tag detection on actual image
-void TagDetection::draw(cv::Mat& image) const {
+void TagDetection::draw(cv::Mat& image) const
+{
   // use corner points detected by line intersection
   std::pair<float, float> p1 = p[0];
   std::pair<float, float> p2 = p[1];

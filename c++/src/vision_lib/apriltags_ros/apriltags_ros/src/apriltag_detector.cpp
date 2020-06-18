@@ -144,6 +144,8 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
     tag_detection.pose = tag_pose;
     tag_detection.id = detection.id;
     tag_detection.size = tag_size;
+    tag_detection.is_good = detection.good;
+    tag_detection.hamming_dist = detection.hammingDistance;
     tag_detection_array.detections.push_back(tag_detection);
     // tag_pose_array.poses.push_back(tag_pose.pose);
 
