@@ -73,6 +73,8 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
 {
   cv_bridge::CvImagePtr cv_ptr;
 
+  // std::cerr << "========> msg->header.frame_id: " << msg->header.frame_id << "\n";
+
   try
   {
     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -101,12 +103,28 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
     py = cam_info->P[6];
   } else {
     // use camera intrinsic focal length and principal point
-    // for backwards compatability
+    // for backwards compatibility
     fx = cam_info->K[0];
     fy = cam_info->K[4];
     px = cam_info->K[2];
     py = cam_info->K[5];
   }
+
+//  std::cout << "================================\n";
+//  std::cout << "--------- cam_info->P ----------\n ";
+//  std::cout << "fx: " << cam_info->P[0] << "\n";
+//  std::cout << "fy: " << cam_info->P[5] << "\n";
+//  std::cout << "px: " << cam_info->P[2] << "\n";
+//  std::cout << "py: " << cam_info->P[6] << "\n";
+//  std::cout << "================================\n";
+//  std::cout << "================================\n";
+//  std::cout << "--------- cam_info->K ----------\n ";
+//  std::cout << "fx: " << cam_info->K[0] << "\n";
+//  std::cout << "fy: " << cam_info->K[4] << "\n";
+//  std::cout << "px: " << cam_info->K[2] << "\n";
+//  std::cout << "py: " << cam_info->K[5] << "\n";
+//  std::cout << "================================\n";
+
 
   if(!sensor_frame_id_.empty()) cv_ptr->header.frame_id = sensor_frame_id_;
 
