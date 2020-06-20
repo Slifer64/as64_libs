@@ -15,8 +15,25 @@
 #include <thread>
 #include <armadillo>
 
+#include <apriltags_ros/gui/main_window.h>
+
 namespace apriltags_ros
 {
+
+template<typename T>
+class MtxVar
+{
+public:
+  MtxVar() { }
+  MtxVar& operator=(const T &val) { set(val); return *this; }
+  bool operator()() const { return get(); }
+  T get() const { std::unique_lock<std::mutex> lck(*(const_cast<std::mutex *>(&var_mtx))); return var; }
+  T read() const { return var; }
+  void set(const T &val) { std::unique_lock<std::mutex> lck(var_mtx); var=val; }
+private:
+  std::mutex var_mtx;
+  T var;
+};
 
 class Semaphore
 {
@@ -137,16 +154,22 @@ private:
 
 class AprilTagDetector
 {
+  friend MainWindow;
+
 public:
 
   AprilTagDetector(ros::NodeHandle &nh);
   ~AprilTagDetector();
 
-  bool setFilter(bool enable, double a_p=0, double a_q=0);
+  void setFilter(bool enable) { this->apply_filter = enable; }
+  void setPosFilter(double ap) { this->a_p.set(ap); }
+  void setOrientFilter(double aq) { this->a_q.set(aq); }
 
   void launchPublishThread();
   void stopPublishThread();
   void setPublishRate(double pub_rate_sec);
+
+  void launchGUI();
 
 private:
 
@@ -169,14 +192,18 @@ private:
 
 private:
 
+  bool use_gui; //
+  MainWindow *gui;
+  Semaphore gui_finished_sem;
+
   bool publish_;
   bool publish_tag_tf;
   bool publish_tag_im;
   unsigned long long pub_rate_nsec;
 
   bool apply_filter; // apply a 1st order low pass filter to the detected pose
-  double a_p; // filtering coeff for position (a_p = 1 : no filtering)
-  double a_q; // filtering coeff for orientation (a_q = 1 : no filtering)
+  MtxVar<double> a_p; // filtering coeff for position (a_p = 1 : no filtering)
+  MtxVar<double> a_q; // filtering coeff for orientation (a_q = 1 : no filtering)
 
   int miss_frames_tol; // if a specific is not detected for more than "tol" then consider it "undetected"
 

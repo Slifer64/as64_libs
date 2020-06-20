@@ -34,7 +34,6 @@
     <rosparam>
       tag_detections_image_topic: "tag_detections_image"
       tag_detections_topic: "tag_detections"
-      pub_tag_frames_flag: true
 
       apply_filter: true
       a_p: 0.3
@@ -46,6 +45,8 @@
       publish_tag_tf: true
       publish_tag_im: true
       pub_rate_sec: 0.033 // 60 ms
+
+      use_gui: true
 
     </rosparam>
 

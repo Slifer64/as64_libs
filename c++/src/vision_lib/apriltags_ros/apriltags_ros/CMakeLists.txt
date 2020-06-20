@@ -1,7 +1,26 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(apriltags_ros)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 11) # Tell CMake to compile with C++11
+set(CMAKE_AUTOMOC ON) # Tell CMake to run moc when needed.
+set(CMAKE_AUTOUIC ON) # Tell CMake to run uic when needed.
+set(CMAKE_AUTORCC ON) # Tell CMake to run rcc when needed
+
+# Moc generated files are located in the current dir so we need to tell CMake to look for them.
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+# Find Qt5
+find_package(Qt5 COMPONENTS Widgets Core Gui PrintSupport REQUIRED)
+# Add Qt5 definitions and includes to build libraries.
+# Widgets add Widgets Core and Gui
+add_definitions(${Qt5Widgets_DEFINITIONS})
+include_directories(${Qt5Widgets_INCLUDES})
+SET(Qt_LIBRARIES
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::Gui
+    Qt5::PrintSupport
+)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -51,11 +70,17 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+set(SRC_LIST
+    include/${PROJECT_NAME}/gui/main_window.cpp
+)
+
 add_library(apriltag_detector
   src/apriltag_detector.cpp
+  ${SRC_LIST}
 )
 target_link_libraries(apriltag_detector
   ${catkin_LIBRARIES}
+  ${Qt_LIBRARIES}
   armadillo
 )
 add_dependencies(apriltag_detector apriltags_ros_generate_messages_cpp)

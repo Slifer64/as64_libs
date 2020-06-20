@@ -12,6 +12,9 @@
 #include <AprilTags/Tag36h11.h>
 #include <XmlRpcException.h>
 
+#include <QApplication>
+#include <QThread>
+
 namespace apriltags_ros
 {
 
@@ -59,9 +62,13 @@ AprilTagDetector::AprilTagDetector(ros::NodeHandle &)
   if (!pnh.getParam("tag_detections_topic", tag_detections_topic))
     throw std::runtime_error("AprilTagDetector::AprilTagDetector: failed to read param \"tag_detections_topic\"..." );
 
+  if (!pnh.getParam("use_gui", use_gui)) use_gui = false;
   if (!pnh.getParam("apply_filter", apply_filter)) apply_filter = false;
-  if (!pnh.getParam("a_p", a_p)) a_p = 1.0;
-  if (!pnh.getParam("a_q", a_q)) a_q = 1.0;
+  double ap, aq;
+  if (!pnh.getParam("a_p", ap)) ap = 1.0;
+  if (!pnh.getParam("a_q", aq)) aq = 1.0;
+  a_p.set(ap);
+  a_q.set(aq);
   if (!pnh.getParam("miss_frames_tol", miss_frames_tol)) miss_frames_tol = 5;
   if (!pnh.getParam("publish_", publish_)) publish_ = false;
   if (!pnh.getParam("publish_tag_tf", publish_tag_tf)) publish_tag_tf = false;
@@ -77,12 +84,17 @@ AprilTagDetector::AprilTagDetector(ros::NodeHandle &)
   // pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("tag_detections_pose", 1);
 
   if (publish_) launchPublishThread();
+
+  if (use_gui) launchGUI();
 }
 
 AprilTagDetector::~AprilTagDetector()
 {
+  emit gui->closeSignal();
   new_msg_sem.notify();
   image_sub_.shutdown();
+
+  gui_finished_sem.wait();
 }
 
 void AprilTagDetector::stopPublishThread()
@@ -125,6 +137,32 @@ void AprilTagDetector::launchPublishThread()
       std::this_thread::sleep_for(std::chrono::nanoseconds(pub_rate_nsec));
     }
   }).detach();
+}
+
+void AprilTagDetector::launchGUI()
+{
+  Semaphore start_sem;
+
+  std::thread( [this, &start_sem]()
+  {
+    int argc = 0;
+    char **argv = 0;
+    QApplication app(argc, argv);
+
+    QThread::currentThread()->setPriority(QThread::LowestPriority);
+
+    gui = new MainWindow(this);
+
+    gui->show();
+    start_sem.notify();
+    app.exec();
+
+    delete gui;
+
+    gui_finished_sem.notify();
+  }).detach();
+
+  start_sem.wait();
 }
 
 void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
@@ -256,13 +294,6 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
 //  if (publish_tag_im) image_pub_.publish(cv_ptr->toImageMsg());
 }
 
-bool AprilTagDetector::setFilter(bool enable, double a_p, double a_q)
-{
-  this->apply_filter = enable;
-  this->a_p = a_p;
-  this->a_q = a_q;
-}
-
 geometry_msgs::PoseStamped AprilTagDetector::filterPose(const geometry_msgs::PoseStamped &pose, const AprilTagDescription &description)
 {
   if (!description.isGood()) return pose;
@@ -271,13 +302,13 @@ geometry_msgs::PoseStamped AprilTagDetector::filterPose(const geometry_msgs::Pos
   filt_pose.header = pose.header;
   geometry_msgs::PoseStamped prev_pose = description.getPose();
 
-  double cp = std::min(1.0, a_p * (description.missed_frames_num + 1) );
+  double cp = std::min(1.0, a_p.get() * (description.missed_frames_num + 1) );
 
   filt_pose.pose.position.x = (1-cp)*prev_pose.pose.position.x + cp*pose.pose.position.x;
   filt_pose.pose.position.y = (1-cp)*prev_pose.pose.position.y + cp*pose.pose.position.y;
   filt_pose.pose.position.z = (1-cp)*prev_pose.pose.position.z + cp*pose.pose.position.z;
 
-  double cq = std::min(1.0, a_q * (description.missed_frames_num + 1) );
+  double cq = std::min(1.0, a_q.get() * (description.missed_frames_num + 1) );
 
   double w = (1-cq)*prev_pose.pose.orientation.w + cq*pose.pose.orientation.w;
   double x = (1-cq)*prev_pose.pose.orientation.x + cq*pose.pose.orientation.x;
