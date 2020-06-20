@@ -4,7 +4,14 @@
 int main(int argc, char **argv){
   ros::init(argc, argv, "apriltag_detector");
   ros::NodeHandle nh;
-  ros::NodeHandle pnh("~");
-  apriltags_ros::AprilTagDetector detector(nh, pnh);
-  ros::spin();
+
+  apriltags_ros::AprilTagDetector detector(nh);
+
+  // detector.setFilter(true, 0.01, 0.01);
+
+  while (ros::ok())
+  {
+    ros::spinOnce();
+    // do other stuff...
+  }
 }

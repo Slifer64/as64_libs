@@ -15,9 +15,9 @@ public:
 
 private:
   void onInit(){
-    detector_.reset(new AprilTagDetector(getNodeHandle(), getPrivateNodeHandle()));
+    detector_.reset(new apriltags_ros::AprilTagDetector(getNodeHandle()));
   }
-  boost::shared_ptr<AprilTagDetector> detector_;
+  boost::shared_ptr<apriltags_ros::AprilTagDetector> detector_;
 
 };
 

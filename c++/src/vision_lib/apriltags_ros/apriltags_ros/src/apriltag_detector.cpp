@@ -1,5 +1,4 @@
 #include <apriltags_ros/apriltag_detector.h>
-#include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <boost/foreach.hpp>
 #include <geometry_msgs/PoseStamped.h>
@@ -13,25 +12,30 @@
 #include <AprilTags/Tag36h11.h>
 #include <XmlRpcException.h>
 
-namespace apriltags_ros{
-
-AprilTagDetector::AprilTagDetector(ros::NodeHandle& nh, ros::NodeHandle& pnh): it_(nh)
+namespace apriltags_ros
 {
+
+AprilTagDetector::AprilTagDetector(ros::NodeHandle &)
+{
+  ros::NodeHandle nh;
+  ros::NodeHandle pnh("~");
+
+  it_.reset(new image_transport::ImageTransport(nh));
+
   XmlRpc::XmlRpcValue april_tag_descriptions;
-  if(!pnh.getParam("tag_descriptions", april_tag_descriptions)){
+  if(!pnh.getParam("tag_descriptions", april_tag_descriptions))
+  {
     ROS_WARN("No april tags specified");
   }
   else{
     try{
       descriptions_ = parse_tag_descriptions(april_tag_descriptions);
     } catch(XmlRpc::XmlRpcException e){
-      ROS_ERROR_STREAM("Error loading tag descriptions: "<<e.getMessage());
+      ROS_ERROR_STREAM( "Error loading tag descriptions: " << e.getMessage() );
     }
   }
 
-  if(!pnh.getParam("sensor_frame_id", sensor_frame_id_)){
-    sensor_frame_id_ = "";
-  }
+  if(!pnh.getParam("sensor_frame_id", sensor_frame_id_)) sensor_frame_id_ = "";
 
   std::string tag_family;
   pnh.param<std::string>("tag_family", tag_family, "36h11");
@@ -50,26 +54,80 @@ AprilTagDetector::AprilTagDetector(ros::NodeHandle& nh, ros::NodeHandle& pnh): i
     tag_codes = &AprilTags::tagCodes36h11;
   }
 
-  pub_tag_detect_image_flag = pnh.getParam("tag_detections_image_topic", tag_detections_image_topic);
+  if (!pnh.getParam("tag_detections_image_topic", tag_detections_image_topic)) tag_detections_image_topic = "tag_detections_image";
 
   if (!pnh.getParam("tag_detections_topic", tag_detections_topic))
     throw std::runtime_error("AprilTagDetector::AprilTagDetector: failed to read param \"tag_detections_topic\"..." );
 
-  if (!pnh.getParam("pub_tag_frames_flag", pub_tag_frames_flag)) pub_tag_frames_flag = false;
+  if (!pnh.getParam("apply_filter", apply_filter)) apply_filter = false;
+  if (!pnh.getParam("a_p", a_p)) a_p = 1.0;
+  if (!pnh.getParam("a_q", a_q)) a_q = 1.0;
+  if (!pnh.getParam("miss_frames_tol", miss_frames_tol)) miss_frames_tol = 5;
+  if (!pnh.getParam("publish_", publish_)) publish_ = false;
+  if (!pnh.getParam("publish_tag_tf", publish_tag_tf)) publish_tag_tf = false;
+  if (!pnh.getParam("publish_tag_im", publish_tag_im)) publish_tag_im = false;
+  double pub_rate_sec;
+  if (!pnh.getParam("pub_rate_sec", pub_rate_sec)) pub_rate_sec = 0.033;
+  this->setPublishRate(pub_rate_sec);
 
   tag_detector_= boost::shared_ptr<AprilTags::TagDetector>(new AprilTags::TagDetector(*tag_codes));
-  image_sub_ = it_.subscribeCamera("image_rect", 1, &AprilTagDetector::imageCb, this);
-  if (pub_tag_detect_image_flag) image_pub_ = it_.advertise(tag_detections_image_topic, 1);
+  image_sub_ = it_->subscribeCamera("image_rect", 1, &AprilTagDetector::imageCb, this);
+  if (publish_tag_im) image_pub_ = it_->advertise(tag_detections_image_topic, 1);
   detections_pub_ = nh.advertise<AprilTagDetectionArray>(tag_detections_topic, 1);
   // pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("tag_detections_pose", 1);
+
+  if (publish_) launchPublishThread();
 }
 
 AprilTagDetector::~AprilTagDetector()
 {
+  new_msg_sem.notify();
   image_sub_.shutdown();
 }
 
-void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
+void AprilTagDetector::stopPublishThread()
+{
+  this->publish_ = false;
+}
+
+void AprilTagDetector::setPublishRate(double pub_rate_sec)
+{
+  this->pub_rate_nsec = pub_rate_sec*1e9;
+}
+
+void AprilTagDetector::launchPublishThread()
+{
+  std::thread([this]()
+  {
+    while (publish_)
+    {
+      new_msg_sem.wait();
+
+      if (publish_tag_im)
+      {
+        image_pub_.publish(this->getImage()->toImageMsg());
+      }
+
+      if (publish_tag_tf)
+      {
+        geometry_msgs::PoseStamped tag_pose;
+        for (auto it = descriptions_.begin(); it!=descriptions_.end(); it++)
+        {
+          const AprilTagDescription &tag_descr = it->second;
+          if (!tag_descr.isGood()) continue;
+          tag_pose = tag_descr.getPose();
+          tf::Stamped<tf::Transform> tag_transform;
+          tf::poseStampedMsgToTF(tag_pose, tag_transform);
+          tf_pub_.sendTransform(tf::StampedTransform(tag_transform, tag_transform.stamp_, tag_transform.frame_id_, tag_descr.frame_name()));
+        }
+      }
+
+      std::this_thread::sleep_for(std::chrono::nanoseconds(pub_rate_nsec));
+    }
+  }).detach();
+}
+
+void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
   cv_bridge::CvImagePtr cv_ptr;
 
@@ -77,7 +135,7 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
 
   try
   {
-    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv_ptr = cv_bridge::toCvCopy(im_msg, sensor_msgs::image_encodings::BGR8);
   }
   catch (cv_bridge::Exception& e)
   {
@@ -132,17 +190,32 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
   geometry_msgs::PoseArray tag_pose_array;
   tag_pose_array.header = cv_ptr->header;
 
-  BOOST_FOREACH(AprilTags::TagDetection detection, detections){
-    std::map<int, AprilTagDescription>::const_iterator description_itr = descriptions_.find(detection.id);
+  for (auto descr_it = descriptions_.begin(); descr_it!=descriptions_.end(); descr_it++)
+  {
+    descr_it->second.missed_frames_num++;
+    if (descr_it->second.missed_frames_num > miss_frames_tol)
+    {
+      descr_it->second.missed_frames_num = 0;
+      descr_it->second.is_good = false;
+    }
+  }
+
+  BOOST_FOREACH(AprilTags::TagDetection detection, detections)
+  {
+    std::map<int, AprilTagDescription>::iterator description_itr = descriptions_.find(detection.id);
     if(description_itr == descriptions_.end())
     {
       ROS_WARN_THROTTLE(10.0, "Found tag: %d, but no description was found for it", detection.id);
       continue;
     }
-    AprilTagDescription description = description_itr->second;
+    AprilTagDescription &description = description_itr->second;
     double tag_size = description.size();
 
-    if (pub_tag_detect_image_flag) detection.draw(cv_ptr->image);
+    description.missed_frames_num = 0;
+
+    if (publish_tag_im) detection.draw(cv_ptr->image);
+
+    this->setImage(cv_ptr);
 
     Eigen::Matrix4d transform = detection.getRelativeTransform(tag_size, fx, fy, px, py);
     Eigen::Matrix3d rot = transform.block(0, 0, 3, 3);
@@ -158,6 +231,12 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
     tag_pose.pose.orientation.w = rot_quaternion.w();
     tag_pose.header = cv_ptr->header;
 
+    if (apply_filter) tag_pose = filterPose(tag_pose, description);
+
+    description.setPose(tag_pose);
+    description.is_good = detection.good;
+    description.hamming_dist = detection.hammingDistance;
+
     AprilTagDetection tag_detection;
     tag_detection.pose = tag_pose;
     tag_detection.id = detection.id;
@@ -166,19 +245,54 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
     tag_detection.hamming_dist = detection.hammingDistance;
     tag_detection_array.detections.push_back(tag_detection);
     // tag_pose_array.poses.push_back(tag_pose.pose);
-
-    if (pub_tag_frames_flag)
-    {
-      tf::Stamped<tf::Transform> tag_transform;
-      tf::poseStampedMsgToTF(tag_pose, tag_transform);
-      tf_pub_.sendTransform(tf::StampedTransform(tag_transform, tag_transform.stamp_, tag_transform.frame_id_, description.frame_name()));
-    }
   }
+
+  new_msg_sem.notify();
+
   detections_pub_.publish(tag_detection_array);
+
   // pose_pub_.publish(tag_pose_array);
-  if (pub_tag_detect_image_flag) image_pub_.publish(cv_ptr->toImageMsg());
+
+//  if (publish_tag_im) image_pub_.publish(cv_ptr->toImageMsg());
 }
 
+bool AprilTagDetector::setFilter(bool enable, double a_p, double a_q)
+{
+  this->apply_filter = enable;
+  this->a_p = a_p;
+  this->a_q = a_q;
+}
+
+geometry_msgs::PoseStamped AprilTagDetector::filterPose(const geometry_msgs::PoseStamped &pose, const AprilTagDescription &description)
+{
+  if (!description.isGood()) return pose;
+
+  geometry_msgs::PoseStamped filt_pose;
+  filt_pose.header = pose.header;
+  geometry_msgs::PoseStamped prev_pose = description.getPose();
+
+  double cp = std::min(1.0, a_p * (description.missed_frames_num + 1) );
+
+  filt_pose.pose.position.x = (1-cp)*prev_pose.pose.position.x + cp*pose.pose.position.x;
+  filt_pose.pose.position.y = (1-cp)*prev_pose.pose.position.y + cp*pose.pose.position.y;
+  filt_pose.pose.position.z = (1-cp)*prev_pose.pose.position.z + cp*pose.pose.position.z;
+
+  double cq = std::min(1.0, a_q * (description.missed_frames_num + 1) );
+
+  double w = (1-cq)*prev_pose.pose.orientation.w + cq*pose.pose.orientation.w;
+  double x = (1-cq)*prev_pose.pose.orientation.x + cq*pose.pose.orientation.x;
+  double y = (1-cq)*prev_pose.pose.orientation.y + cq*pose.pose.orientation.y;
+  double z = (1-cq)*prev_pose.pose.orientation.z + cq*pose.pose.orientation.z;
+
+  double norm = std::sqrt( w*w + x*x + y*y + z*z );
+
+  filt_pose.pose.orientation.w = w/norm;
+  filt_pose.pose.orientation.x = x/norm;
+  filt_pose.pose.orientation.y = y/norm;
+  filt_pose.pose.orientation.z = z/norm;
+
+  return filt_pose;
+}
 
 std::map<int, AprilTagDescription> AprilTagDetector::parse_tag_descriptions(XmlRpc::XmlRpcValue& tag_descriptions)
 {
@@ -186,7 +300,7 @@ std::map<int, AprilTagDescription> AprilTagDetector::parse_tag_descriptions(XmlR
   ROS_ASSERT(tag_descriptions.getType() == XmlRpc::XmlRpcValue::TypeArray);
   for (int32_t i = 0; i < tag_descriptions.size(); ++i)
   {
-    XmlRpc::XmlRpcValue& tag_description = tag_descriptions[i];
+    XmlRpc::XmlRpcValue &tag_description = tag_descriptions[i];
     ROS_ASSERT(tag_description.getType() == XmlRpc::XmlRpcValue::TypeStruct);
     ROS_ASSERT(tag_description["id"].getType() == XmlRpc::XmlRpcValue::TypeInt);
     ROS_ASSERT(tag_description["size"].getType() == XmlRpc::XmlRpcValue::TypeDouble);
