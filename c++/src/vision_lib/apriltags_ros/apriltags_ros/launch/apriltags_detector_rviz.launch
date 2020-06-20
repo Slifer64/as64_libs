@@ -36,15 +36,15 @@
       tag_detections_topic: "tag_detections"
 
       apply_filter: true
-      a_p: 0.3
-      a_q: 0.3
+      a_p: 0.4
+      a_q: 0.4
 
       miss_frames_tol: 5
 
       publish_: true
       publish_tag_tf: true
       publish_tag_im: true
-      pub_rate_sec: 0.033 // 60 ms
+      pub_rate_sec: 0.066 // 60 ms
 
       use_gui: true
 

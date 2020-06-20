@@ -79,11 +79,11 @@ AprilTagDetector::AprilTagDetector(ros::NodeHandle &)
 
   tag_detector_= boost::shared_ptr<AprilTags::TagDetector>(new AprilTags::TagDetector(*tag_codes));
   image_sub_ = it_->subscribeCamera("image_rect", 1, &AprilTagDetector::imageCb, this);
-  if (publish_tag_im) image_pub_ = it_->advertise(tag_detections_image_topic, 1);
+  image_pub_ = it_->advertise(tag_detections_image_topic, 1);
   detections_pub_ = nh.advertise<AprilTagDetectionArray>(tag_detections_topic, 1);
   // pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("tag_detections_pose", 1);
 
-  if (publish_) launchPublishThread();
+   if (publish_) launchPublishThread();
 
   if (use_gui) launchGUI();
 }
@@ -117,6 +117,7 @@ void AprilTagDetector::launchPublishThread()
 
       if (publish_tag_im)
       {
+        // std::cerr << "this->cv_ptr: " << ((void *)this->getImage().get()) << "\n";
         image_pub_.publish(this->getImage()->toImageMsg());
       }
 
@@ -180,6 +181,8 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
+
+//  std::cerr << "cv_ptr: " << ((void *)cv_ptr.get()) << "\n";
 
   cv::Mat gray;
   cv::cvtColor(cv_ptr->image, gray, CV_BGR2GRAY);
@@ -253,8 +256,6 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
 
     if (publish_tag_im) detection.draw(cv_ptr->image);
 
-    this->setImage(cv_ptr);
-
     Eigen::Matrix4d transform = detection.getRelativeTransform(tag_size, fx, fy, px, py);
     Eigen::Matrix3d rot = transform.block(0, 0, 3, 3);
     Eigen::Quaternion<double> rot_quaternion = Eigen::Quaternion<double>(rot);
@@ -285,12 +286,17 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
     // tag_pose_array.poses.push_back(tag_pose.pose);
   }
 
+  // important to do here and not inside the above loop, because in case of no detections
+  // the above loop in not entered and setImage won't be called leading initially to an
+  // empty image which will be attempted to be published by the the publishThread
+  // this->cv_im will be null so the program would crush.
+  this->setImage(cv_ptr);
+
   new_msg_sem.notify();
 
   detections_pub_.publish(tag_detection_array);
 
   // pose_pub_.publish(tag_pose_array);
-
 //  if (publish_tag_im) image_pub_.publish(cv_ptr->toImageMsg());
 }
 

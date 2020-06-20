@@ -35,18 +35,21 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
   // miss_frames_tol: 5
   // pub_rate_sec: 0.033
 
+  // ======================================================
+
   apply_filt_ckbox = new QCheckBox("apply filter");
   apply_filt_ckbox->setFont(font2);
+  apply_filt_ckbox->setChecked(tag_detector->apply_filter);
 
   QLabel *ap_lb = new QLabel("a_p:");
   ap_lb->setFont(font2);
-  ap_le = new QLineEdit(QString::number(tag_detector->a_p.get()));
+  ap_le = new QLineEdit; // (QString::number(tag_detector->a_p.get()));
   ap_le->setFont(font2);
   ap_le->setAlignment(Qt::AlignCenter);
 
   QLabel *aq_lb = new QLabel("a_q:");
   aq_lb->setFont(font2);
-  aq_le = new QLineEdit(QString::number(tag_detector->a_q.get()));
+  aq_le = new QLineEdit; // (QString::number(tag_detector->a_q.get()));
   aq_le->setFont(font2);
   aq_le->setAlignment(Qt::AlignCenter);
 
@@ -62,16 +65,17 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
   filter_frame->setLineWidth(1);
   filter_frame->setLayout(filter_layout);
 
+  // ======================================================
 
   publish_ckbox = new QCheckBox("Publish");
   publish_ckbox->setFont(font2);
   publish_ckbox->setChecked(tag_detector->publish_);
   publish_tag_tf_ckbox = new QCheckBox("Publish tags TF");
   publish_tag_tf_ckbox->setFont(font2);
-  publish_tag_tf_ckbox->setChecked(tag_detector->publish_tag_tf);
+  publish_tag_tf_ckbox->setChecked(tag_detector->publish_tag_tf && tag_detector->publish_);
   publish_tag_im_ckbox = new QCheckBox("Publish tags image");
   publish_tag_im_ckbox->setFont(font2);
-  publish_tag_im_ckbox->setChecked(tag_detector->publish_tag_im);
+  publish_tag_im_ckbox->setChecked(tag_detector->publish_tag_im && tag_detector->publish_);
 
   QLabel *pub_rate_lb = new QLabel("Publish rate (sec):");
   pub_rate_lb->setFont(font2);
@@ -95,12 +99,14 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
   pub_frame->setLineWidth(1);
   pub_frame->setLayout(pub_layout);
 
+  // ======================================================
 
   QHBoxLayout *main_layout = new QHBoxLayout(central_widget);
   main_layout->addWidget(pub_frame);
   main_layout->addWidget(filter_frame);
   main_layout->addStretch(0);
 
+  // ================  Connections  ====================
 
   QObject::connect( apply_filt_ckbox, &QCheckBox::stateChanged, [this]()
   {
@@ -108,11 +114,8 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
     ap_le->setEnabled(set);
     aq_le->setEnabled(set);
     tag_detector->setFilter(set);
-    if (set)
-    {
-      ap_le->setText(QString::number(tag_detector->a_p.get()));
-      aq_le->setText(QString::number(tag_detector->a_q.get()));
-    }
+    ap_le->setText(QString::number(tag_detector->a_p.get()));
+    aq_le->setText(QString::number(tag_detector->a_q.get()));
   });
 
   QObject::connect( ap_le, &QLineEdit::editingFinished, [this]()
@@ -154,6 +157,9 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
 
   QObject::connect( this, SIGNAL(closeSignal()), this, SLOT(close()) );
 
+  // ===============  initialize  =================
+  emit publish_ckbox->stateChanged(Qt::PartiallyChecked);
+  emit apply_filt_ckbox->stateChanged(Qt::PartiallyChecked);
 }
 
 MainWindow::~MainWindow()
