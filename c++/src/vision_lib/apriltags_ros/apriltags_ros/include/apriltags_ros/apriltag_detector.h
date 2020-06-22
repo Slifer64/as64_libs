@@ -16,66 +16,12 @@
 #include <armadillo>
 
 #include <apriltags_ros/gui/main_window.h>
+#include <apriltags_ros/utils/utils.h>
 
 namespace apriltags_ros
 {
 
-template<typename T>
-class MtxVar
-{
-public:
-  MtxVar() { }
-  MtxVar& operator=(const T &val) { set(val); return *this; }
-  bool operator()() const { return get(); }
-  T get() const { std::unique_lock<std::mutex> lck(*(const_cast<std::mutex *>(&var_mtx))); return var; }
-  T read() const { return var; }
-  void set(const T &val) { std::unique_lock<std::mutex> lck(var_mtx); var=val; }
-private:
-  std::mutex var_mtx;
-  T var;
-};
-
-class Semaphore
-{
-private:
-  std::mutex mutex_;
-  std::condition_variable condition_;
-  // unsigned long count_ = 0; // Initialized as locked.
-  bool count_ = false;  // Initialized as locked.
-
-public:
-  void notify()
-  {
-    std::lock_guard<decltype(mutex_)> lock(mutex_);
-    // ++count_;
-    count_ = true;
-    condition_.notify_one();
-  }
-
-  void wait()
-  {
-    std::unique_lock<decltype(mutex_)> lock(mutex_);
-    while(!count_) // Handle spurious wake-ups.
-      condition_.wait(lock);
-    // --count_;
-    count_ = false;
-  }
-
-  bool try_wait()
-  {
-    std::lock_guard<decltype(mutex_)> lock(mutex_);
-    if(count_)
-    {
-      // --count_;
-      count_ = false;
-      return true;
-    }
-    return false;
-  }
-};
-
-
-  class AprilTagDetector; // forward decleration
+class AprilTagDetector; // forward decleration
 
 class AprilTagDescription
 {
@@ -199,13 +145,13 @@ private:
   bool publish_;
   bool publish_tag_tf;
   bool publish_tag_im;
-  unsigned long long pub_rate_nsec;
+  MtxVar<unsigned long long> pub_rate_nsec;
 
   bool apply_filter; // apply a 1st order low pass filter to the detected pose
   MtxVar<double> a_p; // filtering coeff for position (a_p = 1 : no filtering)
   MtxVar<double> a_q; // filtering coeff for orientation (a_q = 1 : no filtering)
 
-  int miss_frames_tol; // if a specific is not detected for more than "tol" then consider it "undetected"
+  MtxVar<int> miss_frames_tol; // if a specific is not detected for more than "tol" then consider it "undetected"
 
   std::string tag_detections_image_topic; // topic where the detected tags image is published
   std::string tag_detections_topic; // topic where the detected tags are published
@@ -229,6 +175,6 @@ private:
 
 };
 
-} // namespace vision_
+} // namespace apriltags_ros
 
 #endif // APRILTAG_DETECTOR_H

@@ -53,12 +53,20 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
   aq_le->setFont(font2);
   aq_le->setAlignment(Qt::AlignCenter);
 
+  QLabel *miss_frames_tol_lb = new QLabel("miss_frames_tol:");
+  miss_frames_tol_lb->setFont(font2);
+  miss_frames_tol_le = new QLineEdit(QString::number(tag_detector->miss_frames_tol.get()));
+  miss_frames_tol_le->setFont(font2);
+  miss_frames_tol_le->setAlignment(Qt::AlignCenter);
+
   QGridLayout *filter_layout = new QGridLayout;
   filter_layout->addWidget(apply_filt_ckbox, 0,0);
   filter_layout->addWidget(ap_lb, 1,0);
   filter_layout->addWidget(ap_le, 1,1);
   filter_layout->addWidget(aq_lb, 2,0);
   filter_layout->addWidget(aq_le, 2,1);
+  filter_layout->addWidget(miss_frames_tol_lb, 3,0);
+  filter_layout->addWidget(miss_frames_tol_le, 3,1);
 
   QFrame *filter_frame = new QFrame;
   filter_frame->setFrameStyle(QFrame::Box | QFrame::Raised);
@@ -77,9 +85,9 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
   publish_tag_im_ckbox->setFont(font2);
   publish_tag_im_ckbox->setChecked(tag_detector->publish_tag_im && tag_detector->publish_);
 
-  QLabel *pub_rate_lb = new QLabel("Publish rate (sec):");
+  QLabel *pub_rate_lb = new QLabel("Publish rate (msec):");
   pub_rate_lb->setFont(font2);
-  pub_rate_le = new QLineEdit("0");
+  pub_rate_le = new QLineEdit(QString::number(tag_detector->pub_rate_nsec.get()/1e6));
   pub_rate_le->setFont(font2);
   pub_rate_le->setAlignment(Qt::AlignCenter);
 
@@ -124,6 +132,8 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
   QObject::connect( aq_le, &QLineEdit::editingFinished, [this]()
   { tag_detector->a_q.set(aq_le->text().toDouble()); });
 
+  QObject::connect( miss_frames_tol_le, &QLineEdit::editingFinished, [this]()
+  { tag_detector->miss_frames_tol.set(miss_frames_tol_le->text().toDouble()); });
 
   QObject::connect( publish_ckbox, &QCheckBox::stateChanged, [this]()
   {
@@ -154,6 +164,10 @@ MainWindow::MainWindow(AprilTagDetector *tag_detector_, QWidget *parent): QMainW
     bool set = publish_tag_im_ckbox->isChecked();
     tag_detector->publish_tag_im = set;
   });
+
+  QObject::connect( pub_rate_le, &QLineEdit::editingFinished, [this]()
+  { tag_detector->setPublishRate(pub_rate_le->text().toDouble()); });
+
 
   QObject::connect( this, SIGNAL(closeSignal()), this, SLOT(close()) );
 

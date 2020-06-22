@@ -44,7 +44,7 @@
       publish_: true
       publish_tag_tf: true
       publish_tag_im: true
-      pub_rate_sec: 0.066 // 60 ms
+      pub_rate_msec: 0.066 // 60 ms
 
       use_gui: true
 
@@ -52,13 +52,16 @@
 
     <!-- Describe the tags -->
     <rosparam param="tag_descriptions">[
-      {id: 0, size: 0.081, frame_id: tag_0},
-      {id: 1, size: 0.161, frame_id: tag_1},
-      {id: 2, size: 0.163513, frame_id: tag_2},
-      {id: 3, size: 0.163513, frame_id: tag_3},
-      {id: 4, size: 0.163513, frame_id: tag_4},
-      {id: 5, size: 0.163513, frame_id: tag_5}]
+      {id: 0, size: 0.081, frame_id: tag_0}]
     </rosparam>
+<!--    <rosparam param="tag_descriptions">[-->
+<!--      {id: 0, size: 0.081, frame_id: tag_0},-->
+<!--      {id: 1, size: 0.161, frame_id: tag_1},-->
+<!--      {id: 2, size: 0.163513, frame_id: tag_2},-->
+<!--      {id: 3, size: 0.163513, frame_id: tag_3},-->
+<!--      {id: 4, size: 0.163513, frame_id: tag_4},-->
+<!--      {id: 5, size: 0.163513, frame_id: tag_5}]-->
+<!--    </rosparam>-->
   </node>
 
   <!--

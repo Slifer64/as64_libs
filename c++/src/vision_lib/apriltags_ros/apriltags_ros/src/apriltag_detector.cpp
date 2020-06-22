@@ -69,13 +69,15 @@ AprilTagDetector::AprilTagDetector(ros::NodeHandle &)
   if (!pnh.getParam("a_q", aq)) aq = 1.0;
   a_p.set(ap);
   a_q.set(aq);
-  if (!pnh.getParam("miss_frames_tol", miss_frames_tol)) miss_frames_tol = 5;
+  int miss_fr_tol;
+  if (!pnh.getParam("miss_frames_tol", miss_fr_tol)) miss_fr_tol = 5;
+  miss_frames_tol.set(miss_fr_tol);
   if (!pnh.getParam("publish_", publish_)) publish_ = false;
   if (!pnh.getParam("publish_tag_tf", publish_tag_tf)) publish_tag_tf = false;
   if (!pnh.getParam("publish_tag_im", publish_tag_im)) publish_tag_im = false;
-  double pub_rate_sec;
-  if (!pnh.getParam("pub_rate_sec", pub_rate_sec)) pub_rate_sec = 0.033;
-  this->setPublishRate(pub_rate_sec);
+  double pub_rate_msec;
+  if (!pnh.getParam("pub_rate_msec", pub_rate_msec)) pub_rate_msec = 33;
+  this->setPublishRate(pub_rate_msec);
 
   tag_detector_= boost::shared_ptr<AprilTags::TagDetector>(new AprilTags::TagDetector(*tag_codes));
   image_sub_ = it_->subscribeCamera("image_rect", 1, &AprilTagDetector::imageCb, this);
@@ -104,7 +106,7 @@ void AprilTagDetector::stopPublishThread()
 
 void AprilTagDetector::setPublishRate(double pub_rate_sec)
 {
-  this->pub_rate_nsec = pub_rate_sec*1e9;
+  this->pub_rate_nsec.set(pub_rate_sec*1e6);
 }
 
 void AprilTagDetector::launchPublishThread()
@@ -135,7 +137,7 @@ void AprilTagDetector::launchPublishThread()
         }
       }
 
-      std::this_thread::sleep_for(std::chrono::nanoseconds(pub_rate_nsec));
+      std::this_thread::sleep_for(std::chrono::nanoseconds(pub_rate_nsec.get()));
     }
   }).detach();
 }
@@ -234,7 +236,7 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
   for (auto descr_it = descriptions_.begin(); descr_it!=descriptions_.end(); descr_it++)
   {
     descr_it->second.missed_frames_num++;
-    if (descr_it->second.missed_frames_num > miss_frames_tol)
+    if (descr_it->second.missed_frames_num > miss_frames_tol.get())
     {
       descr_it->second.missed_frames_num = 0;
       descr_it->second.is_good = false;

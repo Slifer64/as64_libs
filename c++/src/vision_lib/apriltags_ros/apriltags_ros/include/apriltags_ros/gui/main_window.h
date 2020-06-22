@@ -47,6 +47,7 @@ private:
   QCheckBox *apply_filt_ckbox;
   QLineEdit *ap_le;
   QLineEdit *aq_le;
+  QLineEdit *miss_frames_tol_le;
 
   QCheckBox *publish_ckbox;
   QCheckBox *publish_tag_tf_ckbox;
