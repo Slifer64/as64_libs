@@ -1,9 +1,27 @@
 <launch>
 
+<!--
+=================================================================
+===================       ARGUMENTS        ======================
+=================================================================
+-->
+
   <arg name="tag_family" default="36h11" />
   <arg name="tag_detections_topic" default="tag_detections" />
   <arg name="tag_detections_image_topic" default="tag_detections_image" />
-  <arg name="pub_tag_frames_flag" default="true" />
+
+  <arg name="apply_filter" default="true" />
+  <arg name="a_p" default="0.4" />
+  <arg name="a_q" default="0.4" />
+
+  <arg name="miss_frames_tol" default="5" />
+
+  <arg name="publish_" default="true" />
+  <arg name="publish_tag_tf" default="true" />
+  <arg name="publish_tag_im" default="true" />
+  <arg name="pub_rate_msec" default="66" />
+
+  <arg name="use_gui" default="true" />
 
   <arg name="tag_descriptions" default="[
     {id: 0, size: 0.081, frame_id: tag_0},
@@ -14,11 +32,19 @@
     {id: 5, size: 0.163513, frame_id: tag_5}]"
   />
 
+  <arg name="camera_intrinsic_params_url" default="package://apriltags_ros/config/xtion_calib.yaml" />
+
+<!--
+=================================================================
+=================================================================
+=================================================================
+-->
+
   <!-- creates and publishes to all topics relevant to the camera sensor -->
   <include file="$(find openni2_launch)/launch/openni2.launch">
     <arg name="publish_tf" value="false" />
     <arg name="color_depth_synchronization" value="false" />
-    <arg name="rgb_camera_info_url" value="package://apriltags_ros/config/xtion_calib.yaml" />
+    <arg name="rgb_camera_info_url" value="$(arg camera_intrinsic_params_url)" />
   </include>
 
   <node pkg="apriltags_ros" type="apriltag_detector_node" name="apriltag_detector" output="screen">
@@ -36,25 +62,31 @@
 
     <!--  ==========================================================  -->
 
-    <param name="tag_detections_image_topic" type="str" value="$(arg tag_detections_image_topic)" />
-
-    <param name="pub_tag_frames_flag" type="bool" value="$(arg pub_tag_frames_flag)" />
-
-    <param name="tag_detections_topic" type="str" value="$(arg tag_detections_topic)" />
-
     <!-- Select the tag family: 16h5, 25h7, 25h9, 36h9, or 36h11(default) -->
     <param name="tag_family" type="str" value="$(arg tag_family)" />
 
+    <param name="tag_detections_image_topic" type="str" value="$(arg tag_detections_image_topic)" />
+
+    <param name="tag_detections_topic" type="str" value="$(arg tag_detections_topic)" />
+
     <!-- Describe the tags -->
     <rosparam param="tag_descriptions" subst_value="True">$(arg tag_descriptions)</rosparam>
-<!--    <rosparam param="tag_descriptions">[-->
-<!--      {id: 0, size: 0.081, frame_id: tag_0},-->
-<!--      {id: 1, size: 0.161, frame_id: tag_1},-->
-<!--      {id: 2, size: 0.163513, frame_id: tag_2},-->
-<!--      {id: 3, size: 0.163513, frame_id: tag_3},-->
-<!--      {id: 4, size: 0.163513, frame_id: tag_4},-->
-<!--      {id: 5, size: 0.163513, frame_id: tag_5}]-->
-<!--    </rosparam>-->
+
+    <param name="apply_filter" type="bool" value="$(arg apply_filter)" />
+
+    <param name="a_p" type="double" value="$(arg a_p)" />
+
+    <param name="a_q" type="double" value="$(arg a_q)" />
+
+    <param name="miss_frames_tol" type="int" value="$(arg miss_frames_tol)" />
+
+    <param name="publish_" type="bool" value="$(arg publish_)" />
+    <param name="publish_tag_tf" type="bool" value="$(arg publish_tag_tf)" />
+    <param name="publish_tag_im" type="bool" value="$(arg publish_tag_im)" />
+
+    <param name="pub_rate_msec" type="double" value="$(arg pub_rate_msec)" />
+
+    <param name="use_gui" type="bool" value="$(arg use_gui)" />
 
   </node>
 

@@ -1,31 +1,46 @@
 <launch>
 
-  <!--  Apriltag detector -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find apriltags_ros)/urdf/scene.xacro'" />
+
+  <!-- Starting robot state publish which will publish tf -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+  <arg name="rvizconfig" default="$(find vision_test)/rviz/config.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <!-- creates and publishes to all topics relevant to the camera sensor -->
   <include file="$(find apriltags_ros)/launch/apriltags_detector.launch">
     <arg name="tag_family" value="36h11" />
     <arg name="tag_detections_topic" value="tag_detections" />
     <arg name="tag_detections_image_topic" value="tag_detections_image" />
-    <arg name="pub_tag_frames_flag" value="false" />
+
+    <arg name="apply_filter" value="true" />
+    <arg name="a_p" value="0.42" />
+    <arg name="a_q" value="0.42" />
+
+    <arg name="miss_frames_tol" value="6" />
+
+    <arg name="publish_" value="false" />
+    <arg name="publish_tag_tf" value="true" />
+    <arg name="publish_tag_im" value="true" />
+    <arg name="pub_rate_msec" value="99" />
+
+    <arg name="use_gui" value="true" />
 
     <arg name="tag_descriptions" value="[
-      {id: 0, size: 0.081, frame_id: tag_0},
-      {id: 1, size: 0.161, frame_id: tag_1}]"
-    />
+    {id: 0, size: 0.081, frame_id: tag_0},
+    {id: 1, size: 0.161, frame_id: tag_1}]"/>
+
+    <arg name="camera_intrinsic_params_url" value="package://apriltags_ros/config/xtion_calib.yaml" />
+
   </include>
 
 
-  <!--  Rviz -->
-  <arg name="rvizconfig" value="$(find vision_test)/rviz/config.rviz" />
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  <node pkg="vision_test"
+        type="apriltag_detect_test"
+        name="apriltag_detect_test_node"
+        output="screen" cwd="node"
+  />
 
-  <!--  State publisher -->
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find vision_test)/urdf/scene.xacro'" />
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
-
-  <node pkg="vision_test" type="apriltag_detect_test" name="apriltag_detect_test_node" output="screen" cwd="node">
-    <rosparam>
-
-    </rosparam>
-  </node>
 
 </launch>

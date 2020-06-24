@@ -17,86 +17,10 @@
 
 #include <apriltags_ros/gui/main_window.h>
 #include <apriltags_ros/utils/utils.h>
+#include <apriltags_ros/apriltag_description.h>
 
 namespace apriltags_ros
 {
-
-class AprilTagDetector; // forward decleration
-
-class AprilTagDescription
-{
-
-  friend AprilTagDetector;
-
-public:
-
-  AprilTagDescription(int id, double size, std::string &frame_name):
-  id_(id), size_(size), frame_name_(frame_name),
-  is_good(false), pose_mtx(new std::mutex), missed_frames_num(0) {}
-
-  // copy constructor
-  AprilTagDescription(const AprilTagDescription &obj)
-  {
-//    std::memcpy((void *)this, (void *)(&obj), sizeof(AprilTagDescription));
-    this->id_ = obj.id_;
-    this->pose = obj.pose;
-    this->is_good = obj.is_good;
-    this->hamming_dist = obj.hamming_dist;
-    this->size_ = obj.size_;
-    this->frame_name_ = obj.frame_name_;
-    this->ref_frame = obj.ref_frame;
-    this->missed_frames_num = obj.missed_frames_num;
-
-    this->pose_mtx = new std::mutex;
-  }
-
-  ~AprilTagDescription()
-  { delete pose_mtx; }
-
-  double size() const { return size_; }
-
-  int getId() const { return id_; }
-
-  std::string frame_name() const { return frame_name_; }
-
-  std::string getRefFrame() const { return pose.header.frame_id; }
-
-  void setPose(const geometry_msgs::PoseStamped &pose)
-  {
-    std::unique_lock<std::mutex> lck(*pose_mtx);
-    this->pose = pose;
-  }
-
-  geometry_msgs::PoseStamped getPose() const
-  {
-    std::unique_lock<std::mutex> lck(*const_cast<std::mutex *>(pose_mtx));
-    return this->pose;
-  }
-
-  bool isGood() const { return is_good; }
-
-  int hammingDis() const { return hamming_dist; }
-
-private:
-
-  int id_;
-
-  std::mutex *pose_mtx;
-
-  geometry_msgs::PoseStamped pose;
-
-  bool is_good;
-
-  int hamming_dist;
-
-  double size_;
-
-  std::string frame_name_;
-  std::string ref_frame;
-
-  int missed_frames_num;
-};
-
 
 class AprilTagDetector
 {

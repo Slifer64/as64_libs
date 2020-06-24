@@ -75,6 +75,7 @@ AprilTagDetector::AprilTagDetector(ros::NodeHandle &)
   if (!pnh.getParam("publish_", publish_)) publish_ = false;
   if (!pnh.getParam("publish_tag_tf", publish_tag_tf)) publish_tag_tf = false;
   if (!pnh.getParam("publish_tag_im", publish_tag_im)) publish_tag_im = false;
+  if (publish_tag_tf || publish_tag_im) publish_ = true;
   double pub_rate_msec;
   if (!pnh.getParam("pub_rate_msec", pub_rate_msec)) pub_rate_msec = 33;
   this->setPublishRate(pub_rate_msec);
@@ -229,18 +230,18 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
 
   if(!sensor_frame_id_.empty()) cv_ptr->header.frame_id = sensor_frame_id_;
 
-  AprilTagDetectionArray tag_detection_array;
-  geometry_msgs::PoseArray tag_pose_array;
-  tag_pose_array.header = cv_ptr->header;
-
   for (auto descr_it = descriptions_.begin(); descr_it!=descriptions_.end(); descr_it++)
   {
-    descr_it->second.missed_frames_num++;
-    if (descr_it->second.missed_frames_num > miss_frames_tol.get())
+    AprilTagDescription &description = descr_it->second;
+    description.missed_frames_num++;
+    if (description.missed_frames_num > miss_frames_tol.get())
     {
-      descr_it->second.missed_frames_num = 0;
-      descr_it->second.is_good = false;
+      description.missed_frames_num = 0;
+      description.is_good = false;
     }
+    geometry_msgs::PoseStamped pose = description.getPose();
+    pose.header = im_msg->header;
+    description.setPose(pose);
   }
 
   BOOST_FOREACH(AprilTags::TagDetection detection, detections)
@@ -277,15 +278,6 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
     description.setPose(tag_pose);
     description.is_good = detection.good;
     description.hamming_dist = detection.hammingDistance;
-
-    AprilTagDetection tag_detection;
-    tag_detection.pose = tag_pose;
-    tag_detection.id = detection.id;
-    tag_detection.size = tag_size;
-    tag_detection.is_good = detection.good;
-    tag_detection.hamming_dist = detection.hammingDistance;
-    tag_detection_array.detections.push_back(tag_detection);
-    // tag_pose_array.poses.push_back(tag_pose.pose);
   }
 
   // important to do here and not inside the above loop, because in case of no detections
@@ -294,12 +286,24 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& im_msg, const s
   // this->cv_im will be null so the program would crush.
   this->setImage(cv_ptr);
 
+  AprilTagDetectionArray tag_detection_array;
+  for (auto descr_it = descriptions_.begin(); descr_it!=descriptions_.end(); descr_it++)
+  {
+    AprilTagDescription &description = descr_it->second;
+    if (!description.isGood()) continue;
+
+    AprilTagDetection tag_detection;
+    tag_detection.pose = description.getPose();
+    tag_detection.id = description.getId();
+    tag_detection.size = description.size();
+    tag_detection.is_good = description.isGood();
+    tag_detection.hamming_dist = description.hammingDis();
+    tag_detection_array.detections.push_back(tag_detection);
+  }
+
   new_msg_sem.notify();
 
-  detections_pub_.publish(tag_detection_array);
-
-  // pose_pub_.publish(tag_pose_array);
-//  if (publish_tag_im) image_pub_.publish(cv_ptr->toImageMsg());
+  if (tag_detection_array.detections.size() != 0) detections_pub_.publish(tag_detection_array);
 }
 
 geometry_msgs::PoseStamped AprilTagDetector::filterPose(const geometry_msgs::PoseStamped &pose, const AprilTagDescription &description)

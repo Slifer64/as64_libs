@@ -72,6 +72,7 @@ include_directories(
 
 set(SRC_LIST
     include/${PROJECT_NAME}/gui/main_window.cpp
+    src/apriltag_description.cpp
 )
 
 add_library(apriltag_detector
