@@ -28,7 +28,7 @@ void tagDetectionsCb(const apriltags_ros::AprilTagDetectionArrayPtr& tags_msg)
     geometry_msgs::Point pos = tag.pose.pose.position;
     geometry_msgs::Quaternion quat = tag.pose.pose.orientation;
     std::cerr << "position: (" << pos.x << ", " << pos.y << ", " << pos.z << ")\n";
-    std::cerr << "quaternion: (" << quat.w << "," << pos.x << ", " << pos.y << ", " << pos.z << ")\n";
+    std::cerr << "quaternion: (" << quat.w << "," << quat.x << ", " << quat.y << ", " << quat.z << ")\n";
     std::cerr << "ID: " << tag.id << "\n";
     std::cerr << "is_good: " << tag.is_good << "\n";
     std::cerr << "------------------------------------\n";
