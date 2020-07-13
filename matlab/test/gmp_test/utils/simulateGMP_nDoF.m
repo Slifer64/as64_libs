@@ -61,7 +61,7 @@ while (true)
     dx = 1/tau;
 
     %% Stopping criteria
-    if (t>=1.1*t_end) % && norm(y-g)<5e-3 && norm(dy)<5e-3)
+    if (t>=1*t_end) % && norm(y-g)<5e-3 && norm(dy)<5e-3)
         break;
     end
 
