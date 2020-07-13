@@ -7,7 +7,8 @@ function test_gmp_as_dmp()
 set_matlab_utils_path();
 
 %% Load training data
-load('data/train_data.mat', 'Data');
+% load('data/train_data.mat', 'Data');
+load('data/fifthOrd_train_data.mat', 'Data');
 
 Timed = Data.Time;
 Pd_data = Data.Pos(1,:);
@@ -18,9 +19,9 @@ Ts = Timed(2)-Timed(1);
 
 %% initialize and train GMP
 train_method = 'LS';
-N_kernels = 50;
-kernels_std_scaling = 1.5;
-gmp = GMP(N_kernels, 30, 100, kernels_std_scaling);
+N_kernels = 20;
+kernels_std_scaling = 1;
+gmp = GMP(N_kernels, 100, 500, kernels_std_scaling);
 tic
 offline_train_mse = gmp.train(train_method, Timed, Pd_data);
 offline_train_mse
@@ -33,8 +34,9 @@ gmp = GMP.importFromFile('data/gmp_model.bin');
 disp('GMP simulation...');
 tic
 
-ks = 1.5; % spatial scale
-kt = 1.3; % temporal scale
+ks = 1; % spatial scale
+% kt = 1.3; % temporal scale
+kt = Timed(end) / 0.8;
 P0 = Pd_data(1);
 Pgd = Pd_data(end);
 Pg = P0 + ks*(Pgd - P0);

@@ -1,17 +1,19 @@
-clc
-close all
+clc;
+close all;
 clear;
 
-% s = warning('error', 'MATLAB:DELETE:Permission');
-% warning('error', 'MATLAB:DELETE:FileNotFound');
+set_matlab_utils_path();
 
-delete temp.txt
 
-try
-    delete temp.txt
-    disp('File deleted!');
-catch
-    disp('File does not exits...');
-end
+filename = 'recorded_poses.bin';
 
-% warning(s);
+f_io = FileIO(filename, FileIO.in);
+
+f_io.printHeader();
+
+ee_pos_data = f_io.read('ee_pos_data');
+ee_quat_data = f_io.read('ee_quat_data');
+marker_pos_data = f_io.read('marker_pos_data');
+marker_quat_data = f_io.read('marker_quat_data');
+
+
