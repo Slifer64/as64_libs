@@ -39,15 +39,19 @@ for i=1:length(dmp)
 end
 
 
-figure('Position',[680   532   550   390]);
+fig = figure;
+fig.Position(3:4) = [836 809];
 ax = axes();
 hold(ax, 'on');
 
 plot(nan,nan, 'LineWidth',3.0 ,  'LineStyle','-', 'Color','blue', 'DisplayName','novel');
 plot(nan,nan, 'LineWidth',3.0 ,  'LineStyle',':', 'Color','magenta', 'DisplayName','classical');
 plot(nan, nan, 'LineWidth',3.0 ,  'LineStyle','-', 'Color',[0 0.7 0], 'DisplayName','training');
-plot(nan, nan, 'LineWidth',3.0 ,  'LineStyle','--', 'Color',[1 0 0], 'DisplayName','limit');
-legend({}, 'interpreter','latex', 'fontsize',15, 'Position',[0.6863 0.1697 0.2022 0.2603]);
+plot(nan, nan, 'LineWidth',3.0 ,  'LineStyle','--', 'Color',[0.85 0.33 0.1], 'DisplayName','reverse');
+scatter(nan, nan, 'LineWidth',5.0 , 'LineWidth',2, 'Marker','o', ...
+            'MarkerEdgeColor',[1 0 0], 'SizeData',200, 'DisplayName','obstacle');
+        
+legend({}, 'interpreter','latex', 'fontsize',18, 'Position',[0.6863 0.1697 0.2022 0.2603]);
 
 plot(Pd_data(1,:), Pd_data(2,:), 'LineWidth',5.0 ,  'LineStyle','-', 'Color',[0 0.7 0], 'HandleVisibility','off');
 
@@ -60,18 +64,22 @@ Pg = P0 + ks*(Pgd - P0);
 T = 4; %Timed(end) / kt;
 dt = Ts;
 
-limits = [inf; 0.72];
-gamma = 1e-6;
-[Time, P_data] = simulateGMP_nDoF(gmp, P0, Pg, T, dt, limits, gamma);
-[Time2, P_data2] = simulateDMP(dmp, P0, Pg, T, dt, limits, gamma);
+obstacle = [0.366; 0.573];
+gamma = 1000;
+beta = 8;
+[Time, P_data] = simulateGMP_nDoF(gmp, P0, Pg, T, dt, false, obstacle, gamma, beta);
+[Time_rev, P_rev_data] = simulateGMP_nDoF(gmp, P0, Pg, T, dt, true, obstacle, gamma, beta);
+[Time2, P_data2] = simulateDMP(dmp, P0, Pg, T, dt, obstacle, gamma, beta);
 
 %% Plot results
 plot(P_data(1,:), P_data(2,:), 'LineWidth',2.5 ,  'LineStyle','-', 'Color','blue', 'HandleVisibility','off');
 plot(P_data2(1,:), P_data2(2,:), 'LineWidth',2.5, 'LineStyle',':', 'Color','magenta', 'HandleVisibility','off');
+plot(P_rev_data(1,:), P_rev_data(2,:), 'LineWidth',2.5, 'LineStyle','--', 'Color',[0.85 0.33 0.1], 'HandleVisibility','off');
 xlabel('x-axis [$m$]', 'interpreter','latex', 'fontsize',15);
 ylabel('y-axis [$m$]', 'interpreter','latex', 'fontsize',15);
 
-plot(ax.XLim, [limits(2) limits(2)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 0], 'HandleVisibility','off');
+scatter(obstacle(1), obstacle(2), 'LineWidth',4, 'Marker','o', ...
+    'MarkerEdgeColor',[1 0 0], 'SizeData',100, 'HandleVisibility','off');
 
 axis tight;
 hold off;
@@ -80,7 +88,7 @@ hold off;
 %% ===================================================================
 
 
-function [Time, Y_data, dY_data, ddY_data] = simulateGMP_nDoF(gmp, y0, g, T, dt, limits, gamma)
+function [Time, Y_data, dY_data, ddY_data] = simulateGMP_nDoF(gmp, y0, g, T, dt, reverse, obstacle, gamma, beta)
 
 %% Simulates a dmp
 % @param[in] gmp: Dim x 1 cell array, where each cell is a 1D GMP.
@@ -120,6 +128,15 @@ x_data = [];
 gmp.setY0(y0);
 gmp.setGoal(g);
 
+target = g;
+dir = 1;
+if (reverse)
+    dir = -1;
+    y = g;
+    x = 1;
+    target = y0;
+end
+
 %% simulate
 while (true)
 
@@ -131,8 +148,12 @@ while (true)
     % x_data = [x_data x];
 
     %% DMP simulation
-    y_c = -gamma ./ (limits - y).^3; 
-    z_c = 0.0;
+    y_c = 0; 
+    z_c = 0;
+    if (norm(dy) > 1e-3)
+        phi = acos( dot((obstacle-y), dy) / (norm(obstacle-y) * norm(dy)) );
+        z_c = gamma * [cos(phi); sin(phi)]*norm(dy)*phi*exp(-beta*phi);
+    end
     gmp.update(s, y, z, y_c, z_c);
     dy = gmp.getYdot();
     dz = gmp.getZdot();
@@ -141,10 +162,10 @@ while (true)
     ddy = gmp.getYddot(yc_dot);
 
     %% Update phase variable
-    dx = 1/tau;
+    dx = dir* 1/tau;
 
     %% Stopping criteria
-    if (t>=1*t_end) % && norm(y-g)<5e-3 && norm(dy)<5e-3)
+    if (t>=1*t_end && norm(y-target)<5e-3 && norm(dy)<5e-3)
         break;
     end
 
@@ -165,7 +186,7 @@ end
 
 
 
-function [Time, Y_data, dY_data, ddY_data] = simulateDMP(dmp, y0, g, T, dt, limits, gamma)
+function [Time, Y_data, dY_data, ddY_data] = simulateDMP(dmp, y0, g, T, dt, obstacle, gamma, beta)
 %% Simulates a dmp
 % @param[in] dmp: Dim x 1 cell array, where each cell is a 1D DMP.
 % @param[in] y0: Dim x 1 vector with the initial position..
@@ -213,12 +234,17 @@ while (true)
     dY_data = [dY_data dy];  
     ddY_data = [ddY_data ddy];
     % x_data = [x_data x];
+    
+    z_c = zeros(size(y));
+    if (norm(dy) > 1e-3)
+        phi = acos( dot((obstacle-y), dy) / (norm(obstacle-y) * norm(dy)) );
+        z_c = gamma * [cos(phi); sin(phi)]*norm(dy)*phi*exp(-beta*phi);
+    end
 
     %% DMP simulation
     for i=1:Dim
-        y_c = -gamma ./ (limits(i) - y(i)).^3; 
-        z_c = 0.0;
-        dmp{i}.update(x, y(i), z(i), g(i), y_c, z_c);
+        y_c = 0;
+        dmp{i}.update(x, y(i), z(i), g(i), y_c, z_c(i));
         dy(i) = dmp{i}.getYdot();
         dz(i) = dmp{i}.getZdot();
     

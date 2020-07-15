@@ -36,24 +36,25 @@ offline_train_mse = dmp.train(train_method, Timed, Pd_data, dPd_data, ddPd_data)
 % offline_train_mse;
 % toc
 
-ks_data = [-2, -1.5, -0.5, 0.5 1.5 2];
+kt_data = [0.5, 0.7, 0.85, 1.3, 1.6];
 
-figure;
+fig = figure();
+fig.Position(3:4) = [498 376];
 ax = axes();
 hold(ax, 'on');
 
 plot(nan,nan, 'LineWidth',3.0 ,  'LineStyle','-', 'Color','blue', 'DisplayName','novel');
 plot(nan,nan, 'LineWidth',3.0 ,  'LineStyle',':', 'Color','magenta', 'DisplayName','classical');
 plot(nan, nan, 'LineWidth',3.0 ,  'LineStyle','-', 'Color',[0 0.7 0], 'DisplayName','training');
-legend({}, 'interpreter','latex', 'fontsize',15);
+legend({}, 'interpreter','latex', 'fontsize',15, 'Position',[0.6919 0.6659 0.1986 0.1833]);
 
 plot(Timed, Pd_data, 'LineWidth',3.0 ,  'LineStyle','-', 'Color',[0 0.7 0], 'HandleVisibility','off');
 
 for k=1:length(kt_data)
     
-    ks = ks_data(k);
+    kt = kt_data(k);
     
-    kt = 1; % spatial scale
+    ks = 1; % spatial scale
     % kt = 1.3; % temporal scale
     P0 = Pd_data(1);
     Pgd = Pd_data(end);
@@ -70,8 +71,7 @@ for k=1:length(kt_data)
     xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
 
 end
-
-% plot(ax.XLim, [Pgd Pgd], 'LineWidth',3.0, 'LineStyle','-', 'Color',[0 0 1 0.3], 'HandleVisibility','off');
+plot(ax.XLim, [Pgd Pgd], 'LineWidth',2.0, 'LineStyle',':', 'Color',[0.7 0.7 0.7], 'HandleVisibility','off');
 
 axis tight;
 hold off;
