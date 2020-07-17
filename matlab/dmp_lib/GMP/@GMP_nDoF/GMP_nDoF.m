@@ -246,7 +246,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
             
             n_dof = this.length();
             fid.write([prefix 'n_dof'], n_dof);
-            for i=1:n_dof, this.gmp{i}.writeToFile(fid, ['gmp' num2str(i) '_']); end
+            for i=1:n_dof, this.gmp{i}.writeToFile(fid, [prefix 'gmp' num2str(i) '_']); end
            
         end
         
@@ -264,7 +264,7 @@ classdef GMP_nDoF < matlab.mixin.Copyable
 
             for i=1:n_dof
                 this.gmp{i} = GMP(2, 1, 1, 1);
-                this.gmp{i}.readFromFile(fid, ['gmp' num2str(i) '_']);
+                this.gmp{i}.readFromFile(fid, [prefix 'gmp' num2str(i) '_']);
             end
             
         end

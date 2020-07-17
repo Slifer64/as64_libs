@@ -18,6 +18,8 @@ classdef GMPo < GMP_nDoF
         %  \note: Each of the arguments 'N_kernels', 'D', 'K' can be scalar or a 3x1 vector.
         function this = GMPo(N_kernels, D, K, kernels_std_scaling)
 
+            if (nargin < 4), kernels_std_scaling=1; end
+            
             this = this@GMP_nDoF(3, N_kernels, D, K, kernels_std_scaling);
 
             this.setQ0([1 0 0 0]');
@@ -214,7 +216,7 @@ classdef GMPo < GMP_nDoF
             if (nargin < 3), prefix=''; end
             
             writeToFile@GMP_nDoF(this, fid, prefix);
-            fid.write('Q0', this.Q0);
+            fid.write([prefix 'Qd0'], this.Q0);
            
         end
         
@@ -226,7 +228,7 @@ classdef GMPo < GMP_nDoF
             if (nargin < 3), prefix=''; end
             
             readFromFile@GMP_nDoF(this, fid, prefix);
-            this.Q0 = fid.read('Q0');
+            this.Q0 = fid.read([prefix 'Qd0']);
             
         end
 
