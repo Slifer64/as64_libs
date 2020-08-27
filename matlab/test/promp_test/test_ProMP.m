@@ -4,25 +4,19 @@ clear;
 
 rng(0);
 
-
 set_matlab_utils_path();
 
 load('data/demo_data.mat');
 
 Time = Data.Time;
 qd_data = Data.qd_data;
+q0 = qd_data(:,1);
 
 dt = Time(2) - Time(1);
 tf = Time(end);
 
-
 N_joints = length(q0);
 n_data = length(Time);
-
-
-%% Create desired trajectory
-qd_data = get5thOrderPol(q0, qf, Time);
-
 
 %% Train ProMP and use it to create many demos
 x = Time / Time(end);
