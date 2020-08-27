@@ -1,0 +1,9 @@
+def test_freedrive_mode():
+
+  freedrive_mode()
+  
+  while (True):
+    sync()
+  end
+
+end

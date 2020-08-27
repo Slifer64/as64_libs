@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <!-- Start ur_controller -->
+    <include file="$(find ur_robot)/launch/ur_controller.launch" />
+
+    <!-- Start rviz to visualize the robot's urdf model -->
+    <include file="$(find ur_robot)/launch/ur_urdf.launch" />
+
+    <arg name="urScript_file" value="test_freedrive_mode.script" />
+
+    <!-- test node -->
+    <node pkg="ur_test" type="run_urscript" name="run_urscript_node"
+          output="screen" cwd="node" args="$(find ur_test)/ur_scripts/$(arg urScript_file)">
+
+    </node>
+
+</launch>

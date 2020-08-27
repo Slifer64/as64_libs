@@ -40,15 +40,8 @@ public:
   RobotArm(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link, double ctrl_cycle);
   ~RobotArm();
 
-  virtual bool isOk() const;
-  virtual void enable();
-  std::string getErrMsg() const;
-  lwr4p_::Mode getMode() const;
-  double getCtrlCycle() const;
-  int getNumJoints() const;
-  bool setJointsTrajectory(const arma::vec &j_targ, double duration);
-  bool setTaskTrajectory(const arma::mat &target_pose, double duration);
-
+  virtual bool isOk() const = 0;
+  virtual void enable() = 0;
   virtual void update() = 0;
   virtual void setMode(const lwr4p_::Mode &m) = 0;
   virtual void setJointsPosition(const arma::vec &j_pos) = 0;
@@ -61,15 +54,23 @@ public:
   virtual void setCartStiffness(const arma::vec &cart_stiff) = 0;
   virtual void setCartDamping(const arma::vec &cart_damp) = 0;
 
-  virtual arma::vec getJointsPosition() const;
-  virtual arma::vec getJointsVelocity() const;
-  virtual arma::mat getTaskPose() const;
-  virtual arma::vec getTaskPosition() const;
-  virtual arma::vec getTaskOrientation() const;
-  virtual arma::mat getJacobian() const;
-  virtual arma::mat getEEJacobian() const;
-  virtual arma::vec getJointsTorque() const;
-  virtual arma::vec getExternalWrench() const;
+  virtual arma::vec getJointsPosition() const = 0;
+  virtual arma::mat getTaskPose() const = 0;
+  virtual arma::vec getTaskPosition() const = 0;
+  virtual arma::mat getTaskRotm() const = 0;
+  virtual arma::vec getTaskQuat() const = 0;
+  virtual arma::mat getJacobian() const = 0;
+  virtual arma::mat getEEJacobian() const = 0;
+  virtual arma::vec getJointsTorque() const = 0;
+  virtual arma::vec getExternalWrench() const = 0;
+  virtual arma::vec getJointExternalTorque() const = 0;
+
+  lwr4p_::Mode getMode() const;
+  double getCtrlCycle() const;
+  int getNumJoints() const;
+  std::string getErrMsg() const;
+  bool setJointsTrajectory(const arma::vec &j_targ, double duration);
+  bool setTaskTrajectory(const arma::mat &target_pose, double duration);
 
   void setJointLimitCheck(bool check);
   void setSingularityCheck(bool check);
@@ -77,6 +78,7 @@ public:
 
   void readWrenchFromTopic(const std::string &topic);
   void setGetExternalWrenchFun(arma::vec (*getWrenchFun)(void));
+  void setGetExternalWrenchFun(std::function<arma::vec()> get_wrench_fun);
   template<class T>
   void setGetExternalWrenchFun(arma::vec (T::*getWrenchFun)(void), T *obj_ptr)
   {
@@ -94,11 +96,6 @@ protected:
 
   virtual void stop() = 0;
   virtual void protectiveStop() = 0;
-  virtual arma::vec getExternalWrenchImplementation() = 0;
-
-  void setJointsPositionHelper(const arma::vec &j_pos);
-  void setJointsVelocityHelper(const arma::vec &j_vel);
-  void setTaskVelocityHelper(const arma::vec &task_vel);
 
   void init();
 
@@ -109,7 +106,7 @@ protected:
 
   double SINGULARITY_THRES;
 
-  std::mutex robot_state_mtx;
+  mutable std::mutex robot_state_mtx;
 
   urdf::Model urdf_model;
 
@@ -119,8 +116,7 @@ protected:
   std::string tool_link_name;
 
   double ctrl_cycle;
-  arma::vec prev_joint_pos;
-  arma::vec joint_pos;
+
   arma::vec Fext;
 
   bool check_limits;
@@ -129,9 +125,10 @@ protected:
   std::shared_ptr<WrenchReader> wrench_reader;
 
   std::string err_msg;
+  bool checkLimits(const arma::vec &j_pos);
   bool checkJointPosLimits(const arma::vec &j_pos);
   bool checkJointVelLimits(const arma::vec &dj_pos);
-  bool checkSingularity();
+  bool checkSingularity(const arma::vec &j_pos);
 
   std::string getModeName(Mode mode) const;
 

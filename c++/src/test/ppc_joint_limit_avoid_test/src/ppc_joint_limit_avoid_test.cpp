@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     if (!ros::ok()) exit(-1);
 
     arma::vec p = lwr4p_robot->getTaskPosition();
-    arma::vec Q = lwr4p_robot->getTaskOrientation();
+    arma::vec Q = lwr4p_robot->getTaskQuat();
 
     arma::vec V_cmd(6);
     arma::vec err = arma::join_vert(p2 - p, Q2.subvec(1,3) - Q.subvec(1,3) );
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 
     arma::vec q = lwr4p_robot->getJointsPosition();
     arma::vec p = lwr4p_robot->getTaskPosition();
-    arma::vec Q = lwr4p_robot->getTaskOrientation();
+    arma::vec Q = lwr4p_robot->getTaskQuat();
 
     arma::vec V_cmd(6);
     arma::vec err = arma::join_vert(p2 - p, Q2.subvec(1,3) - Q.subvec(1,3) );

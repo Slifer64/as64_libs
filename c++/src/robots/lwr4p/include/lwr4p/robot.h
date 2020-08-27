@@ -28,30 +28,23 @@ public:
     double ctrl_cycle, const char *path_to_FRI_init=NULL);
   ~Robot();
 
-  // void setJointLimitCheck(bool check);
-  // void setSingularityCheck(bool check);
-  // void setSingularityThreshold(double thres);
-  // void readWrenchFromTopic(bool set, const std::string &topic="");
+  bool isOk() const override { return getMode()==lwr4p_::IDLE || const_cast<FastResearchInterface *>(FRI.get())->IsMachineOK(); }
+  void enable() override;
+  void setMode(const lwr4p_::Mode &m) override;
+  void update() override;
 
-  // virtual bool isOk() const;
-  // virtual void enable();
-  // std::string getErrMsg() const;
-  // lwr4p_::Mode getMode() const;
-  // double getCtrlCycle() const;
-  // int getNumJoints() const;
-  // bool setJointsTrajectory(const arma::vec &j_targ, double duration);
-
-  void setMode(const lwr4p_::Mode &m);
-  void update();
-
-  arma::vec getJointsPosition()
+  arma::vec getJointsPosition() const override
   {
-    return joint_pos;
+    arma::vec output(N_JOINTS);
+    static float temp[7];
+    FRI->GetMeasuredJointPositions(temp);
+    for (size_t i = 0; i < N_JOINTS; i++) {
+      output(i) = temp[i];
+    }
+    return output;
   }
 
-  // arma::vec getJointsVelocity() const;
-
-  arma::vec getJointsTorque()
+  arma::vec getJointsTorque() const override
   {
     arma::vec output(N_JOINTS);
     static float joint_torques[7];
@@ -67,7 +60,7 @@ public:
     return output;
   }
 
-  arma::vec getJointExternalTorque()
+  arma::vec getJointExternalTorque() const override
   {
     arma::vec output(N_JOINTS);
     static float estimated_external_joint_torques[7];
@@ -83,7 +76,7 @@ public:
     return output;
   }
 
-  arma::mat getEEJacobian()
+  arma::mat getEEJacobian() const override
   {
     arma::mat output(6, N_JOINTS);
 
@@ -100,7 +93,7 @@ public:
     return output;
   }
 
-  arma::mat getJacobian()
+  arma::mat getJacobian() const override
   {
     arma::mat output = getEEJacobian();
     static float temp[12];
@@ -115,7 +108,7 @@ public:
     return output;
   }
 
-  arma::mat getTaskPose()
+  arma::mat getTaskPose() const override
   {
     arma::mat output = arma::mat().eye(4, 4);
     static float temp[12];
@@ -131,7 +124,7 @@ public:
     return output;
   }
 
-  arma::vec getTaskPosition()
+  arma::vec getTaskPosition() const override
   {
     arma::vec output(3);
     static float temp[12];
@@ -143,7 +136,7 @@ public:
     return output;
   }
 
-  arma::mat getTaskOrientation()
+  arma::mat getTaskRotm() const override
   {
     arma::mat output(3,3);
     static float temp[12];
@@ -161,9 +154,27 @@ public:
     return output;
   }
 
-  // arma::vec getExternalWrench();
+  arma::vec getTaskQuat() const override
+  {
+    return rotm2quat(getTaskRotm());
+  }
 
-  void setJointsPosition(const arma::vec &j_pos)
+  arma::vec getExternalWrench() const override
+  {
+   arma::vec output(6);
+   static float estimated_external_cart_forces_and_torques[6];
+   FRI->GetEstimatedExternalCartForcesAndTorques(estimated_external_cart_forces_and_torques);
+   output(0) = estimated_external_cart_forces_and_torques[0];
+   output(1) = estimated_external_cart_forces_and_torques[1];
+   output(2) = estimated_external_cart_forces_and_torques[2];
+   output(3) = estimated_external_cart_forces_and_torques[3];
+   output(4) = estimated_external_cart_forces_and_torques[4];
+   output(5) = estimated_external_cart_forces_and_torques[5];
+
+   return output;
+  }
+
+  void setJointsPosition(const arma::vec &j_pos) override
   {
     if (getMode() != lwr4p_::Mode::JOINT_POS_CONTROL)
     {
@@ -181,22 +192,18 @@ public:
       FRI->WaitForKRCTick();
     }
 
-    setJointsPositionHelper(j_pos);
-    if (!isOk()) { FRI->StopRobot(); return; }
-
     // temp variables
     static float temp[7];
     // put the values from arma to float[]
-    for (int i = 0; i < 7; i++) {
-      temp[i] = joint_pos(i);
-    }
+    for (int i = 0; i < 7; i++) temp[i] = j_pos(i);
 
     // set commanded joint positions to qd
     FRI->SetCommandedJointPositions(temp);
     // saveLastJointPosition(temp);
+    last_joint_pos = j_pos;
   }
 
-  void setJointsVelocity(const arma::vec &j_vel)
+  void setJointsVelocity(const arma::vec &j_vel) override
   {
     if (getMode() != lwr4p_::Mode::JOINT_VEL_CONTROL)
     {
@@ -204,19 +211,18 @@ public:
       return;
     }
 
-    setJointsVelocityHelper(j_vel);
-    if (!isOk()) { FRI->StopRobot(); return; }
+    last_joint_pos += j_vel*getCtrlCycle();
 
     // temp variables
     static float temp[7];
     // put the values from arma to float[]
     for (int i = 0; i < 7; i++) {
-      temp[i] = joint_pos(i);
+      temp[i] = last_joint_pos(i);
     }
     FRI->SetCommandedJointPositions(temp);
   }
 
-  void setJointsTorque(const arma::vec &j_torq)
+  void setJointsTorque(const arma::vec &j_torq) override
   {
     if (getMode() != lwr4p_::Mode::JOINT_TORQUE_CONTROL)
     {
@@ -240,7 +246,7 @@ public:
     FRI->SetCommandedCartPose(temp_pose);
   }
 
-  void setTaskVelocity(const arma::vec &task_vel)
+  void setTaskVelocity(const arma::vec &task_vel) override
   {
     if (getMode() != lwr4p_::Mode::CART_VEL_CONTROL)
     {
@@ -248,19 +254,19 @@ public:
       return;
     }
 
-    setTaskVelocityHelper(task_vel);
-    if (!isOk()) { FRI->StopRobot(); return; }
+    arma::vec j_vel = arma::solve(getJacobian(),task_vel);
+    last_joint_pos += j_vel*getCtrlCycle();
 
     // temp variables
     static float temp[7];
     // put the values from arma to float[]
     for (int i = 0; i < 7; i++) {
-      temp[i] = joint_pos(i);
+      temp[i] = last_joint_pos(i);
     }
     FRI->SetCommandedJointPositions(temp);
   }
 
-  void setTaskPose(const arma::mat &input)
+  void setTaskPose(const arma::mat &input) override
   {
     if (getMode() != lwr4p_::Mode::CART_IMPEDANCE_CONTROL)
     {
@@ -292,7 +298,7 @@ public:
 
   }
 
-  void setWrench(const arma::vec &input)
+  void setWrench(const arma::vec &input) override
   {
     if (getMode() != lwr4p_::Mode::CART_IMPEDANCE_CONTROL)
     {
@@ -328,15 +334,9 @@ public:
     // saveLastJointPosition(temp_position);
   }
 
-  void setCartStiffness(const arma::vec &cart_stiff);
+  void setCartStiffness(const arma::vec &cart_stiff) override;
 
-  void setCartDamping(const arma::vec &cart_damp);
-
-  // arma::vec getJointsPosition(const arma::mat &pose, const arma::vec &q0, bool *found_solution=NULL) const;
-  // arma::mat getTaskPose(const arma::vec &j_pos) const;
-  // arma::mat getJacobian(const arma::vec j_pos) const;
-
-  // void addJointState(sensor_msgs::JointState &joint_state_msg);
+  void setCartDamping(const arma::vec &cart_damp) override;
 
 private:
 
@@ -358,43 +358,18 @@ private:
     FRI->SetCommandedCartPose(temp_pose);
   }
 
-  virtual arma::vec getExternalWrenchImplementation()
-  {
-    arma::vec output(6);
-    static float estimated_external_cart_forces_and_torques[6];
-    FRI->GetEstimatedExternalCartForcesAndTorques(estimated_external_cart_forces_and_torques);
-    output(0) = estimated_external_cart_forces_and_torques[0];
-    output(1) = estimated_external_cart_forces_and_torques[1];
-    output(2) = estimated_external_cart_forces_and_torques[2];
-    output(3) = estimated_external_cart_forces_and_torques[3];
-    output(4) = estimated_external_cart_forces_and_torques[4];
-    output(5) = estimated_external_cart_forces_and_torques[5];
-
-    return output;
-  }
-
-
   std::shared_ptr<FastResearchInterface> FRI;
   void startJointPositionController();
   void startJointTorqueController();
   void startCartImpController();
-  void stop();
-  void protectiveStop();
+  void stop() override;
+  void protectiveStop() override;
 
   void initRobot(const char *path_to_FRI_init = NULL);
 
-  arma::vec getJointsPositionFromFRI()
-  {
-    arma::vec output(N_JOINTS);
-    static float temp[7];
-    FRI->GetMeasuredJointPositions(temp);
-    for (size_t i = 0; i < N_JOINTS; i++) {
-      output(i) = temp[i];
-    }
-    return output;
-  }
+  mutable float **jacob_temp;
 
-  float **jacob_temp;
+  arma::vec last_joint_pos;
 };
 
 }  // namespace lwr4p_

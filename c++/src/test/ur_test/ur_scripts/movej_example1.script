@@ -1,0 +1,19 @@
+def movej_example1():
+
+  pi = 3.14159
+  deg2rad = pi/180
+
+  joint_vel = 0.6
+  joint_accel = 1.0
+  Cart_vel = 1.2
+  Cart_accel = 10.0
+
+
+  init_joint_pos = [54*deg2rad, -62*deg2rad, 73*deg2rad, 14*deg2rad, 10*deg2rad, -1*deg2rad]
+  goal_joint_pos = [-20*deg2rad, -80*deg2rad, 105*deg2rad, 30*deg2rad, 25*deg2rad, -15*deg2rad]
+
+
+  movej(init_joint_pos, joint_vel, joint_accel)
+  movej(goal_joint_pos, joint_vel, joint_accel)
+
+end

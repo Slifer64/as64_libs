@@ -16,50 +16,33 @@ public:
   SimRobot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link, double ctrl_cycle);
   SimRobot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link, double ctrl_cycle);
 
-  // void setJointLimitCheck(bool check);
-  // void setSingularityCheck(bool check);
-  // void setSingularityThreshold(double thres);
-  // void readWrenchFromTopic(bool set, const std::string &topic="");
+  bool isOk() const override;
+  void enable() override;
+  void update() override;
+  void setMode(const lwr4p_::Mode &m) override;
 
-  // virtual bool isOk() const;
-  // virtual void enable();
-  // std::string getErrMsg() const;
-  // lwr4p_::Mode getMode() const;
-  // double getCtrlCycle() const;
-  // int getNumJoints() const;
-  // bool setJointsTrajectory(const arma::vec &j_targ, double duration);
+  void setJointsPosition(const arma::vec &j_pos) override;
+  void setJointsVelocity(const arma::vec &j_vel) override;
+  void setTaskVelocity(const arma::vec &task_vel) override;
+  void setJointsTorque(const arma::vec &j_torques) override;
+  void setTaskPose(const arma::mat &task_pose) override;
+  void setWrench(const arma::vec &wrench) override;
 
-  virtual void update();
-  virtual void setMode(const lwr4p_::Mode &m);
+  arma::vec getJointsPosition() const override;
+  arma::mat getTaskPose() const override;
+  arma::vec getTaskPosition() const override;
+  arma::mat getTaskRotm() const override;
+  arma::vec getTaskQuat() const override;
+  arma::mat getJacobian() const override;
+  arma::mat getEEJacobian() const override;
+  arma::vec getJointsTorque() const override;
+  arma::vec getExternalWrench() const override;
+  arma::vec getJointExternalTorque() const override;
 
-  void setJointsPosition(const arma::vec &j_pos);
-  void setJointsVelocity(const arma::vec &j_vel);
-  void setTaskVelocity(const arma::vec &task_vel);
-  void setJointsTorque(const arma::vec &j_torques);
-  void setTaskPose(const arma::mat &task_pose);
-  void setWrench(const arma::vec &wrench);
+  void setCartStiffness(const arma::vec &cart_stiff) override;
+  void setCartDamping(const arma::vec &cart_damp) override;
 
-  // virtual void setCartStiffness(const arma::vec &cart_stiff);
-  // virtual void setCartDamping(const arma::vec &cart_damp);
-  //
-  // virtual arma::vec getJointsPosition() const;
-  // virtual arma::vec getJointsVelocity() const;
-  // virtual arma::mat getTaskPose() const;
-  // virtual arma::vec getTaskPosition() const;
-  // virtual arma::vec getTaskOrientation() const;
-  // virtual arma::mat getJacobian() const;
-  // virtual arma::mat getEEJacobian() const;
-  // virtual arma::vec getJointsTorque() const;
-  // virtual arma::vec getExternalWrench() const;
-
-  virtual void setCartStiffness(const arma::vec &cart_stiff);
-  virtual void setCartDamping(const arma::vec &cart_damp);
-
-  // arma::vec getJointsPosition(const arma::mat &pose, const arma::vec &q0, bool *found_solution=NULL) const;
-  // arma::mat getTaskPose(const arma::vec &j_pos) const;
-  // arma::mat getJacobian(const arma::vec j_pos) const;
-  //
-  // void addJointState(sensor_msgs::JointState &joint_state_msg);
+  void initJointsPosition(const arma::vec j_pos0);
 
 private:
 
@@ -67,11 +50,12 @@ private:
   arma::vec cart_damp;
 
   void initSimRobot();
+  void setJointsPositionHelper(const arma::vec &j_pos);
 
-  arma::vec getExternalWrenchImplementation();
+  arma::vec joint_pos;
 
-  void stop();
-  void protectiveStop();
+  void stop() override;
+  void protectiveStop() override;
 
   lwr4p_::Timer timer;
   unsigned long update_time;

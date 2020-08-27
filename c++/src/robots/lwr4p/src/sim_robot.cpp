@@ -6,6 +6,8 @@ namespace as64_
 namespace lwr4p_
 {
 
+#define LWR4p_SimRobot_fun_ std::string("[lwr4p_::SimRobot::") + __func__ + "]: "
+
 SimRobot::SimRobot()
 {
   initSimRobot();
@@ -25,11 +27,10 @@ SimRobot::SimRobot(const std::string &robot_desc_param, const std::string &base_
 
 void SimRobot::initSimRobot()
 {
+  std::function<arma::vec()> zero_wrench_fun = [](){ return arma::vec().zeros(6); };
+  setGetExternalWrenchFun(zero_wrench_fun);
   // jState_pub = node.advertise<sensor_msgs::JointState>(pub_state_topic, 1);
   jState_sub = node.subscribe("/joint_states", 1, &SimRobot::jStateSubCallback, this);
-
-  setGetExternalWrenchFun(&SimRobot::getExternalWrenchImplementation, this);
-
   update_time = (unsigned long)(getCtrlCycle()*1e9);
   timer.start();
 }
@@ -76,6 +77,84 @@ void SimRobot::update()
   timer.start(); // restart time cycle
 }
 
+bool SimRobot::isOk() const
+{
+  return getMode()!=lwr4p_::Mode::PROTECTIVE_STOP;
+}
+
+void SimRobot::enable()
+{
+  mode = lwr4p_::Mode::IDLE;
+  update();
+}
+
+// =================  GET functions  ========================
+
+arma::vec SimRobot::getJointsPosition() const
+{
+  std::unique_lock<std::mutex> lck(robot_state_mtx);
+  return joint_pos;
+}
+
+arma::mat SimRobot::getTaskPose() const
+{
+  // std::unique_lock<std::mutex> lck(robot_state_mtx);
+  return robot_urdf->getTaskPose(getJointsPosition());
+}
+
+arma::vec SimRobot::getTaskPosition() const
+{
+  // std::unique_lock<std::mutex> lck(robot_state_mtx);
+  return getTaskPose().submat(0,3,2,3);
+}
+
+arma::mat SimRobot::getTaskRotm() const
+{
+  return getTaskPose().submat(0,0,2,2);
+}
+
+arma::vec SimRobot::getTaskQuat() const
+{
+  return rotm2quat(getTaskRotm());
+}
+
+arma::mat SimRobot::getJacobian() const
+{
+  return robot_urdf->getJacobian(getJointsPosition());
+}
+
+arma::mat SimRobot::getEEJacobian() const
+{
+  // std::unique_lock<std::mutex> lck(robot_state_mtx);
+  arma::mat R = getTaskPose().submat(0,0,2,2);
+  arma::mat Jrobot = getJacobian();
+  arma::mat Jee(6, N_JOINTS);
+  Jee.submat(0,0,2,N_JOINTS-1) = R * Jrobot.submat(0,0,2,N_JOINTS-1);
+  Jee.submat(3,0,5,N_JOINTS-1) = R * Jrobot.submat(3,0,5,N_JOINTS-1);
+
+  return Jee;
+}
+
+arma::vec SimRobot::getJointsTorque() const
+{
+  // std::unique_lock<std::mutex> lck(robot_state_mtx);
+  throw std::runtime_error("[ERROR]: SimRobot::getJointsTorque is not supported.");
+}
+
+arma::vec SimRobot::getExternalWrench() const
+{
+  // std::unique_lock<std::mutex> lck(robot_state_mtx);
+  if (!get_wrench_fun_ptr) throw std::runtime_error(LWR4p_SimRobot_fun_ + "Function is not initialized...\n");
+  return get_wrench_fun_ptr();
+}
+
+arma::vec SimRobot::getJointExternalTorque() const
+{
+  return getJacobian().t() * getExternalWrench();
+}
+
+// =================  SET functions  ========================
+
 void SimRobot::setJointsPosition(const arma::vec &j_pos)
 {
   if (getMode() != lwr4p_::Mode::JOINT_POS_CONTROL)
@@ -98,7 +177,10 @@ void SimRobot::setJointsVelocity(const arma::vec &j_vel)
   }
 
   err_msg = ""; // clear the error msg
-  setJointsVelocityHelper(j_vel);
+
+  arma::vec j_pos = getJointsPosition() + j_vel*getCtrlCycle();
+  setJointsPositionHelper(j_pos);
+
 }
 
 void SimRobot::setTaskVelocity(const arma::vec &task_vel)
@@ -109,7 +191,10 @@ void SimRobot::setTaskVelocity(const arma::vec &task_vel)
     print_warn_msg("[lwr4+::SimRobot::setTaskVelocity]: Cannot set task velocity. Current mode is \"" + getModeName(getMode()) + "\"\n");
     return;
   }
-  setTaskVelocityHelper(task_vel);
+
+  arma::vec j_vel = arma::solve(getJacobian(),task_vel);
+  arma::vec j_pos = getJointsPosition() + j_vel*getCtrlCycle();
+  setJointsPositionHelper(j_pos);
 }
 
 void SimRobot::setJointsTorque(const arma::vec &j_torques)
@@ -137,6 +222,18 @@ void SimRobot::setCartDamping(const arma::vec &cart_damp)
   this->cart_damp = cart_damp;
 }
 
+void SimRobot::setJointsPositionHelper(const arma::vec &j_pos)
+  {
+    if (checkLimits(j_pos))
+    {
+      std::unique_lock<std::mutex> lck(robot_state_mtx);
+      joint_pos = j_pos;
+    }
+    else setMode(lwr4p_::Mode::PROTECTIVE_STOP);
+  }
+
+// =====================================================
+
 void SimRobot::stop()
 {
   if (getMode() == lwr4p_::IDLE) return;
@@ -144,7 +241,6 @@ void SimRobot::stop()
   update();
   arma::vec q_current = getJointsPosition();
   setJointsPositionHelper(q_current);
-  prev_joint_pos = getJointsPosition();
   if (isOk()) mode = lwr4p_::IDLE;
 }
 
@@ -152,8 +248,6 @@ void SimRobot::protectiveStop()
 {
   if (getMode() == lwr4p_::PROTECTIVE_STOP) return;
 
-  joint_pos = getJointsPosition();
-  prev_joint_pos = joint_pos;
   mode = lwr4p_::Mode::PROTECTIVE_STOP;
   print_warn_msg("Mode changed to \"" + getModeName(getMode()) + "\"\n");
 }
@@ -167,15 +261,16 @@ void SimRobot::jStateSubCallback(const sensor_msgs::JointState::ConstPtr& j_stat
   for (int i=0;i<j_state->name.size();i++)
     j_map.insert( std::pair<std::string,double>(j_state->name[i], j_state->position[i]) );
 
+  std::unique_lock<std::mutex> lck(robot_state_mtx);
   for (int i=0;i<robot_urdf->getNumJoints();i++)
     joint_pos[i] = j_map[robot_urdf->getJointName(i)];
   // joint_vel = j_state->velocity;
   // joint_torques = j_state->effort;
 }
 
-arma::vec SimRobot::getExternalWrenchImplementation()
+void SimRobot::initJointsPosition(const arma::vec j_pos0)
 {
-  return arma::vec().zeros(6);
+  joint_pos = j_pos0;
 }
 
 }; // namespace lwr4p_

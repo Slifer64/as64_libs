@@ -107,14 +107,7 @@ void RobotArm::init()
 
   // preallocate space for all states
   N_JOINTS = robot_urdf->getNumJoints();
-  joint_pos.zeros(N_JOINTS);
-  prev_joint_pos.zeros(N_JOINTS);
   Fext.zeros(6);
-}
-
-bool RobotArm::isOk() const
-{
-  return getMode()!=lwr4p_::Mode::PROTECTIVE_STOP;
 }
 
 void RobotArm::setJointLimitCheck(bool check)
@@ -137,12 +130,9 @@ void RobotArm::setGetExternalWrenchFun(arma::vec (*getWrenchFun)(void))
   get_wrench_fun_ptr = std::bind(getWrenchFun);
 }
 
-void RobotArm::enable()
+void RobotArm::setGetExternalWrenchFun(std::function<arma::vec()> get_wrench_fun)
 {
-  mode = lwr4p_::Mode::IDLE;
-  joint_pos = getJointsPosition();
-  prev_joint_pos = joint_pos;
-  update();
+  get_wrench_fun_ptr = get_wrench_fun;
 }
 
 std::string RobotArm::getErrMsg() const
@@ -152,17 +142,14 @@ std::string RobotArm::getErrMsg() const
 
 void RobotArm::addJointState(sensor_msgs::JointState &joint_state_msg)
 {
-  std::unique_lock<std::mutex> lck(robot_state_mtx);
-
   arma::vec j_pos = getJointsPosition();
-  arma::vec j_vel = getJointsVelocity();
 
   for (int i=0;i<N_JOINTS;i++)
   {
     joint_state_msg.name.push_back(robot_urdf->getJointName(i));
     joint_state_msg.position.push_back(j_pos(i));
-    joint_state_msg.velocity.push_back(j_vel(i));
-    joint_state_msg.effort.push_back(0.0);
+    // joint_state_msg.velocity.push_back(j_vel(i));
+    // joint_state_msg.effort.push_back(0.0);
   }
 }
 
@@ -268,98 +255,23 @@ bool RobotArm::setTaskTrajectory(const arma::mat &target_pose, double duration)
   return false;
 }
 
-void RobotArm::setJointsPositionHelper(const arma::vec &j_pos)
+bool RobotArm::checkLimits(const arma::vec &j_pos)
 {
-  arma::vec current_j_pos = joint_pos; // getJointsPosition();
+  arma::vec current_j_pos = getJointsPosition();
   arma::vec dj_pos = (j_pos - current_j_pos) / ctrl_cycle;
 
   if (check_limits)
   {
-    if (!checkJointPosLimits(j_pos)) return;
-    if (!checkJointVelLimits(dj_pos)) return;
+    if (!checkJointPosLimits(j_pos)) return false;
+    if (!checkJointVelLimits(dj_pos)) return false;
   }
 
   if (check_singularity)
   {
-    if (!checkSingularity()) return;
+    if (!checkSingularity(j_pos)) return false;
   }
 
-  std::unique_lock<std::mutex> lck(robot_state_mtx);
-
-  prev_joint_pos = current_j_pos;
-  joint_pos = j_pos;
-}
-
-void RobotArm::setJointsVelocityHelper(const arma::vec &j_vel)
-{
-  setJointsPositionHelper(getJointsPosition() + j_vel*ctrl_cycle);
-}
-
-void RobotArm::setTaskVelocityHelper(const arma::vec &task_vel)
-{
-  setJointsVelocityHelper(arma::solve(getJacobian(),task_vel));
-}
-
-arma::vec RobotArm::getJointsPosition() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return joint_pos;
-}
-
-arma::vec RobotArm::getJointsVelocity() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return (joint_pos - prev_joint_pos)/getCtrlCycle();
-}
-
-arma::mat RobotArm::getTaskPose() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return robot_urdf->getTaskPose(getJointsPosition());
-}
-
-arma::vec RobotArm::getTaskPosition() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return getTaskPose().submat(0,3,2,3);
-}
-
-arma::vec RobotArm::getTaskOrientation() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  arma::mat R = getTaskPose().submat(0,0,2,2);
-  arma::vec quat = rotm2quat(R);
-  return quat;
-}
-
-arma::mat RobotArm::getJacobian() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return robot_urdf->getJacobian(getJointsPosition());
-}
-
-arma::mat RobotArm::getEEJacobian() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  arma::mat R = getTaskPose().submat(0,0,2,2);
-  arma::mat Jrobot = getJacobian();
-  arma::mat Jee(6, N_JOINTS);
-  Jee.submat(0,0,2,N_JOINTS-1) = R * Jrobot.submat(0,0,2,N_JOINTS-1);
-  Jee.submat(3,0,5,N_JOINTS-1) = R * Jrobot.submat(3,0,5,N_JOINTS-1);
-
-  return Jee;
-}
-
-arma::vec RobotArm::getJointsTorque() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return getJacobian().t() * getExternalWrench();
-}
-
-arma::vec RobotArm::getExternalWrench() const
-{
-  // std::unique_lock<std::mutex> lck(robot_state_mtx);
-  return get_wrench_fun_ptr();
+  return true;
 }
 
 bool RobotArm::checkJointPosLimits(const arma::vec &j_pos)
@@ -372,8 +284,7 @@ bool RobotArm::checkJointPosLimits(const arma::vec &j_pos)
       std::ostringstream out;
       out << robot_urdf->getJointName(i) << ": position limit reached: " << j_pos(i) << " rad";
       err_msg = out.str();
-      // print_err_msg(err_msg);
-      setMode(lwr4p_::Mode::PROTECTIVE_STOP);
+      print_err_msg(err_msg);
       return false;
     }
   }
@@ -390,8 +301,7 @@ bool RobotArm::checkJointVelLimits(const arma::vec &dj_pos)
       std::ostringstream out;
       out << robot_urdf->getJointName(i) << ": velocity limit reached: " << dj_pos(i) << " rad/s";
       err_msg = out.str();
-      // print_err_msg(err_msg);
-      setMode(lwr4p_::Mode::PROTECTIVE_STOP);
+      print_err_msg(err_msg);
       return false;
     }
   }
@@ -399,7 +309,7 @@ bool RobotArm::checkJointVelLimits(const arma::vec &dj_pos)
   return true;
 }
 
-bool RobotArm::checkSingularity()
+bool RobotArm::checkSingularity(const arma::vec &j_pos)
 {
 
   if (getMode()!=lwr4p_::Mode::CART_VEL_CONTROL &&
@@ -408,7 +318,7 @@ bool RobotArm::checkSingularity()
   bool singularity_reached = false;
 
   arma::vec eigval; // = arma::eig_gen(Jrobot);
-  arma::svd(eigval, getJacobian());
+  arma::svd(eigval, robot_urdf->getJacobian(j_pos));
 
   if (arma::min(arma::abs(eigval)) < SINGULARITY_THRES) singularity_reached = true;
 
@@ -416,7 +326,6 @@ bool RobotArm::checkSingularity()
   {
     err_msg = "Singularity reached!";
     // print_err_msg(err_msg);
-    setMode(lwr4p_::Mode::PROTECTIVE_STOP);
     return false;
   }
 
