@@ -8,7 +8,7 @@
 
 
 classdef EKF < handle
-    properties
+    properties (Access = public)
         F_k % state transition function Jacobian
         H_k % measurement function Jacobian
         K % Kalman gain
@@ -183,6 +183,7 @@ classdef EKF < handle
 
             % =====  Correction estimates ===== 
             Kg = this.P*this.H_k'/(this.H_k*this.P*this.H_k' + this.R);
+            
             this.theta = this.theta + Kg * (z - z_hat);
             
             % =====  Apply projection if enabled  ===== 
@@ -280,7 +281,7 @@ classdef EKF < handle
                 H_k(:,j) = (Htheta2 - Htheta1) / (2*this.dtheta(j));
                 dtheta_j(j) = 0.0;
             end
-            
+
         end
 
 

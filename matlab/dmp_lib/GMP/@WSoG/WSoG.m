@@ -148,6 +148,29 @@ classdef WSoG < matlab.mixin.Copyable
         
         %% =============================================================
         
+        function j = doutput_dgoal(this, x, g)
+            
+            sc = (g - this.f0) / (this.fg_d - this.f0_d); 
+            psi = this.kernelFun(x);
+            phi = psi / (sum(psi) + this.zero_tol);
+            
+            j = sc * ( dot(phi,this.w) - this.f0_d );
+            
+        end
+        
+        function j = doutput_dx(this, x, g)
+            
+            psi = this.kernelFun(x);
+            sum_psi = sum(psi);
+            dpsi = -2 * ( this.h.*(x-this.c) ) .* this.kernelFun(x);
+            sum_dpsi = sum(dpsi);
+            
+            sc = (g - this.f0) / (this.fg_d - this.f0_d);
+            
+            j = sc * (dot(this.w,dpsi)*sum_psi - dot(this.w,psi)*sum_dpsi ) / (sum_psi^2 + this.zero_tol);
+            
+        end
+            
         %% Returns the scaled position produced by the model for a given phase variable value.
         %  If a new final (or initial) value has been set, then the
         %  produced position will be spatially scaled accordingly.
