@@ -1,6 +1,6 @@
 
 
-classdef GmpEkfTest < handle
+classdef GmpEkfTest_tau < handle
     
     methods (Static, Access = public)
         
@@ -13,7 +13,7 @@ classdef GmpEkfTest < handle
             close all;
             clear;
             
-            obj = GmpEkfTest();
+            obj = GmpEkfTest_tau();
             
             obj.train('data/train_data.mat');
             % obj.plotTrainResults();
@@ -27,7 +27,7 @@ classdef GmpEkfTest < handle
     
     methods (Access = public)
         
-        function this = GmpEkfTest()
+        function this = GmpEkfTest_tau()
 
         end
         
@@ -90,19 +90,22 @@ classdef GmpEkfTest < handle
         
         function simulate(this)
             
-            this.g_new = this.g0;
-            this.tau_new = 5;
-            dt = 0.005;
+            rng(0);
             
-            theta0 = [this.p0+0.1; 0];
+            this.g_new = this.g0;
+            this.tau_new = 9;
+            dt = 0.002;
+            noise_std = 1e-8;
+            
+            theta0 = [this.p0; 7];
             
             this.N_params = length(theta0);
             this.N_out = 1;
             
             Qn = diag([0.002; 0.02]);
             Rn = 1 * eye(this.N_out, this.N_out);
-            a_p = 1.0000;
-            P_theta = diag([1; 1]);
+            a_p = 1.002;
+            P_theta = diag([1e2; 1e2]);
             
             num_diff_step = [0.001; 0.001];
             
@@ -114,21 +117,21 @@ classdef GmpEkfTest < handle
             this.ekf.P = P_theta;
 
             A_c = [0 -1; 0 1];
-            b_c = [0; 1];
+            b_c = [0.5; 30];
             this.ekf.enableParamsContraints(true);
             this.ekf.setParamsConstraints(A_c, b_c);
             this.ekf.setPartDerivStep(num_diff_step);
 
-            %this.ekf.setStateTransFunJacob(@this.stateTransFunJacob);
-            %this.ekf.setMsrFunJacob(@this.msrFunJacob);
+            % this.ekf.setStateTransFunJacob(@this.stateTransFunJacob);
+            % this.ekf.setMsrFunJacob(@this.msrFunJacob);
+            
+            Ln = eye(this.N_out, this.N_out) * sqrt(noise_std);
             
             g = this.g_new;
             tau = this.tau_new;
             
             g_hat = theta0(1:end-1);
-            x_hat = theta0(end);
-            
-            theta = [g_hat; x_hat];
+            tau_hat = theta0(end);
             
             this.gmp.setY0(this.p0);
             this.gmp.setGoal(g);
@@ -139,28 +142,31 @@ classdef GmpEkfTest < handle
 
                 x = t / tau;
                 z = this.gmp.getYd(x);
+                z_n = z + Ln*randn(this.N_out,1);
                 
                 g0 = this.gmp.getGoal();
                 this.gmp.setGoal(g_hat);
+                x_hat = t / tau_hat;
                 z_hat = this.gmp.getYd(x_hat);
                 this.gmp.setGoal(g0);
                 
                 this.Time = [this.Time t];
                 this.g_hat_data = [this.g_hat_data g_hat];
-                this.x_hat_data = [this.x_hat_data x_hat];
+                this.tau_hat_data = [this.tau_hat_data tau_hat];
                 this.z_hat_data = [this.z_hat_data z_hat];
-                this.x_data = [this.x_data x];
+                this.tau_data = [this.tau_data tau];
                 this.z_data = [this.z_data z];
+                this.z_n_data = [this.z_n_data z_n];
                 
                 cookie = struct('t',t, 'dt',dt);
-                this.ekf.correct(z, cookie);
+                this.ekf.correct(z_n, cookie); 
                 this.ekf.predict(cookie);
                 
                 theta = this.ekf.theta;
 
                 t = t + dt;
                 g_hat = theta(1:end-1);
-                x_hat = theta(end);
+                tau_hat = theta(end);
                 
                 if (t >= tau), break; end
                 
@@ -180,65 +186,63 @@ classdef GmpEkfTest < handle
             legend({'$\hat{g}$', '$g$'}, 'interpreter','latex', 'fontsize',15);
             % -------------------------------------------
             ax = subplot(3,1,2); hold(ax, 'on');
-            plot(this.Time, this.x_hat_data, 'LineWidth',2, 'Color', [0.85 0.33 0.1]);
-            plot(this.Time, this.x_data, 'LineWidth',2, 'Color', 'cyan', 'LineStyle','--');
+            plot(this.Time, this.tau_hat_data, 'LineWidth',2, 'Color', [0.85 0.33 0.1]);
+            plot(this.Time, this.tau_data, 'LineWidth',2, 'Color', 'cyan', 'LineStyle','--');
             axis tight;
-            legend({'$\hat{x}$', '$x$'}, 'interpreter','latex', 'fontsize',15);
+            legend({'$\hat{\tau}$', '$\tau$'}, 'interpreter','latex', 'fontsize',15);
             xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
             % -------------------------------------------
             ax = subplot(3,1,3); hold(ax, 'on');
+            plot(this.Time, this.z_n_data, 'LineWidth',2, 'Color', 'green', 'LineStyle','-');
             plot(this.Time, this.z_hat_data, 'LineWidth',2, 'Color', 'blue');
             plot(this.Time, this.z_data, 'LineWidth',2, 'Color', 'magenta', 'LineStyle','--');
             axis tight;
-            legend({'$\hat{z}$', '$z$'}, 'interpreter','latex', 'fontsize',15);
+            legend({'$z_n$','$\hat{z}$', '$z$'}, 'interpreter','latex', 'fontsize',15);
             xlabel('time [$s$]', 'interpreter','latex', 'fontsize',15);
             
         end
 
         function theta_next = stateTransFun(this, theta, cookie)
-            
-            dt = cookie.dt;
-            t = cookie.t;
-            
+
             theta_next = theta;
-            theta_next(end) = theta(end)*(1 + dt/t);
             
         end
         
         function z = msrFun(this, theta, cookie)
             
             g = theta(1:end-1);
-            x = theta(end);
+            tau = theta(end);
             
             g0 = this.gmp.getGoal(); % store current goal
             
             this.gmp.setGoal(g);
+            x = cookie.t / tau;
             y = this.gmp.getYd(x);
 
-            z = y;
-            
             this.gmp.setGoal(g0); % restore previous goal
             
+            z = y;
+
         end
 
         function J = stateTransFunJacob(this, theta, cookie)
            
-            dt = cookie.dt;
-            t = cookie.t;
-            
-            J = eye(this.N_params, this.N_params);
-            J(end, end) = (1 + dt/t);
+            N = length(theta);
+            J = eye(N,N);
             
         end
         
         function J = msrFunJacob(this, theta, cookie)
             
+            t = cookie.t;
             g = theta(1:end-1);
-            x = theta(end);
+            tau = theta(end);
+            x = t/tau;
+            dx_dt = 1/tau;
       
             J = zeros(this.N_out, this.N_params);
             J(:,1) = this.gmp.dYd_dgoal(x, g);
-            J(:,end) = this.gmp.dYd_dx(x, g);
+            J(:,end) = this.gmp.dYd_dx(x, g) * dx_dt;
 
         end
         
@@ -267,10 +271,11 @@ classdef GmpEkfTest < handle
         % sim data
         Time
         g_hat_data
-        x_hat_data
+        tau_hat_data
         z_hat_data
         z_data
-        x_data
+        z_n_data
+        tau_data
     
     end
     
