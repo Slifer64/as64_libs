@@ -94,7 +94,7 @@ classdef GmpEkfTest < handle
             this.tau_new = 5;
             dt = 0.005;
             
-            theta0 = [this.p0+0.1; 0];
+            theta0 = [this.p0+0.1; 0.01];
             
             this.N_params = length(theta0);
             this.N_out = 1;
@@ -119,7 +119,7 @@ classdef GmpEkfTest < handle
             this.ekf.setParamsConstraints(A_c, b_c);
             this.ekf.setPartDerivStep(num_diff_step);
 
-            %this.ekf.setStateTransFunJacob(@this.stateTransFunJacob);
+            this.ekf.setStateTransFunJacob(@this.stateTransFunJacob);
             %this.ekf.setMsrFunJacob(@this.msrFunJacob);
             
             g = this.g_new;
@@ -153,7 +153,7 @@ classdef GmpEkfTest < handle
                 this.z_data = [this.z_data z];
                 
                 cookie = struct('t',t, 'dt',dt);
-                this.ekf.correct(z, cookie);
+%                 this.ekf.correct(z, cookie);
                 this.ekf.predict(cookie);
                 
                 theta = this.ekf.theta;

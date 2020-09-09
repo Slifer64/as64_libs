@@ -150,7 +150,7 @@ classdef WSoG < matlab.mixin.Copyable
         
         function j = doutput_dgoal(this, x, g)
             
-            sc = (g - this.f0) / (this.fg_d - this.f0_d); 
+            sc = 1 / (this.fg_d - this.f0_d); 
             psi = this.kernelFun(x);
             phi = psi / (sum(psi) + this.zero_tol);
             

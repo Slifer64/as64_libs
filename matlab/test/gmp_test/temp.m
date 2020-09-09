@@ -3,11 +3,34 @@ close all;
 clear;
 
 
-Q = [ 0.685; 0.725; 0.044; -0.054 ];
-Q = Q / norm(Q);
+n = 20;
 
-Q2 = rotm2quat(rotz(40))';
+S = zeros(n, n);
 
-Q_ = quatProd(Q, Q2)'
+for i=1:n
+    for j=1:n
+        S(i,j) = calc(i,j);
+    end
+end
+
+
+S(1,:)
+
+e = eig(S);
+is_spd = isempty(find(e<=0))
+
+
+
+
+function a = calc(i,j)
+
+    
+    % a = 1 / ( 0.1*abs(i-j)^2 + 1 );
+    
+    a = exp(-0.5 * abs(i-j));
+
+
+end
+
 
 
