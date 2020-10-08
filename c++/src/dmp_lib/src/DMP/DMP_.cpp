@@ -64,7 +64,7 @@ void DMP_::train(dmp_::TrainMethod train_method, const arma::rowvec &Time,
       this->w = leastSquares(Psi, s, Fd, this->zero_tol);
       break;
     default:
-      throw std::runtime_error("[DMP_::train]: Unsupported training method");
+      throw std::runtime_error("[DMP_::train]: Unsopported training method");
   }
 
 

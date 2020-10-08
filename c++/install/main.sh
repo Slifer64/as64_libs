@@ -14,7 +14,7 @@ COLOR_RESET="\033[0m"
 cd $INSTALL_SCRIPTS_DIR
 AS64_ERROR=0
 
-declare -a arr=("eigen3" "armadillo") # "eigen3" "armadillo" "frilibrary" "ati_sensor" "qt5")
+declare -a arr=("bhand") # "bhand" "eigen3" "armadillo" "frilibrary" "ati_sensor" "qt5")
 
 echo -e $COLOR_BLUE"Installing dependencies for "$PROJECT_NAME $COLOR_RESET
 

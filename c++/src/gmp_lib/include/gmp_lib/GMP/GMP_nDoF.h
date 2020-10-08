@@ -37,6 +37,9 @@ public:
    */
   unsigned length() const;
 
+  void setStiffness(const arma::vec &K) { for (int i=0; i<length(); i++) gmp[i]->setStiffness(K(i)); }
+
+  void setDamping(const arma::vec &D) { for (int i=0; i<length(); i++) gmp[i]->setDamping(D(i)); }
 
   /* Trains the GMP.
    * @param[in] train_method: the training method to use, as a string ('LWR', 'LS').
@@ -114,6 +117,8 @@ public:
   // Creates a deep copy of this object
   // cp_obj = deepCopy()
 
+  arma::vec getYd0() const { return getYd(0); }
+  arma::vec getYdf() const { return getYd(1); }
 
   /* Returns the scaled desired position.
    * @param[in] x: phase variable.

@@ -36,6 +36,7 @@ void GMPo::train(const std::string &train_method, const arma::rowvec &Time, cons
 
   unsigned n_data = Time.size();
   this->setQ0(Quat_data.col(0));
+  Qd0 = Quat_data.col(0);
 
   arma::mat qd_data(3, n_data);
   for (int j=0; j<n_data; j++)
@@ -155,13 +156,35 @@ std::shared_ptr<GMPo> GMPo::importFromFile(const std::string &filename)
 void GMPo::writeToFile(FileIO &fid, const std::string &prefix) const
 {
   GMP_nDoF::writeToFile(fid, prefix);
-  fid.write("Q0", this->Q0);
+  fid.write(prefix+"Qd0", this->Qd0);
 }
 
 void GMPo::readFromFile(FileIO &fid, const std::string &prefix)
 {
   GMP_nDoF::readFromFile(fid, prefix);
-  fid.read("Q0", this->Q0);
+  fid.read(prefix+"Qd0", this->Qd0);
+  this->Q0 = this->Qd0;
+}
+
+
+arma::vec GMPo::getQd(double x) const
+{
+  return gmp_::GMPo::q2quat(getYd(x), Qd0);
+}
+
+arma::vec GMPo::getRotVeld(double x, double x_dot) const
+{
+  arma::vec q_dot = getYdDot(x, x_dot);
+  arma::vec Q1 = gmp_::GMPo::quatTf(getQd(x),Qd0);
+  return gmp_::GMPo::qdot2rotVel( q_dot, Q1 );
+}
+
+arma::vec GMPo::getRotAcceld(double x, double x_dot, double x_ddot) const
+{
+  arma::vec q_ddot = getYdDDot(x, x_dot, x_ddot);
+  arma::vec Q1 = gmp_::GMPo::quatTf(getQd(x),Qd0);
+  arma::vec rotVel = getRotVeld(x, x_dot);
+  return gmp_::GMPo::rotAccel2qddot(q_ddot, rotVel, Q1);
 }
 
 

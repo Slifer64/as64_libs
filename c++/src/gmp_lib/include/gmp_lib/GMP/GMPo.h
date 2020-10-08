@@ -72,6 +72,10 @@ public:
    */
   void setQ0(const arma::vec &Q0);
 
+  arma::vec getQd0() const { return Qd0; }
+
+  arma::vec getQdf() const { return q2quat(getYdf(),Qd0); }
+
 
   /* Sets goal/target orientation.
    * @param[in] Qg: Goal/target orientation (as unit quaternion).
@@ -81,6 +85,10 @@ public:
 
   // See @GMP_nDoF.deepCopy
   // cp_obj = deepCopy()
+
+  arma::vec getQd(double x) const;
+  arma::vec getRotVeld(double x, double x_dot) const;
+  arma::vec getRotAcceld(double x, double x_dot, double x_ddot) const;
 
 
   // See @GMP_nDoF.getYd
@@ -200,6 +208,8 @@ public:
 protected:
 
   arma::vec Q0; ///< initial orientation (as unit quaternion)
+
+  arma::vec Qd0; ///< initial demonstrated orientation (as unit quaternion)
 
 
   // =======  Static properties  ========

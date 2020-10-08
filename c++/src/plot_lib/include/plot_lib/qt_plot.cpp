@@ -300,7 +300,6 @@ Axes::Axes(Figure *parent): QCustomPlot(parent)
   QObject::connect(this, &Axes::setYLabelSignal, this, &Axes::setYLabelSlot, Qt::BlockingQueuedConnection);
   QObject::connect(this, &Axes::setLegendSignal, this, &Axes::setLegendSlot, Qt::BlockingQueuedConnection);
   QObject::connect(this, SIGNAL(plotSignal(const void *, const void *)), this, SLOT(plotSlot(const void *, const void *)), Qt::BlockingQueuedConnection);
-  QObject::connect(this, SIGNAL(barSignal(const void *, const void *)), this, SLOT(barSlot(const void *, const void *)), Qt::BlockingQueuedConnection);
   QObject::connect(this, &Axes::drawnowSignal, this, &Axes::drawnowSlot, Qt::BlockingQueuedConnection);
 
   this->resize(667, 452);
@@ -360,7 +359,7 @@ Graph *Axes::plot(const arma::vec &x_data, const arma::vec &y_data)
 
   plotSignal(reinterpret_cast<const void *>(&qx_data), reinterpret_cast<const void *>(&qy_data));
 
-  return graphs.back();
+  return last_graph;
 }
 
 Graph *Axes::plot(const arma::rowvec &data)
@@ -375,33 +374,6 @@ Graph *Axes::plot(const arma::rowvec &x_data, const arma::rowvec &y_data)
   arma::vec y_data2 = y_data.t();
   return plot(x_data2, y_data2);
 }
-
-BarGraph *Axes::bar(const arma::vec &x_data, const arma::vec &y_data)
-{
-  int n_data = x_data.size();
-
-  if (y_data.size() != n_data) throw std::runtime_error("[Axes::bar]: Incompatible sizes between x_data and y_data");
-
-  QVector<double> qx_data(n_data);
-  QVector<double> qy_data(n_data);
-  for (int i=0; i<n_data; i++)
-  {
-    qx_data[i] = x_data(i);
-    qy_data[i] = y_data(i);
-  }
-
-  barSignal(reinterpret_cast<const void *>(&qx_data), reinterpret_cast<const void *>(&qy_data));
-
-  return bars.back();
-}
-
-BarGraph *Axes::bar(const arma::rowvec &x_data, const arma::rowvec &y_data)
-{
-  arma::vec x_data2 = x_data.t();
-  arma::vec y_data2 = y_data.t();
-  return bar(x_data2, y_data2);
-}
-
 
 TextLabel *Axes::title(const std::string &title_text)
 {
@@ -437,63 +409,34 @@ void Axes::drawnow()
 
 void Axes::plotSlot(const void *x_data, const void *y_data)
 {
+  // qDebug() << "[Axes::plotSlot]: " << QThread::currentThread() << "\n";
   const QVector<double> &qx_data = *reinterpret_cast<const QVector<double> *>(x_data);
   const QVector<double> &qy_data = *reinterpret_cast<const QVector<double> *>(y_data);
 
   if (!hold_on)
   {
-    this->clearPlottables();
-    graphs.clear();
-    bars.clear();
+    this->clearGraphs();
     color_ind = 0;
   }
 
-  QCPGraph *qcp_graph = new QCPGraph(this->xAxis, this->yAxis);
-  // qcp_graph->setLineStyle(QCPGraph::lsLine); // connect points with straight lines
-  qcp_graph->setData(qx_data, qy_data);
+  QCPGraph *graph = new QCPGraph(this->xAxis, this->yAxis);
+  // graph->setLineStyle(QCPGraph::lsLine); // connect points with straight lines
+  graph->setData(qx_data, qy_data);
 
-  Graph *graph = new Graph(qcp_graph, this);
-  graphs.push_back(graph);
+  graphs.push_back( new Graph(graph, this) );
+  last_graph = graphs.back();
 
-  graph->setColorSlot(QtPlot::getQColor(static_cast<Color>(color_ind)));
+  last_graph->setColorSlot(QtPlot::getQColor(static_cast<Color>(color_ind)));
   color_ind = (color_ind+1)%QtPlot::N_COLORS;
 
-  graph->setLineStyleSlot(SolidLine);
-  graph->setLineWidthSlot(2.0);
-  graph->setMarkerStyleSlot(ssDot);
-  graph->setMarkerSizeSlot(2.0);
+  last_graph->setLineStyleSlot(SolidLine);
+  last_graph->setLineWidthSlot(2.0);
+  last_graph->setMarkerStyleSlot(ssDot);
+  last_graph->setMarkerSizeSlot(2.0);
   //graph->setPen(QPen(QBrush(c), 2.0, Qt::SolidLine)); // line color blue for first graph
   // graph->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDot, 4)); // set marker type and size. The width is determined by the linewidth
   this->rescaleAxes();
 }
-
-void Axes::barSlot(const void *x_data, const void *y_data)
-{
-  const QVector<double> &qx_data = *reinterpret_cast<const QVector<double> *>(x_data);
-  const QVector<double> &qy_data = *reinterpret_cast<const QVector<double> *>(y_data);
-
-  if (!hold_on)
-  {
-    this->clearPlottables();
-    graphs.clear();
-    bars.clear();
-    color_ind = 0;
-  }
-
-  QCPBars *qcp_bar = new QCPBars(this->xAxis, this->yAxis);
-  qcp_bar->setData(qx_data, qy_data);
-
-  BarGraph *bar = new BarGraph(qcp_bar, this);
-  bars.push_back(bar);
-
-  bar->setColorSlot(QtPlot::getQColor(static_cast<Color>(color_ind)));
-  color_ind = (color_ind+1)%QtPlot::N_COLORS;
-
-  // bar->setWidthSlot(2.0);
-
-  this->rescaleAxes();
-}
-
 
 void Axes::holdSlot(bool set)
 {
@@ -552,76 +495,12 @@ void Axes::drawnowSlot()
 }
 
 
-// =============================================
-// =============   BarGraph   ==================
-// =============================================
-
-BarGraph::BarGraph(QCPBars *qcp_bars, Axes *axes)
-{
-  QObject::connect(this, &BarGraph::setColorSignal, this, &BarGraph::setColorSlot, Qt::BlockingQueuedConnection);
-  QObject::connect(this, &BarGraph::setWidthSignal, this, &BarGraph::setWidthSlot, Qt::BlockingQueuedConnection);
-
-  this->qcp_bars = qcp_bars;
-  this->axes = axes;
-}
-
-BarGraph::~BarGraph()
-{
-
-}
-
-void BarGraph::setProperty() {}
-
-void BarGraph::setPropertyHelper(pl_::PROPERTY p, pl_::Color p_value)
-{
-  if (p == pl_::Color_) setColor(p_value);
-  else std::cerr << "[BarGraph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
-}
-
-void BarGraph::setPropertyHelper(pl_::PROPERTY p, const QColor &p_value)
-{
-  if (p == pl_::Color_) setColor(p_value);
-  else std::cerr << "[BarGraph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
-}
-
-void BarGraph::setPropertyHelper(pl_::PROPERTY p, double p_value)
-{
-  if (p == pl_::BarWidth_) setWidth(p_value);
-  else std::cerr << "[BarGraph::setPropertyHelper]: ** Invalid property \"" << QtPlot::getPropertyName(p) << "\" **\n";
-}
-
-void BarGraph::setColor(Color color)
-{
-  setColor(QtPlot::getQColor(static_cast<Color>(color)));
-}
-
-void BarGraph::setColor(const QColor &color)
-{
-  setColorSignal(color);
-}
-
-void BarGraph::setWidth(double width)
-{
-  setWidthSignal(width);
-}
-
-void BarGraph::setColorSlot(const QColor &color)
-{
-  qcp_bars->setBrush(color);
-}
-
-void BarGraph::setWidthSlot(double width)
-{
-  qcp_bars->setWidth(width);
-}
-
-
 // ==========================================
 // =============   Graph   ==================
 // ==========================================
 
 
-Graph::Graph(QCPGraph *qcp_graph, Axes *axes)
+Graph::Graph(QCPGraph *qcp_graph, Axes *parent)
 {
   QObject::connect(this, &Graph::setColorSignal, this, &Graph::setColorSlot, Qt::BlockingQueuedConnection);
   QObject::connect(this, &Graph::setLineStyleSignal, this, &Graph::setLineStyleSlot, Qt::BlockingQueuedConnection);
@@ -630,7 +509,6 @@ Graph::Graph(QCPGraph *qcp_graph, Axes *axes)
   QObject::connect(this, &Graph::setMarkerSizeSignal, this, &Graph::setMarkerSizeSlot, Qt::BlockingQueuedConnection);
 
   this->qcp_graph = qcp_graph;
-  this->axes = axes;
 }
 
 Graph::~Graph()
@@ -814,16 +692,16 @@ void Legend::setAlignment(Qt::Alignment alignment)
 
 void Legend::setLabelsSlot(const QVector<QString> &labels)
 {
-  int n_plots = axes->plottableCount();
+  int n_graphs = axes->graphCount();
   int n_labels = labels.size();
 
-  if (n_labels > n_plots)
+  if (n_labels > n_graphs)
   {
     std::cerr << "[Legend::setLabelsSlot]: Extra legend labels will be ignored...\n";
-    n_labels = n_plots;
+    n_labels = n_graphs;
   }
 
-  for (int i=0; i<n_labels; i++) axes->plottable(i)->setName(labels[i]);
+  for (int i=0; i<n_labels; i++) axes->graph(i)->setName(labels[i]);
 
   // qcp_legend->setVisible(true);
   // qcp_legend->setBrush(QBrush(QColor(255,255,255,230)));

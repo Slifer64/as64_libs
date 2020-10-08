@@ -7,8 +7,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Set the path containing additional modules like armadillo
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../install/deps/ ${CMAKE_MODULE_PATH} )
 
-find_package(armadillo REQUIRED)
-find_package(eigen REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
 )
 
@@ -19,8 +17,7 @@ catkin_package(
 
 include_directories(
   include
-  ${ARMADILLO_INCLUDE_DIR}
-  ${EIGEN_INCLUDE_DIR}
+  /usr/include/eigen3
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -46,5 +43,5 @@ add_dependencies(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${ARMADILLO_LIBRARY}
+  armadillo
 )

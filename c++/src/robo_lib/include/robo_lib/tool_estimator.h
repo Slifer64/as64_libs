@@ -2,6 +2,7 @@
 #define ROBO_LIB_TOOL_ESTIMATOR_H
 
 #include <Eigen/Dense>
+#include <armadillo>
 #include <mutex>
 
 namespace Eigen
@@ -31,10 +32,12 @@ public:
 
   void initFromFile(const std::string &path);
 
-  void setCoM(const Eigen::Vector3d &CoM) { std::unique_lock<std::mutex>(mass_mtx); this->CoM = CoM; }
+  void setCoM(const Eigen::Vector3d &CoM) { std::unique_lock<std::mutex>(CoM_mtx); this->CoM = CoM; }
+  void setCoM(const arma::vec &CoM) { std::unique_lock<std::mutex>(CoM_mtx); this->CoM << CoM(0), CoM(1), CoM(2); }
   void setMass(double mass) { std::unique_lock<std::mutex>(mass_mtx); this->mass = mass; }
 
-  Eigen::Vector3d getCoM() const  { std::unique_lock<std::mutex>(mass_mtx); return this->CoM; }
+  Eigen::Vector3d getCoM() const  { std::unique_lock<std::mutex>(CoM_mtx); return this->CoM; }
+  arma::vec getCoM(bool get_arma) const { std::unique_lock<std::mutex>(CoM_mtx); return arma::vec({CoM(0), CoM(1), CoM(2)}); }
   double getMass() const  { std::unique_lock<std::mutex>(mass_mtx); return this->mass; }
 
   /**
@@ -54,6 +57,8 @@ public:
    * @return The wrench of the tool expressed in the tool frame.
    */
   Eigen::Vector6d getToolWrench(const Eigen::Quaterniond& orientation) const;
+  arma::vec getToolWrench(const arma::vec &quat) const;
+  arma::vec getToolWrench(const arma::mat &Rotm_base_tool) const;
 
 private:
 

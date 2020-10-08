@@ -26,18 +26,14 @@
 #include <ur_robot/robot_urdf.h>
 #include <ur_modern_driver/utils.h>
 
-namespace as64_
-{
-
 namespace ur_
 {
 
 class RobotArm
 {
 public:
-  RobotArm();
-  RobotArm(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link, double ctrl_cycle);
-  RobotArm(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link, double ctrl_cycle);
+  RobotArm(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link);
+  RobotArm(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link);
   ~RobotArm();
 
   virtual bool isOk() const = 0;
@@ -48,7 +44,7 @@ public:
   virtual void setJointsPosition(const arma::vec &j_pos) = 0;
   virtual void setJointsVelocity(const arma::vec &j_vel) = 0;
   virtual void setTaskVelocity(const arma::vec &task_vel) = 0;
-  virtual void setTaskPose(const arma::mat &task_pose) = 0;
+  virtual void setTaskPose(const arma::vec &task_pose) = 0;
 
   virtual arma::vec getJointsPosition() const = 0;
   virtual arma::vec getJointsVelocity() const = 0;
@@ -131,7 +127,5 @@ protected:
 };
 
 }; // namespace ur_
-
-}; // namespace as64_
 
 #endif // UR_ROBOT_ARM_H

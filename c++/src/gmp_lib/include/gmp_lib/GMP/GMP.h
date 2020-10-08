@@ -40,6 +40,10 @@ public:
   void train(const std::string &train_method, const arma::rowvec &Time, const arma::rowvec &yd_data, double *train_error=0);
 
 
+  void setStiffness(double K_) { this->K = K_; }
+
+  void setDamping(double D_) { this->D = D_; }
+
   /* Returns the derivatives of the GMP states.
    * @param[in] s: phase variable state, see @Phase.
    * @param[in] y: 'y' state of the GMP.

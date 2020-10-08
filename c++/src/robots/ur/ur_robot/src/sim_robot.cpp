@@ -1,26 +1,18 @@
 #include <ur_robot/sim_robot.h>
 
-namespace as64_
-{
-
 namespace ur_
 {
 
 #define UR_SimRobot_fun_ std::string("[ur_::SimRobot::") + __func__ + "]: "
 
-SimRobot::SimRobot()
+SimRobot::SimRobot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link):
+RobotArm(urdf_model, base_link, tool_link)
 {
   initSimRobot();
 }
 
-SimRobot::SimRobot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link,
-                   double ctrl_cycle): RobotArm(urdf_model, base_link, tool_link, ctrl_cycle)
-{
-  initSimRobot();
-}
-
-SimRobot::SimRobot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link,
-                   double ctrl_cycle): RobotArm(robot_desc_param, base_link, tool_link, ctrl_cycle)
+SimRobot::SimRobot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link):
+RobotArm(robot_desc_param, base_link, tool_link)
 {
   initSimRobot();
 }
@@ -159,7 +151,7 @@ void SimRobot::setTaskVelocity(const arma::vec &task_vel)
   setJointsPositionHelper(j_pos);
 }
 
-void SimRobot::setTaskPose(const arma::mat &task_pose)
+void SimRobot::setTaskPose(const arma::vec &task_pose)
 {
   throw std::runtime_error("[ERROR]: SimRobot::setTaskPose is not supported.");
 }
@@ -205,5 +197,3 @@ void SimRobot::initJointsPosition(const arma::vec j_pos0)
 }
 
 }; // namespace ur_
-
-}; // namespace as64_

@@ -258,7 +258,7 @@ void GMP_nDoF::writeToFile(FileIO &fid, const std::string &prefix) const
 {
   unsigned n_dof = this->length();
   fid.write(prefix+"n_dof", n_dof);
-  for (int i=0; i<n_dof; i++) this->gmp[i]->writeToFile(fid, "gmp"+std::to_string(i+1)+"_");
+  for (int i=0; i<n_dof; i++) this->gmp[i]->writeToFile(fid, prefix+"gmp"+std::to_string(i+1)+"_");
 }
 
 void GMP_nDoF::readFromFile(FileIO &fid, const std::string &prefix)
@@ -273,7 +273,7 @@ void GMP_nDoF::readFromFile(FileIO &fid, const std::string &prefix)
   for (int i=0; i<n_dof; i++)
   {
     this->gmp[i].reset( new gmp_::GMP(2, 1, 1, 1) );
-    this->gmp[i]->readFromFile(fid, "gmp"+std::to_string(i+1)+"_");
+    this->gmp[i]->readFromFile(fid, prefix+"gmp"+std::to_string(i+1)+"_");
   }
 }
 

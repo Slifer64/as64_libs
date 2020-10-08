@@ -48,6 +48,10 @@ Eigen::MatrixXd SingularValueFilter::pinv(const Eigen::MatrixXd &M) const
 
   // Eigen::MatrixXd M_reconstr = U*S*V.transpose();
 
+//  double sigma_min = svd.singularValues().minCoeff();
+//  if (sigma_min < 0.05)
+//    std::cerr << "[SingularValueFilter::pinv]: sigma_min = " << svd.singularValues().minCoeff() << "\n";
+
   for (int i=0;i<S.cols(); i++) S(i,i) = 1/filterEigVal(S(i,i));
 
   return V*S*U.transpose();

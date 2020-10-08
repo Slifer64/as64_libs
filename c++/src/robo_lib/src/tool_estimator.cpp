@@ -143,6 +143,22 @@ Vector6d ToolEstimator::getToolWrench(const Quaterniond& orientation) const
   return wrench;
 }
 
+arma::vec ToolEstimator::getToolWrench(const arma::vec &quat) const
+{
+  Eigen::Vector6d Ftool = getToolWrench(Eigen::Quaterniond(quat(0),quat(1),quat(2),quat(3)));
+  return arma::vec({Ftool(0), Ftool(1), Ftool(2), Ftool(3), Ftool(4), Ftool(5)});
+}
+
+arma::vec ToolEstimator::getToolWrench(const arma::mat &Rotm_base_tool) const
+{
+  static const arma::vec g = {0, 0, -GRAVITY_ACC};
+
+  arma::vec wrench(6);
+  wrench.subvec(0,2) = Rotm_base_tool.t() * (g * this->getMass());
+  wrench.subvec(3,5) = arma::cross( this->getCoM(true), wrench.subvec(0,2));
+  return wrench;
+}
+
 void ToolEstimator::initFromFile(const std::string &path)
 {
   double mass;
