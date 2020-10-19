@@ -4,16 +4,18 @@ clear;
 
 set_matlab_utils_path();
 
+use_namespace_math_;
+
 rng(0);
 
 % ========= object params =========
 g = [0; 0; -10];
 m_o = 5;
-% p_o = [0.05; 0.08; 0.2];
+p_o = [0.05; 0.08; 0.2];
 
 
 % ========= force estimator params =========
-noise_std = 1e-1;
+noise_std = 1e-100;
 
 
 % ========= payload estimator params =========
@@ -24,9 +26,9 @@ a_p = 1; % forgetting factor
 
 
 % ========= robot params =========
-M = 2*ones(3,1);
-D = 30*ones(3,1);
-K = 150*ones(3,1);
+Mo = 2*ones(3,1);
+Do = 30*ones(3,1);
+Ko = 150*ones(3,1);
 
 
 % ========= create desired trajectory =========
@@ -36,6 +38,14 @@ Time = 0:dt:Tf;
 y0 = [0; 0; 0];
 yf = [0.5; 0.7; 1.2];
 [yd, yd_dot, yd_ddot] = get5thOrderPol(y0, yf, Time);
+
+Qo = [1 0 0 0]';
+
+Q0 = [1 0 0 0]';
+Qf = 
+
+y0 = quatLog(quatDiff(Q0, Qo));
+
 
 
 n_steps = length(Time);
@@ -61,10 +71,10 @@ y_dot = zeros(3,1);
 y_ddot = zeros(3,1);
 f_h = zeros(3,1);
 f_o = m_o * g;
-f_ext = f_h + f_o + noise_std*randn(3,1);
+f_ext = f_h + f_o + 0*g; % noise_std*randn(3,1);
 
 f_h_hat = zeros(3,1);
-m_o_hat = (f_ext(3) - f_h_hat(3)) / g(3) + 1*rand();
+m_o_hat = (f_ext(3) - f_h_hat(3)) / g(3); % + 1*rand();
 f_o_hat = m_o_hat * g;
 P = P0;
 
@@ -93,8 +103,8 @@ for k=1:n_steps
     f_o_hat = m_o_hat*g;
     
     % calculate disturbance force (if our estimation is correct, this should be zero)
-    f_dist = f_ext - f_o_hat - f_h;
-    
+    f_dist = f_ext - f_o_hat - f_h_hat;
+    %f_dist = f_ext - f_o_hat - f_h;
 
     % dynamic equations
     y_ddot = (-D.*y_dot + f_ext - f_o_hat) ./ M;
@@ -121,11 +131,11 @@ for k=1:n_steps
     
 end
 
-figure
-for i=1:3
-    subplot(3,1,i);
-    plot(Time, e_z_data(i,:));
-end
+% figure
+% for i=1:3
+%     subplot(3,1,i);
+%     plot(Time, e_z_data(i,:));
+% end
 
 % ========= plot results =========
 figure; 
