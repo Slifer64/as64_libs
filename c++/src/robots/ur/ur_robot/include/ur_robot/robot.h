@@ -38,11 +38,10 @@ namespace ur_
 class Robot : public RobotArm
 {
 public:
-  Robot(const std::string &robot_ip, int reverse_port, double ctrl_cycle);
   Robot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link,
-    double ctrl_cycle, const std::string &robot_ip, int reverse_port);
+       const std::string &robot_ip, int reverse_port);
   Robot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link,
-    double ctrl_cycle, const std::string &robot_ip, int reverse_port);
+        const std::string &robot_ip, int reverse_port);
   ~Robot();
 
   bool isOk() const override;
@@ -78,11 +77,16 @@ public:
   arma::mat getTaskPose() const override
   {
     arma::mat output = arma::mat().eye(4, 4);
+    output.submat(0,0,2,2) = getTaskRotm();
+    output.submat(0,3,2,3) = getTaskPosition();
     return output;
   }
 
   arma::vec getTaskPosition() const override
-  { return ur_driver->getTcpPos(); }
+  {
+    return ur_driver->getTcpPos();
+//    return robot_urdf->getTaskPosition(getJointsPosition());
+  }
 
   arma::mat getTaskRotm() const override
   {
@@ -90,25 +94,34 @@ public:
   }
 
   arma::vec getTaskQuat() const override
-  { return ur_driver->getTcpQuat(); }
+  {
+    return ur_driver->getTcpQuat();
+//    return robot_urdf->getTaskQuat(getJointsPosition());
+  }
 
   arma::vec getTcpWrench() const override
   { return ur_driver->getTcpWrench(); }
 
+
+  double servo_a, servo_v, servo_T, servo_lookahead_time, servo_gain;
+
   void setJointsPosition(const arma::vec &j_pos) override
-  { this->movej(j_pos, 1.4, 1.0, 0.012); }
+  {
+    // this->movej(j_pos, 30, 10, 0.03);
+    this->servoj(j_pos, servo_a, servo_v, servo_T, servo_lookahead_time, servo_gain);
+    // this->servoj(j_pos, 10, 20, 0.01, 0.02, 800);
+  }
 
   void setJointsVelocity(const arma::vec &j_vel) override
   {
-    // ur_driver->joint_vel_cmd = dqd;
-    // ur_driver->joint_pos_cmd = qd;
-    this->speedj(j_vel, 10, 0.012);
+//    this->speedj(j_vel, arma::max(arma::abs((j_vel-getJointsVelocity()))/ctrl_cycle), 0.03);
+     this->speedj(j_vel, 5, 0.04);
   }
 
   void setTaskVelocity(const arma::vec &task_vel) override
   {
-    //this->speedl(Twist, arma::max(arma::abs((Twist-getTaskVelocity()))/this->cycle), this->cycle);
-    this->speedl(task_vel, 2, 0.012);
+//    this->speedl(task_vel, arma::max(arma::abs((task_vel-getTaskVelocity()))/ctrl_cycle), 0.03);
+    this->speedl(task_vel, 20, 0.04);
   }
 
   void setTaskPose(const arma::mat &input) override
@@ -118,6 +131,10 @@ public:
     //convertPose2PosAngles(pose, p);
     // this->movel(p, 1.2, 1.0, this->cycle);
   }
+
+  void biasFtSensor() { ur_driver->setUrScriptCmd("zero_ftsensor()\n"); }
+
+  void movej(const arma::vec &q, double a, double v, double t, double r=0);
 
 private:
 
@@ -150,7 +167,8 @@ private:
     return out.str();
   }
 
-  void movej(const arma::vec &q, double a, double v, double t, double r=0);
+  void servoj(const arma::vec &q, double a, double v, double t, double lookahead_time=0.1, double gain=300);
+
   void movel(const arma::vec &p, double a, double v, double t, double r=0);
   void speedj(arma::vec dq, double a, double t);
   void speedl(arma::vec dp, double a, double t);

@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Set the path containing additional modules like armadillo
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../install/deps/ ${CMAKE_MODULE_PATH} )
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
+# set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
 
 find_package(armadillo REQUIRED)
 find_package(eigen REQUIRED)
@@ -17,7 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_parser
   roscpp
   roslib
-  std_msgs
   geometry_msgs
   sensor_msgs
   # ur_kinematics
@@ -51,26 +50,27 @@ file(GLOB INCLUDE_LIST "")
 ## Your package locations should be listed before other locations
 include_directories(
   include
-  /usr/include/eigen3
+  ${ARMADILLO_INCLUDE_DIR}
+  ${EIGEN_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
 )
 
 # *************************************************
 # *************************************************
 
-add_library(ur_robot
-  ${INCLUDE_LIST} ${SRC_LIST}
+add_library(${PROJECT_NAME}
+  ${SRC_LIST}
 )
 
-add_dependencies(ur_robot
+add_dependencies(${PROJECT_NAME}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(ur_robot
+target_link_libraries(${PROJECT_NAME}
   pthread
   orocos-kdl
-  armadillo
-  # ur10_kin
+  ${ARMADILLO_LIBRARY}
+  ${catkin_LIBRARIES}
   ur_modern_driver
 )
 

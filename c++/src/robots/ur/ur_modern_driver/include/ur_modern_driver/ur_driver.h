@@ -19,24 +19,25 @@
 #ifndef UR_DRIVER_H_
 #define UR_DRIVER_H_
 
-#include <mutex>
-#include <condition_variable>
-#include "ur_realtime_communication.h"
-#include "ur_communication.h"
-#include "do_output.h"
-#include <vector>
-#include <math.h>
 #include <string>
+#include <vector>
+#include <cmath>
+#include <memory>
+#include <mutex>
+#include <chrono>
+#include <condition_variable>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include <memory>
-
 #include <armadillo>
 
-#include <chrono>
+#include "ur_realtime_communication.h"
+#include "ur_communication.h"
+#include "do_output.h"
 
+#include <ur_modern_driver/utils.h>
 
 class UrDriver
 {
@@ -81,7 +82,7 @@ private:
 
   std::vector<double> joint_target_vel;
 
-  std::string ur_script_cmd;
+  as64_::ur_::MtxVar<std::string> ur_script_cmd;
 
 public:
 
@@ -162,7 +163,7 @@ public:
   void readRTMsg();
   void readMbMsg();
 
-  void setUrScriptCmd(const std::string &cmd) { ur_script_cmd = cmd; }
+  void setUrScriptCmd(const std::string &cmd) { ur_script_cmd.set(cmd); }
 
   double getServojTime() const { return servoj_time_; }
 

@@ -191,6 +191,21 @@ arma::mat RobotUrdf::getTaskPose(const arma::vec &j_pos) const
   return task_pose;
 }
 
+arma::mat RobotUrdf::getTaskPosition(const arma::vec &j_pos) const
+{
+  return getTaskPose(j_pos).submat(0,3,2,3);
+}
+
+arma::mat RobotUrdf::getTaskRotm(const arma::vec &j_pos) const
+{
+  return getTaskPose(j_pos).submat(0,0,2,2);
+}
+
+arma::mat RobotUrdf::getTaskQuat(const arma::vec &j_pos) const
+{
+  return rotm2quat(getTaskRotm(j_pos));
+}
+
 arma::mat RobotUrdf::getJacobian(const arma::vec &j_pos) const
 {
   int N_JOINTS = this->getNumJoints();

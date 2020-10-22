@@ -30,12 +30,13 @@ UrRealtimeCommunication::UrRealtimeCommunication(as64_::ur_::Semaphore &msg_sem,
 	if (server_ == NULL) print_fatal("ERROR, no such host");
 	serv_addr_.sin_family = AF_INET;
 	bcopy((char *) server_->h_addr, (char *)&serv_addr_.sin_addr.s_addr, server_->h_length);
+	// inet_pton(AF_INET, host_ip.c_str(), (void *)&server_addr.sin_addr.s_addr);
 	serv_addr_.sin_port = htons(30003);
 	flag_ = 1;
 	setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, (char *) &flag_, sizeof(int));
 	setsockopt(sockfd_, IPPROTO_TCP, TCP_QUICKACK, (char *) &flag_, sizeof(int));
 	setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, (char *) &flag_, sizeof(int));
-	fcntl(sockfd_, F_SETFL, O_NONBLOCK);
+	fcntl(sockfd_, F_SETFL, O_NONBLOCK); // make the socket non-blocking
 	connected_ = false;
 	keepalive_ = false;
 	safety_count_ = safety_count_max + 1;

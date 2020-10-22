@@ -15,50 +15,7 @@ namespace as64_
 namespace ur_
 {
 
-RobotArm::RobotArm()
-{
-  std::string robot_description_name;
-  if (!node.getParam("/ur_robot/robot_description_name",robot_description_name))
-  {
-    throw std::runtime_error("[RobotArm Error]: Failed to load parameter \"/ur_robot/robot_description_name\" ...\n");
-  }
-
-  if (!node.getParam("/ur_robot/base_frame",base_link_name))
-  {
-    throw std::runtime_error("[RobotArm Error]: Failed to load parameter \"/ur_robot/base_frame\" ...\n");
-  }
-
-  if (!node.getParam("/ur_robot/tool_frame",tool_link_name))
-  {
-    throw std::runtime_error("[RobotArm Error]: Failed to load parameter \"/ur_robot/tool_frame\" ...\n");
-  }
-
-  if (!node.getParam("/ur_robot/ctrl_cycle",ctrl_cycle))
-  {
-    ctrl_cycle = 0.01;
-  }
-
-  if (!node.getParam("/ur_robot/check_limits",check_limits))
-  {
-    check_limits = false;
-  }
-
-  if (!node.getParam("/ur_robot/check_singularity",check_singularity))
-  {
-    check_singularity = false;
-  }
-
-  //std::string urdf_file_path = ros::package::getPath("lwr4p") + "/urdf/ur_robot.urdf";
-  if (!urdf_model.initParam(robot_description_name.c_str()))
-  // if (!urdf_model.initFile(urdf_file_path.c_str()))
-  {
-    throw std::ios_base::failure("[RobotArm Error]: Couldn't load urdf model from \"" + robot_description_name + "\"...\n");
-  }
-
-  init();
-}
-
-RobotArm::RobotArm(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link, double ctrl_cycle)
+RobotArm::RobotArm(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link)
 {
   this->urdf_model = urdf_model;
   this->base_link_name = base_link;
@@ -70,7 +27,7 @@ RobotArm::RobotArm(urdf::Model &urdf_model, const std::string &base_link, const 
   init();
 }
 
-RobotArm::RobotArm(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link, double ctrl_cycle)
+RobotArm::RobotArm(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link)
 {
   if (!urdf_model.initParam(robot_desc_param.c_str()))
   {

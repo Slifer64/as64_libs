@@ -446,6 +446,9 @@ void UrDriver::readRTMsg()
 	// unsigned long ctrl_cycle = 0.001*1e9;
   // timer.start();
 
+  try
+  {
+
   while (keep_alive_)
   {
     rt_msg_sem.wait(); // wait for new data to arrive...
@@ -475,8 +478,8 @@ void UrDriver::readRTMsg()
     if (angle < 1e-16) tcp_quat = {1, 0, 0, 0};
     else
     {
-      tcp_quat[0] = std::cos(angle);
-      double sin_a = std::sin(angle);
+      tcp_quat[0] = std::cos(angle/2);
+      double sin_a = std::sin(angle/2);
       tcp_quat[1] = sin_a*rx/angle;
       tcp_quat[2] = sin_a*ry/angle;
       tcp_quat[3] = sin_a*rz/angle;
@@ -485,14 +488,21 @@ void UrDriver::readRTMsg()
     // tool velocity
     tcp_vel = rt_interface_->robot_state_.getTcpSpeedActual();
 
-    rt_interface_->addCommandToQueue(ur_script_cmd);
-
-    // unsigned long elaps_time = timer.elapsedNanoSec();
-    // if (elaps_time < ctrl_cycle) std::this_thread::sleep_for(std::chrono::nanoseconds((unsigned long)(ctrl_cycle-elaps_time)));
-    // timer.start();
+    if (!ur_script_cmd().empty())
+    {
+      rt_interface_->addCommandToQueue(ur_script_cmd.get());
+      ur_script_cmd.set(""); // clear previous command
+    }
 
     update_sem.notify();
   }
+
+  }
+  catch(std::exception &e)
+  {
+    std::cerr << "ERROR: " << e.what() << "\n";
+  }
+
 }
 
 void UrDriver::readMbMsg()

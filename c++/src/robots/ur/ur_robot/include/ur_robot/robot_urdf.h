@@ -42,6 +42,9 @@ public:
   // return using the urdf model and kdl forward-inverse kinematics solvers
   arma::vec getJointsPosition(const arma::mat &pose, const arma::vec &q0, bool *found_solution=NULL) const;
   arma::mat getTaskPose(const arma::vec &j_pos) const;
+  arma::mat getTaskPosition(const arma::vec &j_pos) const;
+  arma::mat getTaskRotm(const arma::vec &j_pos) const;
+  arma::mat getTaskQuat(const arma::vec &j_pos) const;
   arma::mat getJacobian(const arma::vec &j_pos) const;
   arma::mat getEEJacobian(const arma::vec &j_pos) const;
 

@@ -9,27 +9,29 @@ namespace as64_
 namespace ur_
 {
 
-Robot::Robot(const std::string &robot_ip, int reverse_port, double ctrl_cycle)
-{
-  initRobot(robot_ip, reverse_port);
-}
-
 Robot::Robot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link,
-             double ctrl_cycle, const std::string &robot_ip, int reverse_port):
-    RobotArm(urdf_model, base_link, tool_link, ctrl_cycle)
+             const std::string &robot_ip, int reverse_port):
+    RobotArm(urdf_model, base_link, tool_link)
 {
   initRobot(robot_ip, reverse_port);
 }
 
 Robot::Robot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link,
-             double ctrl_cycle, const std::string &robot_ip, int reverse_port):
-    RobotArm(robot_desc_param, base_link, tool_link, ctrl_cycle)
+             const std::string &robot_ip, int reverse_port):
+    RobotArm(robot_desc_param, base_link, tool_link)
 {
   initRobot(robot_ip, reverse_port);
 }
 
 void Robot::initRobot(const std::string &robot_ip, int reverse_port)
 {
+  ros::NodeHandle nh("~");
+  if (!nh.getParam("servo_a",servo_a)) servo_a = 10;
+  if (!nh.getParam("servo_v",servo_v)) servo_v = 20;
+  if (!nh.getParam("servo_T",servo_T)) servo_T = 0.01;
+  if (!nh.getParam("servo_lookahead_time",servo_lookahead_time)) servo_lookahead_time = 0.02;
+  if (!nh.getParam("servo_gain",servo_gain)) servo_gain = 800;
+
   this->robot_ip = robot_ip;
   this->reverse_port = reverse_port;
 
@@ -37,7 +39,8 @@ void Robot::initRobot(const std::string &robot_ip, int reverse_port)
 
   mode = ur_::Mode::NORMAL;
 
-  ros::Duration(4.0).sleep(); // needed to let UR initialize
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // needed to let UR initialize
+  // ros::Duration(2.0).sleep(); // needed to let UR initialize
 
   ctrl_cycle = ur_driver->getServojTime();
 
@@ -119,6 +122,13 @@ bool Robot::isOk() const
   *(const_cast<std::string *>(&err_msg)) = "";
 
   return true;
+}
+
+void Robot::servoj(const arma::vec &q, double a, double v, double t, double lookahead_time, double gain)
+{
+  std::ostringstream out;
+  out << "servoj(" << print_vector(q) << "," << a << "," << v << "," << t << "," << lookahead_time << gain << ")\n";
+  ur_driver->setUrScriptCmd(out.str());
 }
 
 void Robot::movej(const arma::vec &q, double a, double v, double t, double r)

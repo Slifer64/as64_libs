@@ -8,19 +8,14 @@ namespace ur_
 
 #define UR_SimRobot_fun_ std::string("[ur_::SimRobot::") + __func__ + "]: "
 
-SimRobot::SimRobot()
+SimRobot::SimRobot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link):
+RobotArm(urdf_model, base_link, tool_link)
 {
   initSimRobot();
 }
 
-SimRobot::SimRobot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link,
-                   double ctrl_cycle): RobotArm(urdf_model, base_link, tool_link, ctrl_cycle)
-{
-  initSimRobot();
-}
-
-SimRobot::SimRobot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link,
-                   double ctrl_cycle): RobotArm(robot_desc_param, base_link, tool_link, ctrl_cycle)
+SimRobot::SimRobot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link):
+RobotArm(robot_desc_param, base_link, tool_link)
 {
   initSimRobot();
 }

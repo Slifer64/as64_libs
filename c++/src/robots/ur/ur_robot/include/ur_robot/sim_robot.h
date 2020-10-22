@@ -12,9 +12,8 @@ namespace ur_
 class SimRobot : public RobotArm
 {
 public:
-  SimRobot();
-  SimRobot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link, double ctrl_cycle);
-  SimRobot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link, double ctrl_cycle);
+  SimRobot(urdf::Model &urdf_model, const std::string &base_link, const std::string &tool_link);
+  SimRobot(const std::string &robot_desc_param, const std::string &base_link, const std::string &tool_link);
 
   bool isOk() const override;
   void enable() override;
