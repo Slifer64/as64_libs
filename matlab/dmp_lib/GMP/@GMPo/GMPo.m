@@ -23,6 +23,7 @@ classdef GMPo < GMP_nDoF
             this = this@GMP_nDoF(3, N_kernels, D, K, kernels_std_scaling);
 
             this.setQ0([1 0 0 0]');
+            this.Qd0 = [1 0 0 0]';
 
         end
         
@@ -36,6 +37,8 @@ classdef GMPo < GMP_nDoF
 
             n_data = length(Time);
             this.setQ0(Quat_data(:,1));
+            
+            this.Qd0 = Quat_data(:,1);
             
             qd_data = zeros(3, n_data);
             for j=1:n_data
@@ -106,6 +109,13 @@ classdef GMPo < GMP_nDoF
         
         %% See @GMP_nDoF.getYdDDot
         % function p_ref_ddot = getYdDDot(this, x, x_dot, x_ddot)
+        
+        
+        function Qd = getQd(this, x)
+
+            Qd = GMPo.q2quat(this.getYd(x), this.Qd0);
+            
+        end
         
         
         %% Returns the rotational velocity.
@@ -439,6 +449,8 @@ classdef GMPo < GMP_nDoF
     properties  (Access = protected)
         
         Q0 % initial orientation (as unit quaternion)
+        
+        Qd0
         
     end
     

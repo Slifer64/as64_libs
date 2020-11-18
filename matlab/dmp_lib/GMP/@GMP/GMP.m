@@ -134,11 +134,6 @@ classdef GMP < matlab.mixin.Copyable
             
         end
 
-        function g = getGoal(this)
-           
-            g = this.wsog.getFinalValue();
-            
-        end
         
         %% Returns a deep copy of this object.
         %  @return: deep copy of this object.
@@ -151,18 +146,6 @@ classdef GMP < matlab.mixin.Copyable
 
         end
           
-        
-        function j = dYd_dgoal(this, x, g)
-            
-            j = this.wsog.doutput_dgoal(x, g);
-            
-        end
-        
-        function j = dYd_dx(this, x, g)
-            
-            j = this.wsog.doutput_dx(x, g);
-            
-        end
 
         %% Returns the scaled desired position.
         %  @param[in] x: phase variable.
