@@ -30,6 +30,7 @@ tic
 offline_train_mse = mp.train('LS', x, Pd_data);
 offline_train_mse
 toc
+mp.optWeightsCovariance();
 
 dx = 1/tau;
 [P_data, dP_data, ddP_data] = mp.simulate(x, dx, 0);
@@ -38,12 +39,12 @@ dx = 1/tau;
 P0 = Pd_data(:,1);
 Pg = Pd_data(:,end);
 
-ks = 1.5;
+ks = 2.5;
 Pg2 = ks*(Pg - P0) + P0;
 
 % calc scaled MP
-mp.optWeightsCovariance();
-mp.updatePos([x0; xf], [P0; Pg2], 1e-5);
+
+mp.updatePos([x0; xf], [P0; Pg2]);
 [P2_data, dP2_data, ddP2_data] = mp.simulate(x, dx, 0);
 
 % calc scaled demo
@@ -55,7 +56,7 @@ ddPd2_data = ks*ddPd_data;
 figure;
 subplot(2,1,1); hold on;
 plot(Time, P2_data, 'LineWidth',2, 'LineStyle','-', 'Color','magenta');
-plot(Time, Pd2_data, 'LineWidth',2, 'LineStyle','-', 'Color','blue');
+plot(Time, Pd2_data, 'LineWidth',2, 'LineStyle','--', 'Color','blue');
 plot(Time, Pd_data, 'LineWidth',2, 'LineStyle','--', 'Color','green');
 legend({'MP','DMP','demo'}, 'interpreter','latex', 'fontsize',15);
 axis tight;

@@ -88,47 +88,77 @@ classdef MP < matlab.mixin.Copyable
             H = zeros(N,n);
             for i=1:length(x), H(i,:) = this.regressVec(x(i)); end
             y_old = H*w_old;
+            z_old = [y_old(1); y_old(end)];
             
             ks = [1 1.1 1.3 1.5 1.6];
 %             ks = 1.5;
             m = length(ks);
             
             W = zeros(n, m);
+            z = zeros(2,m);
             
             for j=1:m
                 y = ks(j)*(y_old-y_old(1)) + y_old(1);
                 W(:,j) = H\y;
+                z(:,j) = [y(1); y(end)];
             end
             
-            W_err = W - repmat(mean(W, 2),1,m);
-            Sw = zeros(n,n);
-            for i=1:m
-                v = W_err(i,:);% / norm(W_err(i,:));
-                Sw = Sw + v*v';
-            end
-            Sw = Sw/n;
-  
-            W_err
+            W_err = W - repmat(w_old,1,m);
+            z_err = z - repmat(z_old,1,m);
+            H = [this.regressVec(x(1))'; this.regressVec(x(end))'];
+            R = 1e-5*eye(2,2);          
             
-            Sw
-            
-            stop
-            
-            cvx_begin sdp
-                variable S(n,n) hermitian toeplitz
-                minimize( norm( S - Sw, 'fro' ) )
-                S >= 0
-            cvx_end
-            
-            this.Sigma_w = real(S);
-            
-            Sw(1:5,1:5)
+            Sw0 = this.Sigma_w;
+            L0 = chol(Sw0, 'lower');
+            x0 = this.lowtriangmat2vec(L0);
+            x = fminunc(@(x)objFun(this, x, W_err, z_err, H, R), x0);
+            L = this.vec2lowtriangmat(x,n);
+            this.Sigma_w = L*L';
             
             figure;
             subplot(2,1,1);
-            imshow(Sw, 'InitialMagnification', 800);
+            imshow(Sw0, 'InitialMagnification', 800);
             subplot(2,1,2);
             imshow(this.Sigma_w, 'InitialMagnification', 800);
+            
+        end
+        
+        function J = objFun(this, x, W_err, z_err, H, R)
+            
+            n = length(this.w);
+            
+            %Sw = reshape(x,n,n);
+            L = this.vec2lowtriangmat(x,n);
+            Sw = L*L';
+            
+            J = sum(sum((W_err - Sw*H'/(R + H*Sw*H')*z_err).^2));
+            
+        end
+        
+        function L = vec2lowtriangmat(this, x, n)
+            
+            L = zeros(n,n);
+            
+            i1 = 1;
+            for j=1:n
+               i2 = i1 + n-j; 
+               L(j:n,j) = x(i1:i2);
+               i1 = i2+1;
+            end
+            
+        end
+        
+        function x = lowtriangmat2vec(this, L)
+            
+            n = size(L,1);
+            N = (n+1)*n/2;
+            x = zeros(N,1);
+            i1 = 1;
+            for j=1:n
+               i2 = i1 + n-j; 
+               x(i1:i2) = L(j:n,j);
+               i1 = i2+1;
+            end
             
         end
         
