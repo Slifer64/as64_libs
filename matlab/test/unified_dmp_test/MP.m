@@ -90,8 +90,7 @@ classdef MP < matlab.mixin.Copyable
             y_old = H*w_old;
             z_old = [y_old(1); y_old(end)];
             
-            ks = [1 1.1 1.3 1.5 1.6];
-%             ks = 1.5;
+            ks = [0.7];% 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6];
             m = length(ks);
             
             W = zeros(n, m);
@@ -108,22 +107,26 @@ classdef MP < matlab.mixin.Copyable
             H = [this.regressVec(x(1))'; this.regressVec(x(end))'];
             R = 1e-5*eye(2,2);          
             
+            %Sw0 = eye(n,n);
             Sw0 = this.Sigma_w;
             L0 = chol(Sw0, 'lower');
             x0 = this.lowtriangmat2vec(L0);
-            x = fminunc(@(x)objFun(this, x, W_err, z_err, H, R), x0);
+            options = optimoptions('fminunc', 'Algorithm','trust-region', 'SpecifyObjectiveGradient',true);
+            tic
+            x = fminunc(@(x)objFun(this, x, W_err, z_err, H, R), x0, options);
+            toc
             L = this.vec2lowtriangmat(x,n);
             this.Sigma_w = L*L';
             
             figure;
             subplot(2,1,1);
-            imshow(Sw0, 'InitialMagnification', 800);
+            imshow(Sw0, 'InitialMagnification', 2000);
             subplot(2,1,2);
-            imshow(this.Sigma_w, 'InitialMagnification', 800);
+            imshow(this.Sigma_w, 'InitialMagnification', 2000);
             
         end
         
-        function J = objFun(this, x, W_err, z_err, H, R)
+        function [J, Jx] = objFun(this, x, W_err, z_err, H, R)
             
             n = length(this.w);
             
@@ -131,8 +134,19 @@ classdef MP < matlab.mixin.Copyable
             L = this.vec2lowtriangmat(x,n);
             Sw = L*L';
             
-            J = sum(sum((W_err - Sw*H'/(R + H*Sw*H')*z_err).^2));
+            A = H'/(R + H*Sw*H');
+            Y = (W_err - Sw*A*z_err);
             
+            J = sum(sum(Y.^2));
+            %J = trace(Y*Y')
+
+            if (nargout > 1)
+                U = A*z_err;
+                V = 2*Y'*(Sw*A*H-eye(n,n));
+                B = U*V;
+                Jx = this.lowtriangmat2vec(B'*L + B*L);
+            end
+
         end
         
         function L = vec2lowtriangmat(this, x, n)
