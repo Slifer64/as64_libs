@@ -1,6 +1,6 @@
-% clc;
-% close all;
-% clear;
+clc;
+close all;
+clear;
 
 set_matlab_utils_path();
 data_path = '../data/';
@@ -57,8 +57,10 @@ z_m = [P0; Pg2];
 k = round(n_data*1.0);
 xk = x(k);
 Pk = Pd2_data(:,k);
-x_m = [x0; xk];
-z_m = [P0; Pk];
+% x_m = [x0; xk];
+% z_m = [P0; Pk];
+x_m = [xk];
+z_m = [Pk];
 
 % calc scaled MP
 mp.updatePos(x_m, z_m); 

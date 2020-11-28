@@ -90,7 +90,7 @@ classdef MP < matlab.mixin.Copyable
             y_old = H*w_old;
             z_old = [y_old(1); y_old(end)];
             
-            ks = [0.7 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6];
+            ks = [0.7];% 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6];
             m = length(ks);
             
             W = zeros(n, m);
@@ -110,11 +110,13 @@ classdef MP < matlab.mixin.Copyable
             W_err = W - repmat(w_old,1,m);
             z_err = z - repmat(z_old,1,m);
 %             z_err = z - z_old;
-            H = [this.regressVec(x(1))'; this.regressVec(x(end))'];
-            R = 1e-5*eye(2,2);
 %             H = [this.regressVec(x(1))'; this.regressVec(x(end))'];
+%             R = 1e-5*eye(2,2);
+            H = [this.regressVec(x(end))'];
+            R = 1e-5;
+            z_err = z_err(2,:);
             
-            %Sw0 = eye(n,n);
+%             Sw0 = eye(n,n);
             Sw0 = this.Sigma_w;
             L0 = chol(Sw0, 'lower');
             x0 = this.lowtriangmat2vec(L0);
@@ -170,12 +172,7 @@ classdef MP < matlab.mixin.Copyable
 %                    end
 %                 end
                 
-                
-%                 Jx_err = norm(Jx - Jx2);
-%                 if (Jx_err > 1e-15)
-%                     Jx_err
-%                     pause
-%                 end
+%                 if (norm(Jx - Jx2) > 1e-15), display(norm(Jx - Jx2)); end
                 
             end
 
