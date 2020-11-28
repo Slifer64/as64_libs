@@ -90,7 +90,7 @@ classdef MP < matlab.mixin.Copyable
             y_old = H*w_old;
             z_old = [y_old(1); y_old(end)];
             
-            ks = [0.7];% 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6];
+            ks = [0.7 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6];
             m = length(ks);
             
             W = zeros(n, m);
@@ -120,7 +120,8 @@ classdef MP < matlab.mixin.Copyable
             x0 = this.lowtriangmat2vec(L0);
             options = optimoptions('fminunc', 'Algorithm','trust-region', 'SpecifyObjectiveGradient',true);
             tic
-            x = fminunc(@(x)objFun(this, x, W_err, z_err, H, R), x0, options);
+            [x, fval] = fminunc(@(x)objFun(this, x, W_err, z_err, H, R), x0, options);
+            fval
             toc
             L = this.vec2lowtriangmat(x,n);
             this.Sigma_w = L*L';
@@ -152,6 +153,30 @@ classdef MP < matlab.mixin.Copyable
                 V = 2*Y'*(Sw*A*H-eye(n,n));
                 B = U*V;
                 Jx = this.lowtriangmat2vec(B'*L + B*L);
+                
+%                 Jx = zeros(length(x),1);
+%                 k = 1;
+%                 C = zeros(n,n);
+%                 m = size(U,2);
+%                 for j=1:n
+%                    for i=j:n
+%                       C(i,:) = L(:,j)';
+%                       Jx(k) = trace(V*(C+C')*U);
+% %                       for l=1:m
+% %                         Jx(k) = Jx(k) + V(l,:)*(C+C')*U(:,l);
+% %                       end
+%                       k = k + 1;
+%                       C(i,:) = zeros(1,n);
+%                    end
+%                 end
+                
+                
+%                 Jx_err = norm(Jx - Jx2);
+%                 if (Jx_err > 1e-15)
+%                     Jx_err
+%                     pause
+%                 end
+                
             end
 
         end

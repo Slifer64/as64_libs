@@ -1,6 +1,6 @@
-clc;
-close all;
-clear;
+% clc;
+% close all;
+% clear;
 
 set_matlab_utils_path();
 data_path = '../data/';
