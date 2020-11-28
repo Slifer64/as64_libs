@@ -50,20 +50,14 @@ classdef MP < matlab.mixin.Copyable
         %  @param[in] x: Row vector with the timestamps of the training data points. Must take values in [0 1].
         %  @param[in] Fd: Row vector with the desired values.
         %  @param[out] train_error: Optinal pointer to return the training error as norm(F-Fd)/n_data.
-        function train_error = train(this, train_method, x, Fd)
+        function train_error = train(this, x, Fd)
 
-            n_data = length(x);
+            N = length(x);
+            n = length(this.w);
 
-            s = ones(1, n_data);
-            Psi = zeros(this.N_kernels, n_data);
-            for i=1:n_data
-                Psi(:,i) = this.kernelFun(x(i));
-            end
-
-            if (strcmpi(train_method,'LWR') == 1), this.w = LWR(Psi, s, Fd, this.zero_tol);
-            elseif (strcmpi(train_method,'LS') == 1), this.w = leastSquares(Psi, s, Fd, this.zero_tol);
-            else, error('[WSoG::train]: Unsupported training method...');
-            end
+            H = zeros(N,n);
+            for i=1:N, H(i,:) = this.regressVec(x(i))'; end
+            this.w = H\Fd';
             
             if (nargout > 0)
                 F = zeros(size(Fd));

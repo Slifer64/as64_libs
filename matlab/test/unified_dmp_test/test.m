@@ -29,7 +29,7 @@ N_kernels = 20;
 kernels_std_scaling = 1;
 mp = MP(N_kernels, kernels_std_scaling);
 tic
-offline_train_mse = mp.train('LS', x, Pd_data);
+offline_train_mse = mp.train(x, Pd_data);
 offline_train_mse
 toc
 mp.optWeightsCovariance();
