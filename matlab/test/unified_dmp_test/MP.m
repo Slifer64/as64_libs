@@ -102,10 +102,17 @@ classdef MP < matlab.mixin.Copyable
                 z(:,j) = [y(1); y(end)];
             end
             
+%             y = 1.5*(y_old-y_old(1)) + y_old(1);
+%             W = repmat(H\y,1,N);
+%             z = [y'; ones(1,N)*y(1)];
+%             z_old = [y_old'; ones(1,N)*y_old(1)];
+            
             W_err = W - repmat(w_old,1,m);
             z_err = z - repmat(z_old,1,m);
+%             z_err = z - z_old;
             H = [this.regressVec(x(1))'; this.regressVec(x(end))'];
-            R = 1e-5*eye(2,2);          
+            R = 1e-5*eye(2,2);
+%             H = [this.regressVec(x(1))'; this.regressVec(x(end))'];
             
             %Sw0 = eye(n,n);
             Sw0 = this.Sigma_w;
@@ -135,13 +142,13 @@ classdef MP < matlab.mixin.Copyable
             Sw = L*L';
             
             A = H'/(R + H*Sw*H');
-            Y = (W_err - Sw*A*z_err);
+            U = A*z_err;
+            Y = (W_err - Sw*U);
             
             J = sum(sum(Y.^2));
             %J = trace(Y*Y')
 
             if (nargout > 1)
-                U = A*z_err;
                 V = 2*Y'*(Sw*A*H-eye(n,n));
                 B = U*V;
                 Jx = this.lowtriangmat2vec(B'*L + B*L);

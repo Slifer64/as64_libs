@@ -6,7 +6,7 @@ set_matlab_utils_path();
 data_path = '../data/';
 
 %% Load training data
-load([data_path 'train_data1.mat'], 'Data');
+load([data_path 'train_data3.mat'], 'Data');
 
 Time = Data.Time;
 Pd_data = Data.Pos(3,:);
@@ -54,7 +54,7 @@ x_m = [x0; xf];
 z_m = [P0; Pg2];
 
 % update weights based on intermediate position
-k = round(n_data*0.5);
+k = round(n_data*1.0);
 xk = x(k);
 Pk = Pd2_data(:,k);
 x_m = [x0; xk];
