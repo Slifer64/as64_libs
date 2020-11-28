@@ -69,16 +69,11 @@ classdef MP < matlab.mixin.Copyable
             
         end
         
-        function plotWeightsCovariance(this)
-            
-            figure;
-            imshow(this.Sigma_w, [min(this.Sigma_w(:)) max(this.Sigma_w(:))], 'InitialMagnification', 2000);
-            
-        end
-        
         function optWeightsCovariance(this)
             
             n = length(this.w);
+            
+            S_hat = eye(n, n);
             
             w_old = this.w;
             
@@ -87,22 +82,35 @@ classdef MP < matlab.mixin.Copyable
             H = zeros(N,n);
             for i=1:length(x), H(i,:) = this.regressVec(x(i)); end
             y_old = H*w_old;
-                            
-            y = 1.5*(y_old-y_old(1)) + y_old(1);
-            w = H\y;
+            z_old = [y_old(1); y_old(end)];
             
-            ind = round([0.1:0.1:1]*N);
-            z_old = y_old(ind)';
-            z = y(ind)';
-            H = H(ind,:);
-                        
-            N = size(z,2);
+            ks = [0.7];% 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6];
+            m = length(ks);
             
-            W_err = repmat(w-w_old,1,N);
-            z_err = (z-z_old);
+            W = zeros(n, m);
+            z = zeros(2,m);
+            
+            for j=1:m
+                y = ks(j)*(y_old-y_old(1)) + y_old(1);
+                W(:,j) = H\y;
+                z(:,j) = [y(1); y(end)];
+            end
+            
+%             y = 1.5*(y_old-y_old(1)) + y_old(1);
+%             W = repmat(H\y,1,N);
+%             z = [y'; ones(1,N)*y(1)];
+%             z_old = [y_old'; ones(1,N)*y_old(1)];
+            
+            W_err = W - repmat(w_old,1,m);
+            z_err = z - repmat(z_old,1,m);
+%             z_err = z - z_old;
+%             H = [this.regressVec(x(1))'; this.regressVec(x(end))'];
+%             R = 1e-5*eye(2,2);
+            H = [this.regressVec(x(end))'];
             R = 1e-5;
+            z_err = z_err(2,:);
             
-            %Sw0 = eye(n,n);
+%             Sw0 = eye(n,n);
             Sw0 = this.Sigma_w;
             L0 = chol(Sw0, 'lower');
             x0 = this.lowtriangmat2vec(L0);
@@ -118,40 +126,49 @@ classdef MP < matlab.mixin.Copyable
             subplot(2,1,1);
             imshow(Sw0, 'InitialMagnification', 2000);
             subplot(2,1,2);
-            imshow(this.Sigma_w, [min(this.Sigma_w(:)) max(this.Sigma_w(:))], 'InitialMagnification', 2000);
+            imshow(this.Sigma_w, 'InitialMagnification', 2000);
             
         end
         
         function [J, Jx] = objFun(this, x, W_err, z_err, H, R)
             
             n = length(this.w);
-            N = size(H,1);
             
             %Sw = reshape(x,n,n);
             L = this.vec2lowtriangmat(x,n);
             Sw = L*L';
             
-            J = 0;
-            Jx_mat = zeros(n,n);
+            A = H'/(R + H*Sw*H');
+            U = A*z_err;
+            Y = (W_err - Sw*U);
             
-            for k=1:N
-                H_k = H(k,:);
-                A = H_k'/(R + H_k*Sw*H_k');
-                U = A*z_err(:,k);
-                Y = (W_err(:,k) - Sw*U);
+            J = sum(sum(Y.^2));
+            %J = trace(Y*Y')
 
-                J = J + sum(sum(Y.^2));
-                %J = trace(Y*Y')
-
-                if (nargout > 1)
-                    V = 2*Y'*(Sw*A*H_k-eye(n,n));
-                    B = U*V;
-                    Jx_mat = Jx_mat + (B'*L + B*L);
-                end
+            if (nargout > 1)
+                V = 2*Y'*(Sw*A*H-eye(n,n));
+                B = U*V;
+                Jx = this.lowtriangmat2vec(B'*L + B*L);
+                
+%                 Jx = zeros(length(x),1);
+%                 k = 1;
+%                 C = zeros(n,n);
+%                 m = size(U,2);
+%                 for j=1:n
+%                    for i=j:n
+%                       C(i,:) = L(:,j)';
+%                       Jx(k) = trace(V*(C+C')*U);
+% %                       for l=1:m
+% %                         Jx(k) = Jx(k) + V(l,:)*(C+C')*U(:,l);
+% %                       end
+%                       k = k + 1;
+%                       C(i,:) = zeros(1,n);
+%                    end
+%                 end
+                
+%                 if (norm(Jx - Jx2) > 1e-15), display(norm(Jx - Jx2)); end
                 
             end
-            
-            if (nargout > 1), Jx = this.lowtriangmat2vec(Jx_mat); end
 
         end
         
