@@ -61,7 +61,7 @@ classdef SMP < MP
             Z_err = cell(N,1);
             for i=1:N, Z_err{i} = Z_data(i,:) - Zo_data(i,:); end
             
-            R = 1e-5*eye(m,m);
+            R = 1e-5;
 
             Sw0 = this.Sigma_w;
             L0 = chol(Sw0, 'lower');
@@ -82,10 +82,13 @@ classdef SMP < MP
             
         end
         
-        function plotWeightsCovariance(this)
+        function plotWeightsCovariance(this, ax)
             
-            figure;
-            imshow(this.Sigma_w, [min(this.Sigma_w(:)) max(this.Sigma_w(:))], 'InitialMagnification', 2000);
+            if (nargin < 2)
+                figure;
+                ax = axes();
+            end
+            imshow(this.Sigma_w, [min(this.Sigma_w(:)) max(this.Sigma_w(:))], 'InitialMagnification', 2000, 'Parent',ax);
             
         end
               

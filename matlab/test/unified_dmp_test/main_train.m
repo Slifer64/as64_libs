@@ -28,14 +28,52 @@ xf = 1;
 N_kernels = 15;
 kernels_std_scaling = 1;
 smp = SMP(N_kernels, kernels_std_scaling);
+
+% test againt this SMP
+smp2 = SMP(N_kernels, kernels_std_scaling);
+smp2.train(x, Pd_data); % train smp
+w_o = smp2.w;
+% set covariance matrix
+S = zeros(N_kernels,N_kernels);
+for i=1:N_kernels
+    for j=i+1:N_kernels
+        S(i,j) = exp(-0.1 * abs(i-j));
+        %S(i,j) = 1 - 1*(abs(i-j)/n)^3;
+    end
+end
+S = S + S' + eye(N_kernels,N_kernels);
+smp2.Sigma_w = S;
+% create some trajectories
+yg = Pd_data(end);
+yg_new = [0.8 0.9 1.1 1.3]*yg;
+m = length(yg_new);
+x = 0:0.005:1;
+Y_data = zeros(m, length(x));
+y_o = smp2.simulate(x, 1/tau, 0);
+% Y_data = 1.5*(y_o - y_o(1)) + y_o(1);
+for i=1:m
+    smp2.updatePos(x(end), yg_new(i));
+    Y_i = smp2.simulate(x, 1/tau, 0);
+    Y_data(i,:) = Y_i;
+    smp2.w = w_o; % restore previous weights
+end
+
+% figure;
+% plot(Y_data')
+
+%Y_data = 1.5*(Pd_data-Pd_data(1)) + Pd_data(1);
+
 tic
-Y_data = 1.5*(Pd_data-Pd_data(1)) + Pd_data(1);
-smp.train(x, Pd_data, Y_data);
+smp.train(x, y_o, Y_data);
 toc
 
 is_spd = isSPD(smp.Sigma_w)
 
 save('data.mat', 'Time','Pd_data','smp');
+
+figure;
+smp2.plotWeightsCovariance(subplot(2,1,1));
+smp.plotWeightsCovariance(subplot(2,1,2));
 
 % figure;
 % subplot(3,1,1); hold on;
