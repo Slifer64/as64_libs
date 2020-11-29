@@ -126,10 +126,12 @@ classdef MP < matlab.mixin.Copyable
             
             n = length(this.w);
             N = size(H,1);
-            
-            %Sw = reshape(x,n,n);
+
             L = this.vec2lowtriangmat(x,n);
             Sw = L*L';
+            
+            %i_diag = 1:n+1:n^2;
+            %dL_dai = -diag(L).^2;
             
             J = 0;
             Jx_mat = zeros(n,n);
@@ -148,6 +150,7 @@ classdef MP < matlab.mixin.Copyable
                     B = U*V;
                     Jx_mat = Jx_mat + (B'*L + B*L);
                 end
+                %Jx_mat(i_diag) = diag(Jx_mat).*dL_dai;
                 
             end
             
@@ -166,11 +169,15 @@ classdef MP < matlab.mixin.Copyable
                i1 = i2+1;
             end
             
+            %L(1:n+1:n^2) = 1./diag(L);
+            
         end
         
         function x = lowtriangmat2vec(this, L)
             
             n = size(L,1);
+            %L(1:n+1:n^2) = 1./diag(L);
+            
             N = (n+1)*n/2;
             x = zeros(N,1);
             i1 = 1;

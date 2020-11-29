@@ -24,7 +24,7 @@ Pd2_data = ks*(Pd_data - P0) + P0;
 % ddPd2_data = ks*ddPd_data;
 
 % update weights based on intermediate position
-k = round(n_data*0.37);
+k = round(n_data*0.575);
 xk = x(k);
 Pk = Pd2_data(:,k);
 % x_m = [x0; xk];

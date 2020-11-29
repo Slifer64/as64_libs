@@ -1,0 +1,13 @@
+- Training with multiple via points seems to learn the same covariance Sw in the following cases:
+	i) either providing the gradient or not.
+	   This is an additional indication that the gradient should be correct
+	ii) with specific initialization, or just eye(n,n)
+	   This is interesting, if indeed the Sw found is robust w.r.t the initial estimate! (must be further investigated)
+	
+	
+- Enforcing strict non-zeroness of diag(L):
+  Using L(i,i) = 1/ai
+  so dJ/dL = Jx
+  therefore dJ/dL(i,i) = Jx(i,i)
+  so dJ/dai = dJ/dLii * dL(i,i)/dai = Jx(i,i) * (-L(i,i)^2)
+  However, this lead to a Sw which did very poor generalization (even training with a single point and testing againts it)
