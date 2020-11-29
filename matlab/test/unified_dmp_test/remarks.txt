@@ -11,3 +11,8 @@
   therefore dJ/dL(i,i) = Jx(i,i)
   so dJ/dai = dJ/dLii * dL(i,i)/dai = Jx(i,i) * (-L(i,i)^2)
   However, this lead to a Sw which did very poor generalization (even training with a single point and testing againts it)
+
+- This method can be thought of as a PCA - GPR
+  That is, instead of using the covariance cov([y y_out],[y yout) to predict the output y_out' based on a new input y',
+  we encode y (Nx1 vec) through w (nx1 vec where n<N) as y = H*w and use cov(w,w) and the knowledge that y = H*w
+  to find y_out' based on

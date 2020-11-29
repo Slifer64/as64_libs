@@ -2,14 +2,14 @@ clc;
 close all;
 clear;
 
-load('data.mat', 'Time','Pd_data','mp');
+load('data.mat', 'Time','Pd_data','smp');
 
 tau = Time(end);
 x = Time / tau;
 n_data = length(Time);
 
 dx = 1/tau;
-[P_data, dP_data, ddP_data] = mp.simulate(x, dx, 0);
+[P_data, dP_data, ddP_data] = smp.simulate(x, dx, 0);
 
 
 P0 = Pd_data(:,1);
@@ -33,8 +33,8 @@ x_m = [xk];
 z_m = [Pk];
 
 % calc scaled MP
-mp.updatePos(x_m, z_m); 
-[P2_data, dP2_data, ddP2_data] = mp.simulate(x, dx, 0);
+smp.updatePos(x_m, z_m); 
+[P2_data, dP2_data, ddP2_data] = smp.simulate(x, dx, 0);
 
 figure;
 subplot(2,1,1); hold on;
@@ -45,7 +45,7 @@ scatter(xk, Pk, 'SizeData',150, 'LineWidth',5, 'Marker','o', 'MarkerEdgeColor','
 legend({'MP','DMP','demo','$P_k$'}, 'interpreter','latex', 'fontsize',15);
 axis tight;
 ax = subplot(2,1,2); hold on;
-mp.plotPsi(x, ax);
+smp.plotPsi(x, ax);
 xlabel('canonical time [$t/\tau$]', 'interpreter','latex', 'fontsize',15);
 
 

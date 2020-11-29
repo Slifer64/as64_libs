@@ -27,16 +27,15 @@ xf = 1;
 %% initialize and train GMP
 N_kernels = 15;
 kernels_std_scaling = 1;
-mp = MP(N_kernels, kernels_std_scaling);
+smp = SMP(N_kernels, kernels_std_scaling);
 tic
-offline_train_mse = mp.train(x, Pd_data);
-offline_train_mse
+Y_data = 1.5*(Pd_data-Pd_data(1)) + Pd_data(1);
+smp.train(x, Pd_data, Y_data);
 toc
-mp.optWeightsCovariance();
 
-is_spd = isSPD(mp.Sigma_w)
+is_spd = isSPD(smp.Sigma_w)
 
-save('data.mat', 'Time','Pd_data','mp');
+save('data.mat', 'Time','Pd_data','smp');
 
 % figure;
 % subplot(3,1,1); hold on;

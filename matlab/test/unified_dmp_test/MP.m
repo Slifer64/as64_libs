@@ -1,4 +1,4 @@
-%% Class
+%% Class: Movement Primitive
 
 classdef MP < matlab.mixin.Copyable
 
@@ -17,20 +17,7 @@ classdef MP < matlab.mixin.Copyable
             
             this.h = 1./(kernel_std_scaling*(this.c(2:end)-this.c(1:end-1))).^2;
             this.h = [this.h; this.h(end)];
-            
-            n = this.N_kernels;
-            S = zeros(n,n);
-            for i=1:n
-                for j=i+1:n
-                    S(i,j) = exp(-0.01 * abs(i-j));
-                    %S(i,j) = 1 - 1*(abs(i-j)/n)^3;
-                end
-            end
-            S = S + S' + eye(n,n);
-            
-            this.Sigma_w = S;
-            % imshow(this.Sigma_w, 'InitialMagnification', 800);
-            
+
         end
 
         
@@ -68,127 +55,8 @@ classdef MP < matlab.mixin.Copyable
             end
             
         end
-        
-        function plotWeightsCovariance(this)
-            
-            figure;
-            imshow(this.Sigma_w, [min(this.Sigma_w(:)) max(this.Sigma_w(:))], 'InitialMagnification', 2000);
-            
-        end
-        
-        function optWeightsCovariance(this)
-            
-            n = length(this.w);
-            
-            w_old = this.w;
-            
-            x = 0:0.005:1;
-            N = length(x);
-            H = zeros(N,n);
-            for i=1:length(x), H(i,:) = this.regressVec(x(i)); end
-            y_old = H*w_old;
-                            
-            y = 1.5*(y_old-y_old(1)) + y_old(1);
-            w = H\y;
-            
-            ind = round([0.1:0.1:1]*N);
-            z_old = y_old(ind)';
-            z = y(ind)';
-            H = H(ind,:);
-                        
-            N = size(z,2);
-            
-            W_err = repmat(w-w_old,1,N);
-            z_err = (z-z_old);
-            R = 1e-5;
-            
-            %Sw0 = eye(n,n);
-            Sw0 = this.Sigma_w;
-            L0 = chol(Sw0, 'lower');
-            x0 = this.lowtriangmat2vec(L0);
-            options = optimoptions('fminunc', 'Algorithm','trust-region', 'SpecifyObjectiveGradient',true);
-            tic
-            [x, fval] = fminunc(@(x)objFun(this, x, W_err, z_err, H, R), x0, options);
-            fval
-            toc
-            L = this.vec2lowtriangmat(x,n);
-            this.Sigma_w = L*L';
-            
-            figure;
-            subplot(2,1,1);
-            imshow(Sw0, 'InitialMagnification', 2000);
-            subplot(2,1,2);
-            imshow(this.Sigma_w, [min(this.Sigma_w(:)) max(this.Sigma_w(:))], 'InitialMagnification', 2000);
-            
-        end
-        
-        function [J, Jx] = objFun(this, x, W_err, z_err, H, R)
-            
-            n = length(this.w);
-            N = size(H,1);
 
-            L = this.vec2lowtriangmat(x,n);
-            Sw = L*L';
-            
-            %i_diag = 1:n+1:n^2;
-            %dL_dai = -diag(L).^2;
-            
-            J = 0;
-            Jx_mat = zeros(n,n);
-            
-            for k=1:N
-                H_k = H(k,:);
-                A = H_k'/(R + H_k*Sw*H_k');
-                U = A*z_err(:,k);
-                Y = (W_err(:,k) - Sw*U);
 
-                J = J + sum(sum(Y.^2));
-                %J = trace(Y*Y')
-
-                if (nargout > 1)
-                    V = 2*Y'*(Sw*A*H_k-eye(n,n));
-                    B = U*V;
-                    Jx_mat = Jx_mat + (B'*L + B*L);
-                end
-                %Jx_mat(i_diag) = diag(Jx_mat).*dL_dai;
-                
-            end
-            
-            if (nargout > 1), Jx = this.lowtriangmat2vec(Jx_mat); end
-
-        end
-        
-        function L = vec2lowtriangmat(this, x, n)
-            
-            L = zeros(n,n);
-            
-            i1 = 1;
-            for j=1:n
-               i2 = i1 + n-j; 
-               L(j:n,j) = x(i1:i2);
-               i1 = i2+1;
-            end
-            
-            %L(1:n+1:n^2) = 1./diag(L);
-            
-        end
-        
-        function x = lowtriangmat2vec(this, L)
-            
-            n = size(L,1);
-            %L(1:n+1:n^2) = 1./diag(L);
-            
-            N = (n+1)*n/2;
-            x = zeros(N,1);
-            i1 = 1;
-            for j=1:n
-               i2 = i1 + n-j; 
-               x(i1:i2) = L(j:n,j);
-               i1 = i2+1;
-            end
-            
-        end
-        
         %% =============================================================
         
         %% Returns the scaled position produced by the model for a given phase variable value.
@@ -227,21 +95,6 @@ classdef MP < matlab.mixin.Copyable
             f_ddot = dot(Phi_ddot, this.w);
             
         end
-
-        
-        function updatePos(this, x, z, Rz)
-            
-            if (nargin < 4), Rz = this.sigma_R*eye(length(z),length(z)); end
-            
-            N = length(x);
-            n = length(this.w);
-            H = zeros(N,n);
-            for i=1:N, H(i,:) = this.regressVec(x(i))'; end
-            z_hat = H*this.w;
-            this.w = this.w + this.Sigma_w*H' / (Rz + H*this.Sigma_w*H') * (z - z_hat);
-            
-        end
-
 
         %% ============================================================
         
@@ -329,7 +182,7 @@ classdef MP < matlab.mixin.Copyable
     end
     
     %% =================  Methods: private  =================
-    methods (Access = public) % private?  
+    methods (Access = protected) % private?  
         
         %% Returns a column vector with the values of the kernel functions.
         %  @param[in] x: The phase variable.
@@ -376,22 +229,18 @@ classdef MP < matlab.mixin.Copyable
     end
     
     %% =================  Properties: private  =================
-    properties (Access = public) %{?GMP})
+    properties (Access = public) %{?SMP} or protected ?
         
         N_kernels % number of kernels (basis functions)
         w % N_kernels x 1 vector with the kernels' weights
         c % N_kernels x 1 vector with the kernels' centers
         h % N_kernels x 1 vector with the kernels' inverse width
         
-        Sigma_w
-        
     end
     
     properties (Constant, Access = private)
         
         zero_tol = 1e-200 % small value used to avoid divisions with very small numbers
-        
-        sigma_R = 1e-5 % default noise variance for update of weights
         
     end
     
