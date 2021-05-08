@@ -28,8 +28,8 @@ taud = Timed(end);
 yd0 = Pd_data(1);
 gd = Pd_data(end);
 
-temp_s = 1; % temporal scaling
-spat_s = 1; % spatial scaling
+temp_s = 0.9; % temporal scaling
+spat_s = 1.2; % spatial scaling
 tau = taud/temp_s;
 y0 = yd0; % + 0.1;
 g = spat_s*(gd - yd0) + y0;

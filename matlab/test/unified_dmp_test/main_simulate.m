@@ -42,7 +42,7 @@ plot(x, P2_data, 'LineWidth',2, 'LineStyle','-', 'Color','magenta');
 plot(x, Pd2_data, 'LineWidth',2, 'LineStyle','--', 'Color','blue');
 plot(x, Pd_data, 'LineWidth',2, 'LineStyle','--', 'Color','green');
 scatter(xk, Pk, 'SizeData',150, 'LineWidth',5, 'Marker','o', 'MarkerEdgeColor','red');
-legend({'MP','DMP','demo','$P_k$'}, 'interpreter','latex', 'fontsize',15);
+legend({'SMP','DMP','demo','$P_k$'}, 'interpreter','latex', 'fontsize',15);
 axis tight;
 ax = subplot(2,1,2); hold on;
 smp.plotPsi(x, ax);
